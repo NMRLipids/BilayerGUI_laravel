@@ -13,7 +13,8 @@ return [
     |
     */
 
-    'name' => env('APP_NAME', 'Laravel'),
+    'name' => env('APP_NAME', 'NMRLipids'),
+    'version' => '2.0.0-prealpha-1', // Application version
 
     /*
     |--------------------------------------------------------------------------

@@ -77,11 +77,19 @@ use App\Http\Controllers\StatisticsController;
         <div class="container px-4 px-lg-5  ">
             <div class="row gx-4 gx-lg-5   align-items-center justify-content-center text-center">
                 <div class="col-lg-8 align-self-end">
+<<<<<<< HEAD
+                    <h2 class="text-white font-weight-bold">
+                        <img class="img-fluid" alt="Responsive image"
+                            src="{{ asset('storage/images/nmr_w_letras.png') }}" alt="">
+                         Welcome to NMRlipids Databank-GUI (v<?php echo config('app.version'); ?>)
+                    </h2>
+=======
                     <h1 class="text-white font-weight-bold">
                         <img class="img-fluid" alt="Responsive image"
                             src="{{ asset('storage/images/nmr_w_letras.png') }}" alt="">
                         <br><br> Welcome to NMRlipids Databank-GUI (nightly build)
                     </h1>
+>>>>>>> be5aded0e2b1b02c35080ab63f8ae7e5d202cde7
                     <hr class="divider" />
                 </div>
                 <div class="col-lg-8 align-self-baseline">

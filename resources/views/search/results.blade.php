@@ -63,7 +63,7 @@ foreach ($listaIdsSesson as $key => $value) {
                                     <div class="col-sm-12 col-lg-2 p-1">
                                         <span class="badge badge-secondary">@lang('Lípido') </span>
                                         <span>
-                                            <a href="{{ route('new_advanced_search.results') . '?lipidos_operador[1]=or&lipidos[1]=' . $lipido->molecule }}"
+                                            <a href="{{ route('lipid.show', $lipido->id) }}"
                                                 class="">{!! resaltar_texto($lipido->molecule, $texto) !!}</a>
                                         </span>
                                     </div>

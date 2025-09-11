@@ -73,7 +73,36 @@
      <script type="text/javascript"  src="https://unpkg.com/chart.js@3.8.2"></script>
 
      <script type="text/javascript"  src="https://unpkg.com/chartjs-chart-error-bars@3"></script>
+<style>
+    /* Dark pill tabs */
+    .nav-pills .nav-link {
+        color: #ddd;
+        background-color: transparent;
+        border-radius: 50rem;
+        margin: 0 0.3rem;
+        transition: background-color 0.2s ease, color 0.2s ease;
+    }
 
+    .nav-pills .nav-link:hover {
+        color: #fff;
+        background-color: rgba(255, 255, 255, 0.15);
+    }
+
+    .nav-pills .nav-link.active {
+        color: #fff;
+        background-color: #0d6efd; /* Bootstrap primary */
+        font-weight: 600;
+        box-shadow: 0 0 10px rgba(13,110,253,0.5);
+    }
+
+    /* Tab content styling */
+    .tab-content {
+        background-color: #212529; /* Bootstrap dark */
+        border-radius: 0 0 0.5rem 0.5rem;
+        margin-top: 1rem;
+        padding: 1.5rem;
+    }
+</style>
 
 
 </head>
