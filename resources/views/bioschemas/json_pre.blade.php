@@ -1,9 +1,7 @@
 {{-- Toggle with a triangle --}}
 <div style="margin-top:0.5rem;margin-bottom:0.5rem;">
     <span id="json-toggle-btn" 
-          style="cursor:pointer;user-select:none;font-size:0.8em;color:#eeeeee;">
-        ▸ View JSON
-    </span>
+          style="cursor:pointer;user-select:none;font-size:0.8em;color:#eeeeee;">⏵ View JSON</span>
 </div>
 
 <pre id="json-preview"
@@ -12,18 +10,15 @@
 </pre>
 
 <script>
-    document.addEventListener("DOMContentLoaded", function () {
-        const btn = document.getElementById("json-toggle-btn");
-        const pre = document.getElementById("json-preview");
-
-        btn.addEventListener("click", function () {
-            if (pre.style.display === "none") {
-                pre.style.display = "block";
-                btn.textContent = "▾ Hide JSON";
+    $(document).ready(function(){
+        $("#json-toggle-btn").click(function(){
+            if($("#json-toggle-btn").text() === "⏵ View JSON") {
+   	            $("#json-toggle-btn").text("⏷ Hide JSON") 
             } else {
-                pre.style.display = "none";
-                btn.textContent = "▸ View JSON";
+     	        $("#json-toggle-btn").text("⏵ View JSON")
             }
-        });
+            $("#json-preview").slideToggle("slow");
+        }); 
     });
 </script>
+
