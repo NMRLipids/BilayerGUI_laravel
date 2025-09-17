@@ -17,13 +17,10 @@ use Illuminate\Support\Collection;
 @section('content')
     <?php
 
-    // PATH A GIThub de la base de datos https://github.com/NMRLipids/Databank/tree/main/Data/Simulations  -> quita Databank de la base de datos y añade esto --> tree/main/
-    // https://github.com/NMRLipids/Databank/tree/main/Data/Simulations/d15/255/d152552d182b9d3b623ca5cc03700fef00505b05/f7dd41f2428fbc621fed20aefa8cceafaf761d53/POPCOrderParameters.json
-    // https://raw.githubusercontent.com/NMRLipids/Databank/main/  <--- descarga del json en Raw
-    // https://github.com/NMRLipids/Databank/tree/main/Data/Simulations  <-- ?¿?¿ Nueva url
-    // fd8/18f/fd818f1fa1b32dcd80ac3a124e76bd2d73705abe/fd9cef87eca7bfbaac8581358f2d8f13d8d43cd1
+    // PATH to the simulation data in github https://github.com/NMRLipids/BilayerData/Simulations  -> 
+    /* ICICIC: this breaks the MVC pattern because there is a lot of controller code in here */ 
 
-    $GitHubURL =    'https://raw.githubusercontent.com/NMRLipids/BilayerData/main/';
+    $GitHubURL =    'https://raw.githubusercontent.com/NMRLipids/BilayerData/refs/heads/main/';
     $GitHubURLEXP = 'https://raw.githubusercontent.com/NMRLipids/BilayerData/main/';
     // TODO: Why do we have two same vars?
 
@@ -773,8 +770,8 @@ die();
                                 <div class="card-body" style="height: 100%;">
                                     <span class="d-flex justify-content-center jmol_zorder  bg-jmolAnalysis"
                                         id=jmolViewLast_traj></span>
-                                    <button id="btnWater" type="button" class="mt-2 btn btn-primary btn-sm "
-                                        onclick="scrWater()">Hide Water</button>
+                                    <!-- button id="btnWater" type="button" class="mt-2 btn btn-primary btn-sm "
+                                        onclick="scrWater()">Hide Water</button -->
 
                                     <div class="row p-4">
 
@@ -816,6 +813,8 @@ die();
                                     </div>
 
                                     <div class="row justify-content">
+
+                                        <!--  This won't work properly -->
                                         <?php
                                     $col = 0;
                                     foreach ($trayectoria->lipidos as $lipido) {
@@ -840,9 +839,10 @@ die();
                                                         echo '<span ><b>Show Lipid</b>  </span></br>';
                                                         echo '</a>';
                                                     }
-                                                    $pathToScr ="https://raw.githubusercontent.com/NMRLipids/Databank/main/Scripts/BuildDatabank/mapping_files/".$lipido->mapping;
-
-                                                    echo '<a href="' .   $pathToScr  . '" title="Download Mapping file" target="_blank">';
+                                                    $mappingFile = $lipido->getMappingByForcefield($trayectoria->campo_de_fuerza);
+                                                    $pathToScr =$GitHubURL . 'Molecules/membrane/' . $lipido->molecule .'/'. $mappingFile;
+                                                    
+                                                    echo '<a href="' . $pathToScr  . '" title="Download Mapping file" target="_blank">';
                                                     echo '<span ><b>Download Mapping file</b>  </span></br>';
                                                     echo '</a>';
 
@@ -884,11 +884,14 @@ die();
                                             <div class=" m-2 w-100" style="width: 18rem;">
                                                 <div class=" ">
                                                     <h5 class=" ">{{ $heteromol->molecule }}</h5>
-
+                                                    <!-- TODO: The mapping is no longer tied to a molecule directly -->
+                                                    <!-- As there is there is a many to many relationship, we need a more complicated approach -->
                                                     <!--<span> Ranking total </span>-->
                                                     <?php
-                                                    $pathToScr ="https://raw.githubusercontent.com/NMRLipids/Databank/main/Scripts/BuildDatabank/mapping_files/".$heteromol->mapping;
-
+                                                    $mappingFile = $heteromol->mapping;
+                                                    $pathToScr = $pathToScr =$GitHubURL . 'Molecules/membrane/' . $heteromol->molecule .'/'. $mappingFile;
+                                                    
+                                                    
                                                     echo '<a href="' .   $pathToScr  . '" title="Download Mapping file" target="_blank">';
                                                     echo '<span ><b>Download Mapping file</b>  </span></br>';
                                                     echo '</a>';
@@ -1230,7 +1233,7 @@ die();
 
     ?>
 
-    <script type="text/javascript">
+    <!-- script type="text/javascript">
         $(document).ready(function() {
             var InfoBase = {
                 width: 300,
@@ -1271,7 +1274,7 @@ die();
             Jmol.script(jmolApplet1, "spin off; wireframe 15%;spacefill 100%;set zoomLarge off;" + Cadena)
             //Jmol.script(jmolApplet2, "spin off; wireframe 15%;spacefill 100%;set zoomLarge off;select hydrophobic;color green; select polar;color yellow;select acidic;color red;select basic;color blue;"+Cadena)
 
-            // Select CHOL---> CHO ::: DOPC --> DOP En mayusculas
+            // Select CHOL -- CHO ::: DOPC -- DOP En mayusculas
             //select [CHO]; hide !selected;
 
             //select WITHIN(ATOMNAME,"NH3,PO4,GL1,GL2,C1A,D2A,C3A,C4A,C1B,D2B,C3B,C4B"); color green
@@ -1290,7 +1293,7 @@ die();
                 cssTx += '</style>';
                 document.writeln(cssTx);
             */
-            <?php
+            <!- ?php
 
             // LOOP PARA LOS LIPIDOS
 
@@ -1308,7 +1311,7 @@ die();
                 echo 'Jmol.script(jmolApplet' . $lipido->short_name . ", \"spin off; wireframe 15%;spacefill 200%;select C\");\n";
             }
 
-            ?>
+            ? ->
 
         });
 
@@ -1344,7 +1347,7 @@ die();
                 //Jmol.script(jmolApplet1, 'select water; hide selected;');
             }
         };
-    </script>
+    </script -->
 
     <script>
 

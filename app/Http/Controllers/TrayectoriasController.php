@@ -27,7 +27,7 @@ class TrayectoriasController extends Controller
             //var_dump($trayectoria2);
             //die();
 
-       // TODO : Esto es mal tener dos fuente de datos
+       // TODO : This is BAD, we got two queries for the same thing
         return view('trayectorias.show', [
             'trayectoria' => $trayectoria
         ]);

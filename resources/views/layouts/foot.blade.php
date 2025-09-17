@@ -6,7 +6,7 @@
         <section>
 
             <div class="row justify-content-center align-items-center ">
-                <span> Copyright &copy;{{ date('Y') }} - NMRlipids </span>
+                <span> Copyright &copy;{{ date('Y') }} - NMRlipids - Universidade de Santiago de Compostela, Universitetet i Bergen </span>
                 <!--<div class="col-md-3 col-sm-12  justify-content-center  logos" style="max-width: 250px;">
            <a href="https://www.AAA.com"><img class="img-fluid"  src="{{ asset('storage/images/AAA.jpg') }}"/></a>
           </div>

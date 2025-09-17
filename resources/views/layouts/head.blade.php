@@ -56,18 +56,20 @@
     <link href="https://fonts.googleapis.com/css?family=Nunito" rel="stylesheet">
     -->
     <!--<link rel="shortcut icon" href="{{ asset('favicon.ico') }}">-->
-    <!-- <link rel="icon" type="image/png" href="{{ asset('favicon.png') }}"> -->
+    <!-- Load jQuery from a CDN -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+
 
     <!-- nouislider -->
-    <link href="{{ asset('storage/js/nouislider/nouislider.min.css') }}" rel="stylesheet" />
+    <!-- link href="{{ asset('storage/js/nouislider/nouislider.min.css') }}" rel="stylesheet" />
     <script type="text/javascript" src="{{ asset('storage/js/nouislider/nouislider.min.js') }}"></script>
-    <script type="text/javascript" src="{{ asset('storage/js/nouislider/wNumb.min.js') }}"></script>
+    <script type="text/javascript" src="{{ asset('storage/js/nouislider/wNumb.min.js') }}"></script -->
 
     <!-- JSMOL -->
-    <script type="text/javascript" src="{{ asset('storage/js/jsmol/JSmol.min.js') }}"></script> {{--  Tiene que estar antes el jsmol que jquery--}}
+    <!-- script type="text/javascript" src="{{ asset('storage/js/jsmol/JSmol.min.js') }}"></script> {{--  Tiene que estar antes el jsmol que jquery--}} -->
 
 
-   <script src="https://code.jquery.com/jquery-3.6.0.js" integrity="sha256-H+K7U5CnXl1h5ywQfKtSj8PCmoN9aaq30gDh27Xc0jk=" crossorigin="anonymous"></script>
+   <!-- script src="https://code.jquery.com/jquery-3.6.0.js" integrity="sha256-H+K7U5CnXl1h5ywQfKtSj8PCmoN9aaq30gDh27Xc0jk=" crossorigin="anonymous"></script -->
 
    <!--  AUTOCOMPLETE -->
      <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js" integrity="sha256-T0Vest3yCU7pafRw9r+settMBX6JkKN06dqBnpQ8d30=" crossorigin="anonymous"></script>
@@ -75,8 +77,7 @@
   <!--SLIDER -->
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"   crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
-   <!-- Load jQuery from a CDN -->
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+   
      <!-- Chart -->
      <!--<script type="text/javascript"  src="https://cdn.jsdelivr.net/npm/chart.js"></script>-->
      <script type="text/javascript"  src="https://unpkg.com/chart.js@3.8.2"></script>
