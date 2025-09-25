@@ -657,7 +657,7 @@ if __name__ == '__main__':
     # part). At this moment the ranking is not necessary in the DB, the web
     # already provides the result sorted by quality.
     # Same for the heteromolecules.
-                    PATH_RANKING = osp.join(NMLDB_DATA_PATH, "ranking")
+                    PATH_RANKING = osp.join(NMLDB_DATA_PATH, "Ranking",)
                     Lipid_Ranking[key] = {}
                     # Find the position of the system in the ranking
                     for file in glob.glob(osp.join(PATH_RANKING, key) + "*"):
