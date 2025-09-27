@@ -21,7 +21,7 @@ NMRLipids Databank -- A portal for visualization of molecular simulations
 * Install more dependencies with ``` npm install && npm install node ```
 * Create a .env configuration file from the example environment ``` cp .env-example .env ```
 * Create the pp key: ``` php artisan key:generate ```
-* Create the database (default database name and user is ```laravel```) and set priviledges
+* Create the database (default database name and user is ```laravel```) and set privileges
 * Edit the configuration file ```.env``` and add the database credentials and key
 * Optionally: configure server host and port (default: localhost9000)
 * Create the database: ``` php artisan migrate ```
