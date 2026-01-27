@@ -19,7 +19,7 @@ class Aguas extends Filtro
         $this->visible = true;
         $this->table = 'water_models';
         $this->fields = 'short_name';
-        $this->join_count = " COUNT(CASE WHEN trajectories_water.water_name = '%s' THEN 1 ELSE NULL END) AS %s ";
+        $this->join_count = " COUNT(CASE WHEN trajectories_water.water_name = '%s' THEN 1 ELSE NULL END) AS `%s` ";
         $this->where = " water.%s = 1 ";
         $this->join = " INNER JOIN(
             SELECT water.id

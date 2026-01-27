@@ -19,7 +19,7 @@ class PeptidosActivity extends Filtro
         $this->fields = 'activity';
         $this->columna = 'activity';
         $this->visible = true;
-        $this->join_count = " COUNT(CASE WHEN peptides.activity = '%s' THEN 1 ELSE NULL END) AS %s ";
+        $this->join_count = " COUNT(CASE WHEN peptides.activity = '%s' THEN 1 ELSE NULL END) AS `%s` ";
         $this->where = " pep_activity.%s = 1 ";
         $this->join = "INNER JOIN(
                       SELECT pep_activity.id

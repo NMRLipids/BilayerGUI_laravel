@@ -249,35 +249,24 @@ use Illuminate\Support\Collection;
         }
     }
 
-    function genDataParamOrdeExperiment($GitHubURL, $FileUrl, &$labelData, &$data, &$dataerror, &$maxData, &$minData, $Grupo, $ind)
+    function genDataParamOrderExperiment($GitHubURL, $FileUrl, &$labelData, &$data, &$dataerror, &$maxData, &$minData, $Grupo, $ind, $lipid_id)
     {
         $jsonFileUrl = '';
 
          //if (strlen($FileUrl)==0) return;
+        if ($lipid_id != '') {
+            
+            $jsonFileUrl = $GitHubURL . $FileUrl . '/' . $lipid_id. '_Order_Parameters.json'; //10
+        } else {
+            $jsonFileUrl = $GitHubURL . $FileUrl; //10
+        }
+        $jsonFile = '';
 
-        $jsonFileUrl = $GitHubURL . $FileUrl;
-
-       /*var_dump($jsonFileUrl);
-       die();*/
-       //$handle = @fopen($jsonFileUrl, 'r');
-
-       // Check if file exists
-       /*if(!$handle){
-           echo 'File not found';
-           die();
-       }else{
-           //echo 'File exists';
-       }
-       */
         $jsonFile = file_get_contents($jsonFileUrl);
 
-        //var_dump($jsonFileUrl);
-        //var_dump($jsonFile);
-             //die();
         $jsonFile = str_replace('NaN', 0.0, $jsonFile);
 
         $jsonFileData = [];
-        //$jsonFileData = json_decode($jsonFile, true, JSON_ERROR_INF_OR_NAN | JSON_NUMERIC_CHECK | JSON_PARTIAL_OUTPUT_ON_ERROR);
 
         $jsonFile = str_replace('_M M_', '_', $jsonFile);
         $jsonFile = str_replace('_M', '', $jsonFile);
@@ -285,25 +274,6 @@ use Illuminate\Support\Collection;
 
         $jsonFileData = json_decode($jsonFile, true);
         //var_dump($jsonFileData);
-
-      /*  echo("--------------");
-        var_dump($jsonFileData);
-        echo("--------------");
-        die();
-        */
-/*
-        if ($ind != '') {
-            $array_reordenado = array_replace(array_flip($ind), $jsonFileData);
-
-            $jsonFileData = $array_reordenado;
-        }
-*/
-        /* var_dump($jsonFileUrl);
-         var_dump($jsonFileData);
-         var_dump($array_reordenado);
-         die();
-*/
-        //$jsonFileData = json_decode(unserialize(str_replace(array("NAN","INF"),0,serialize($jsonFile))));
 
         $labelData = array();
         $data = array();
@@ -568,15 +538,7 @@ use Illuminate\Support\Collection;
         $MemNameAssoc[$value['molecule']] = $value['name'];
         $RealNameAsoc = $RealNameAsoc . "'" . $value['molecule'] . "':'" . $value['name'] . "',";
     }
-    /*
-var_dump($trayectoria->TrayectoriasHeteromoleculasMolecule);
-die();
-*/
-
-    foreach ($trayectoria->moleculas as $key => $value) {
-        $MemNameAssoc[$value['molecule']] = $value['name'];
-        $RealNameAsoc = $RealNameAsoc . "'" . $value['molecule'] . "':'" . $value['name'] . "',";
-    }
+    
 
     $colorList = ['#FF9AA2', '#C7CEEA', '#FFB7B2', '#B5EAD7', '#FFDAC1', '#E2F0CB', '#FF9AA2', '#C7CEEA', '#FFB7B2', '#B5EAD7', '#FFDAC1', '#E2F0CB'];
     //$colorList = array('#C82842','#F08041','#FEC544','__#6BAC2E','#055B4E','#FF00FF','#FF3300','#663300');
@@ -650,7 +612,7 @@ die();
 
 
                     <div role="tabpanel" class="pt-4">
-                        <ul class="nav nav-tabs nav-tabs-conf" role="tablist">
+                        <ul class="nav nav-pills justify-content-start" id="trajectoryTab" role="tablist">
 
                             <li role="presentation" class="nav-item ">
                                 <a href="#homePeptide" class="nav-link active  " aria-controls="homePeptide" role="tab"
@@ -666,7 +628,6 @@ die();
                                 <a href="#homeAnalysis" class="nav-link" aria-controls="homeAnalysis" role="tab"
                                     data-toggle="tab">Analysis/Experiment</a>
                             </li>
-                            <!--<li role="presentation" class="nav-item"><a href="#homeExperiment" class="nav-link" aria-controls="homeExperiment" role="tab"data-toggle="tab">Experiment</a></li>-->
                         </ul>
 
 
@@ -708,7 +669,7 @@ die();
                                                             <span class="txt-titulo">{{ c('software') }}:</span>
                                                             <span class="txt-dato">{{ $trayectoria->software }} </span><br>
 
-                                                            <!--<span class="txt-titulo">@lang('Heteromoléculas'):</span><span class="txt-dato">  {{ $trayectoria->moleculas->implode('name', ', ') }}</span><br>-->
+                                                          
                                                             <span class="txt-titulo">@lang('Iones'):</span>
                                                             <span class="txt-dato">
 
@@ -719,8 +680,8 @@ die();
                                                                <span class="txt-titulo">@lang('Water'):</span>
                                                                <span class="txt-dato">
 
-                                                                   {{ $trayectoria->modelos_acuaticos_num->map(function($water) {return "{$water->water_name}({$water->number})";})->implode(', ') }}
-
+                                                                   {{ $trayectoria->water_resname }} 
+                                                                   
                                                                   </span><br>
 
                                                             <span class="txt-titulo">@lang('Lipidos'):</span><br>
@@ -735,9 +696,7 @@ die();
                                                             </span><br>
                                                             <p>
                                                                 <?php
-                                                                //echo "<br><a class=\"bi bi-cloud-download\" href=\"".route('download', ['id' => $trayectoria->id ,'file' => 'run.mdp'])."\" class=\"card-link\" >&nbsp;&nbsp;Download MDP File. </a></br>";
-                                                                //echo "<a class=\"bi bi-cloud-download\" href=\"".route('download', ['id' => $trayectoria->id ,'file' => 'system.top'])."\" class=\"card-link\" >&nbsp;&nbsp;Download TOP File. </a></br>";
-                                                                //echo "<a class=\"bi bi-cloud-download\" href=\"" . route('download', ['id' => $trayectoria->id, 'file' => 'first_trj.pdb']) . "\" class=\"card-link\" >&nbsp;&nbsp;Download PDB File. </a></br>";
+                                                               
                                                                 $cadPath = asset('storage/simulations/' . $trayectoria->git_path);
                                                                 echo "<a class=\"bi bi-cloud-download\" href=\"" . $cadPath . "/conf.pdb.gz\" class=\"card-link\" >&nbsp;Download PDB File. </a></br>";
 
@@ -768,16 +727,9 @@ die();
                             <!-- homeMembrane -->
                             <div role="tabpanel" class="tab-pane m-1 bg-solapa card-datos" id="homeMembrane">
                                 <div class="card-body" style="height: 100%;">
-                                    <span class="d-flex justify-content-center jmol_zorder  bg-jmolAnalysis"
-                                        id=jmolViewLast_traj></span>
-                                    <!-- button id="btnWater" type="button" class="mt-2 btn btn-primary btn-sm "
-                                        onclick="scrWater()">Hide Water</button -->
+                                   
 
                                     <div class="row p-4">
-
-                                        <div class="col-xl-4 col-md-12 col-lg-6 bg-jmol">
-                                            <div class="d-flex justify-content-center" id=jmolViewMembrane></div>
-                                        </div>
 
                                         <div class="col-xl-8 col-md-12 col-lg-6 pt-4 pb-4 ">
                                             <div class="row">
@@ -808,7 +760,6 @@ die();
                                             <span>
                                                 <h3>Lipids</h3>
                                             </span></br>
-                                            <!--  <h4>{{ $trayectoria->membrana->lipid_names_l1 }} </h4>-->
                                         </div>
                                     </div>
 
@@ -829,7 +780,6 @@ die();
                                                 <div class=" ">
                                                     <h5 class=" ">{{ $lipido->molecule }}</h5>
 
-                                                    <!--<span> Ranking total </span>-->
 
                                                     <?php
 
@@ -869,55 +819,8 @@ die();
                                         <?php
                                     } // Foreach End
                                     ?>
-                                        <!--  </div>-->
 
-
-                                        <!--<div class="row justify-content">-->
-                                        <?php
-                                    $col = 0;
-                                    foreach ($trayectoria->moleculas as $heteromol) {
-                                        //$gifFile = $lipido->forcefield_id."/".$lipido->short_name.".gif";
-                                        //$pathlip = asset('storage/forcefields/'.$gifFile);
-                                    ?>
-                                        <div class="col-xs-12 col-lg-6 d-flex flex-wrap cardlipids">
-
-                                            <div class=" m-2 w-100" style="width: 18rem;">
-                                                <div class=" ">
-                                                    <h5 class=" ">{{ $heteromol->molecule }}</h5>
-                                                    <!-- TODO: The mapping is no longer tied to a molecule directly -->
-                                                    <!-- As there is there is a many to many relationship, we need a more complicated approach -->
-                                                    <!--<span> Ranking total </span>-->
-                                                    <?php
-                                                    $mappingFile = $heteromol->mapping;
-                                                    $pathToScr = $pathToScr =$GitHubURL . 'Molecules/membrane/' . $heteromol->molecule .'/'. $mappingFile;
-                                                    
-                                                    
-                                                    echo '<a href="' .   $pathToScr  . '" title="Download Mapping file" target="_blank">';
-                                                    echo '<span ><b>Download Mapping file</b>  </span></br>';
-                                                    echo '</a>';
-                                                    foreach ($trayectoria->ranking_heteromolecules as $ranking_hetero) {
-                                                        if ($ranking_hetero->molecule_id == $heteromol->id) {
-                                                            //echo($ranking_hetero->ranking_total);
-                                                            //echo("<br><span> Quality total </span>");
-                                                            //echo($ranking_hetero->quality_total);
-                                                            echo '<span>Quality (ranking)</span><br>';
-                                                            echo '<ul>';
-                                                            echo '<li>Headgroups : ' . filtraValor($ranking_hetero->quality_hg) . ' ( ' . filtraValor($ranking_hetero->ranking_hg) . ' )</li>';
-                                                            echo '<li>Tail : ' . filtraValor($ranking_hetero->quality_tails) . ' ( ' . filtraValor($ranking_hetero->ranking_tails) . ' )</li>';
-                                                            echo '</ul>';
-                                                        }
-                                                    }
-
-                                                    ?>
-                                                </div>
-                                            </div>
-                                        </div> <!--  CARD loop end-->
-
-                                        <?php
-                                    } // Foreach End
-                                    ?>
                                     </div>
-
                                 </div>
                             </div>
 
@@ -929,32 +832,7 @@ die();
                                 <div class="card-body">
                                     @if (!is_null($trayectoria->analisis))
                                         <div class="row p-2">
-                                            <div class="col-sm-12 col-md-6 pb-4">
-
-
-
-
-                                            </div>
-
-
-                                            <div class="col-sm-12 col-md-6 ">
-
-                                                <?php
-                                                /*if(file_exists(public_path('storage'.$pathFilesAnalisis.'/number_of_contacts.png')))
-                       {
-                       echo '<h5 class=" ">';
-                       echo 'Number of contacts: ';
-                       echo '<div class="tooltip-2 bi bi-info-circle">
-                           <span class="tooltiptext">Number of contacts between the peptide and the lipids separated by lipid headgroups (HG) or lipid tails, averaged over the last microsecond
-.</span>
-                       </div>';
-                       echo '</h5>';
-                       echo '<a class="portfolio-box" href="'.$cadPath.'/number_of_contacts.png" title="Click to Zoom">';
-                       echo '<img class="img-fluid justify-content-center "  style="border-radius:20px; max-height:300px;" src="'.$cadPath.'/number_of_contacts.png" alt="..." />';
-                       echo '</a>';
-                     }*/
-                                                ?>
-                                            </div>
+                                          
 
 
                                         </div>
@@ -980,23 +858,8 @@ die();
                                                 <h3>Order Parameters : '{{ $lipidName }}' </h3>
                                                 <a href="{{ $GitHubURLEXP }}{{ $value->order_parameters_file }}">Download
                                                     JSON</a>
-                                                <?php
-
-                                                //$pathToPeptid = '/mol2d_landscape/' . $lipidName . '.png';
-                                                $pathToPeptid = '/molecule2D/' . $lipidName . '.png';
-                                                if (file_exists(public_path('storage' . $pathToPeptid))) {
-                                                    // VERSION LINK
-                                                    //echo '<a class="portfolio-box" href="'.asset('storage/'.$pathToPeptid).'" title="Click to Zoom">';
-                                                    //echo '<span ><b>Show Lipid</b>  </span></br>';
-                                                    //echo '</a>';
-                                                    // --------------
-
-                                                ?>
-                                                <div class="m-2"><img class="ordeparameterlipid img-fluid"
-                                                        src="{{ asset('storage/' . $pathToPeptid) }}"></div>
-                                                <?php
-                                                }
-                                                ?>
+                                                
+                                               
                                                 <div class="chart-container-half"><canvas
                                                         id="myChartOrderParamLipidsg1{{ $nlip }}"></canvas>
                                                 </div>
@@ -1222,132 +1085,14 @@ die();
     <?php
 
 
-    //echo $trayectoria->analisis->form_factor_experiment . '/FormFactor.json';
-
-    // die();
+   
 
     $cadPath = asset('storage/simulations/' . $trayectoria->git_path);
 
-    //echo($cadPath);
-    //die();
+   
 
     ?>
 
-    <!-- script type="text/javascript">
-        $(document).ready(function() {
-            var InfoBase = {
-                width: 300,
-                height: 300,
-                debug: false,
-                j2sPath: "{{ asset('storage/js/jsmol/j2s') }}", // Ruta al j2s, si no se indica no lo encuentra
-                color: "0xAAAAAA",
-                disableJ2SLoadMonitor: true,
-                disableInitialConsole: true,
-                addSelectionOptions: false,
-                serverURL: "{{ asset('storage/js/jsmol/php/jsmol.php') }}",
-                use: "HTML5",
-                deferApplet: false,
-                readyFunction: null,
-                script: "",
-
-            }
-
-            //InfoPeptide = Object.create(InfoBase);
-            InfoMembrane = Object.create(InfoBase);
-            //InfoLast_traj = Object.create(InfoBase);
-
-            InfoMembrane.width = 600;
-
-            //        InfoPeptide["script"]= "load async {{-- $cadPath.'/peptide.pdb' --}}";
-            InfoMembrane["script"] = "load async {{ $cadPath . '/conf.pdb.gz' }}";
-            //    InfoLast_traj["script"]= "load async {{-- $cadPath.'/last_trj.pdb' --}}";
-
-
-            //$("#jmolViewPeptide").html(Jmol.getAppletHtml("jmolApplet0",InfoPeptide))
-            $("#jmolViewMembrane").html(Jmol.getAppletHtml("jmolApplet1", InfoMembrane))
-            //$("#jmolViewLast_traj").html(Jmol.getAppletHtml("jmolApplet2",InfoLast_traj))//color amino;
-
-            Cadena = "<?php echo $CadSelectMem; ?> ";
-            //#FF9AA2','#C7CEEA','#FFB7B2','#B5EAD7','#FFDAC1','#E2F0CB'
-
-            //Jmol.script(jmolApplet0, "spin off; wireframe 15%;spacefill 100%;set zoomLarge off; select hydrophobic;color green; select polar;color yellow;select acidic;color red;select basic;color blue")
-            Jmol.script(jmolApplet1, "spin off; wireframe 15%;spacefill 100%;set zoomLarge off;" + Cadena)
-            //Jmol.script(jmolApplet2, "spin off; wireframe 15%;spacefill 100%;set zoomLarge off;select hydrophobic;color green; select polar;color yellow;select acidic;color red;select basic;color blue;"+Cadena)
-
-            // Select CHOL -- CHO ::: DOPC -- DOP En mayusculas
-            //select [CHO]; hide !selected;
-
-            //select WITHIN(ATOMNAME,"NH3,PO4,GL1,GL2,C1A,D2A,C3A,C4A,C1B,D2B,C3B,C4B"); color green
-
-
-            // CSS personalizado
-
-            /*var side = "bottom";
-            var h = 60;
-
-              var cssTx = '<style type="text/css">';
-                cssTx += '#jmolViewPeptide { leff:0; width:100%; ' + ( side=="bottom" ? "bottom:0;" : "top:0;" ) + ' height:' + h + '%;} ';
-                cssTx += '#jmolViewMembrane { leff:0; width:100%; ' + ( side=="bottom" ? "bottom:0;" : "top:0;" ) + ' height:' + h + '%;} ';
-                cssTx += '#jmolViewLast_traj { leff:0; width:100%; ' + ( side=="bottom" ? "bottom:0;" : "top:0;" ) + ' height:' + h + '%;} ';
-                cssTx += '#mainPane { left:0; width:100%; ' + ( side=="bottom" ? "top:0;" : "bottom:0;" ) + ' height:' + (100-h) + '%; } ';
-                cssTx += '</style>';
-                document.writeln(cssTx);
-            */
-            <!- ?php
-
-            // LOOP PARA LOS LIPIDOS
-
-            foreach ($trayectoria->lipidos as $lipido) {
-                echo 'var Info_' . $lipido->short_name . " = InfoBase;\n";
-
-                //echo "Info_".$lipido->short_name.".script = \"load async https://supepmem.com/storage/forcefields/".$lipido->forcefield_id."/".$lipido->short_name.".pdb\";\n";
-
-                echo 'Info_' . $lipido->short_name . ".width = 450;\n";
-                echo 'Info_' . $lipido->short_name . ".height = 250;\n";
-
-                echo "$(\"#jmolView_" . $lipido->short_name . "\").html(Jmol.getAppletHtml(\"jmolApplet" . $lipido->short_name . "\",Info_" . $lipido->short_name . "));\n";
-
-                //echo "Jmol.script(jmolApplet".$lipido->short_name.", \"spacefill 120%; wireframe 0.15;','ball&stick',true\");\n";
-                echo 'Jmol.script(jmolApplet' . $lipido->short_name . ", \"spin off; wireframe 15%;spacefill 200%;select C\");\n";
-            }
-
-            ? ->
-
-        });
-
-
-        function ShowLipid(id, name) {
-            $('.details' + name).
-            slideToggle(function() {
-                $('#more' + name).
-                html(
-                    $('.details' + name).is(':visible') ? '&nbsp;&nbsp;Hide ' + name + ' lipid' :
-                    '&nbsp;&nbsp;See ' + name + ' lipid');
-            });
-            //console.log("jmolApplet"+name);
-            //console.log('load async "https://supepmem.com/storage/forcefields/'+id+'/'+name+'.pdb"');
-
-            //$("#jmolView_"+name).html(Jmol.getAppletHtml('jmolApplet','Info_'+name));
-
-            Jmol.script(this['jmolApplet' + name], 'load async "https://supepmem.com/storage/forcefields/' + id + '/' +
-                name + '.pdb";spin on; wireframe 15%;spacefill 200%;select C;');
-
-        };
-
-        function scrWater() {
-            var x = document.getElementById("btnWater");
-            if (x.innerHTML === "Show water") {
-                x.innerHTML = "Hide water";
-                console.log("hide water");
-                Jmol.script(jmolApplet1, 'display all;');
-            } else {
-                x.innerHTML = "Show water";
-                console.log("Show water");
-                Jmol.script(jmolApplet1, 'select water,sol; hide selected;');
-                //Jmol.script(jmolApplet1, 'select water; hide selected;');
-            }
-        };
-    </script -->
 
     <script>
 
@@ -1361,6 +1106,11 @@ die();
           var combinedArray = arr1.concat(arr2);
           return arrayUnique(combinedArray);
         }
+
+        // This function draws charts using Chart.js
+        // canvasId,names,data,data2,step,chartType,title,labelX,labelY,borde,radio,gridOn,responsive,AutoSkiping,showLeyend,xtype
+        // Example call:    
+        // DrawChart('myChart1', ['A','B','C'], [10,20,30], '', 1, 'bar', 'Sample Chart', 'Categories', 'Values', 1, 5, true, true, true, true, '');
 
         function DrawChart(canvasId, names, data,names2, data2, step, chartType, title, labelX, labelY, borde, radio, gridOn,
             responsive, AutoSkiping, showLeyend, xtype) {
@@ -1444,9 +1194,7 @@ die();
                 }
 
               }
-              //console.log(labelFusion);
-              //console.log(data1Fusion);
-              //console.log(data2Fusion);
+             // Simulated and Experimental Data fusion
 
               dataTop = {
                   labels: labelFusion,
@@ -1615,15 +1363,12 @@ die();
       responsive, AutoSkiping, showLeyend, xtype) {
 
       var labels1 = names;
-      //var labels2 = names2;
       var ArrayTop = data;
 
       var colorList = ['#FF9AA2', '#C7CEEA', '#FFB7B2', '#B5EAD7', '#FFDAC1', '#E2F0CB', ];
       var borderCol = 'rgb(255, 255, 255)';
       var borderCol2 = 'rgb(70, 70, 70)';
       var textCol = '#ffffff';
-
-
       // _____________
       // Data fusion
 
@@ -1649,20 +1394,17 @@ die();
 
 // --------------------------------------------------
       labelFusion = names; // esto son los label de
-
       names2.forEach((itemArray, i) => {
         labelFusion =  uniqueArrays(labelFusion,itemArray);
       });
       var indpos = 0;
       names2.forEach((itemArray, i) => {
       console.log(itemArray);
-
         var dataFusion = [];
         // Inicializamos
         for (var i = 0; i < labelFusion.length; i++) {
           dataFusion[i] = NaN;
         }
-
         // ponemos los valores en su sitio
         for (var i = 0; i < labelFusion.length; i++) {
           pos1indx = itemArray.indexOf(labelFusion[i]);
@@ -1673,7 +1415,7 @@ die();
           }
         }
         indpos=indpos+1;
-console.log(label2);
+        console.log(label2);
         var d = {
             label: label2[indpos-1],
             backgroundColor: colorList[indpos],
@@ -1687,7 +1429,6 @@ console.log(label2);
         };
 
         ddd.push(d);
-
       });
 
       //console.log(ddd);
@@ -2042,48 +1783,7 @@ die();
             //echo 'DrawChart("myChartOrderParam",[' . $DataStr . '],[' . $DataError . '],[' . $DataError . '],1,"line","Order parameters","","-SCH",1,5,true,true,false);';
             echo 'DrawChart("myChartOrderParam",[' . $DataStr . '],[' . $DataValue . '],[],[],1,"line","Order parameters","","SCH",1,5,true,true,false,"");';
         }
-
-        /*
-        if ($trayectoria->TrayectoriaAnalisisLipidosfunc != null) {
-            $nlip = 1;
-
-            foreach ($trayectoria->TrayectoriaAnalisisLipidosfunc as $key => $value) {
-                genDataParamOrde($GitHubURL, $value->order_parameters_file, $DataStr, $DataValue, $DataError, $maxValue, $minValue, 'G1');
-
-                echo 'DrawChart("myChartOrderParamLipidsg1' . $nlip . '",[' . $DataStr . '],[' . $DataError . '],[' . $DataError . '],1,"line","Tail S1","","-SCH",1,5,true,true,false);';
-
-                genDataParamOrde($GitHubURL, $value->order_parameters_file, $DataStr, $DataValue, $DataError, $maxValue, $minValue, 'G2');
-                echo 'DrawChart("myChartOrderParamLipidsg2' . $nlip . '",[' . $DataStr . '],[' . $DataError . '],[' . $DataError . '],1,"line","Tail S2","","-SCH",1,5,true,true,false);';
-                genDataParamOrde($GitHubURL, $value->order_parameters_file, $DataStr, $DataValue, $DataError, $maxValue, $minValue, 'G3');
-                echo 'DrawChart("myChartOrderParamLipidsg3' . $nlip . '",[' . $DataStr . '],[' . $DataError . '],[' . $DataError . '],1,"line","Headgroup","","-SCH",1,5,true,true,false);';
-                $nlip++;
-            }
-        }
-
-        // EXPERIMENTS  EXPERIMENTS  EXPERIMENTS  EXPERIMENTS  EXPERIMENTS
-
-        if ($trayectoria->TrayectoriaAnalisisLipidosfunc != null) {
-            $nlip = 1;
-
-            foreach ($trayectoria->TrayectoriaAnalisisLipidosfunc as $key => $value) {
-                if ($value->order_parameters_experiment != null) {
-                    genDataParamOrdeExperiment($GitHubURLEXP, $value->order_parameters_experiment, $DataExpStr, $DataExpValue, $DataExpError, $maxValue, $minValue, 'G1');
-
-                    echo 'DrawChart("myChartOrderParamLipidsEXPg1' . $nlip . '",[' . $DataExpStr . '],[' . $DataExpError . '],"",1,"line","Tail S1","","-SCH",1,5,true,true,false);';
-
-                    genDataParamOrdeExperiment($GitHubURLEXP, $value->order_parameters_experiment, $DataStr, $DataValue, $DataError, $maxValue, $minValue, 'G2');
-
-                    echo 'DrawChart("myChartOrderParamLipidsEXPg2' . $nlip . '",[' . $DataStr . '],[' . $DataError . '],"",1,"line","Tail S2","","-SCH",1,5,true,true,false);';
-
-                    genDataParamOrdeExperiment($GitHubURLEXP, $value->order_parameters_experiment, $DataStr, $DataValue, $DataError, $maxValue, $minValue, 'G3');
-
-                    echo 'DrawChart("myChartOrderParamLipidsEXPg3' . $nlip . '",[' . $DataStr . '],[' . $DataError . '],"",1,"line","Headgroup","","-SCH",1,5,true,true,false);';
-
-                    $nlip++;
-                }
-            }
-        }
-        */
+       
 
         if ($trayectoria->TrayectoriaAnalisisLipidosfunc != null) {
             $nlip = 1;
@@ -2100,26 +1800,23 @@ die();
                     $DataExpValueArray = array();
 $DataExpLabelArray = array();
                     // HACK CARGA DE EXPERIMETOS VAN A SER MAS DE UNO ASI QUE A VER SOMO SE HACE ESTO...
-                    //genDataParamOrdeExperiment($GitHubURLEXP, $value->order_parameters_experiment, $DataExpStr, $DataExpValue, $DataExpError, $maxValue, $minValue, 'G1', $ind);
-
+                    // HACK (english) LOADING EXPERIMENTS THEY WILL BE MORE THAN () ONE SO LET'S SEE HOW TO DO THIS...
+                    // Problem is that now we have multiple experimental data for the same order parameter simulation data.
+                    // So we have to load all the experimental data and plot them together with the simulation data
                     foreach ($trayectoria->experimentsOP as $keyOP => $valueOP) {
 
                         if (!is_null($valueOP->path)) {
                             if (!empty(trim($valueOP->path))) {
-
-
-                              genDataParamOrdeExperiment($GitHubURLEXP, $valueOP->path, $DataExpStr, $DataExpValue, $DataExpError, $maxValue, $minValue, 'G1', $ind);
-
-                              /*echo($GitHubURLEXP.$valueOP->path);
-                              echo "\r\n";
-                              var_dump($DataExpStr);
-                                 echo "\r\n";
-                              var_dump($DataExpValue);
-                                 echo "\r\n";*/
+                              genDataParamOrderExperiment($GitHubURLEXP, 
+                              $valueOP->path, 
+                              $DataExpStr, 
+                              $DataExpValue, 
+                              $DataExpError, $maxValue, $minValue, 'G1', $ind, 
+                              $nlip);
+                              
                               $DataExpStrArray[] = $DataExpStr;
                               $DataExpValueArray[] = $DataExpValue;
                               $DataExpLabelArray[] = $valueOP->doi;
-                              //$DataExpErrorArray[] = $DataExpError;
                             }
                         }
                     } // Foreach
@@ -2138,12 +1835,22 @@ $DataExpLabelArray = array();
                           $DataExpStrArray = array();
                           $DataExpValueArray = array();
                           $DataExpLabelArray = array();
-                            //genDataParamOrdeExperiment($GitHubURLEXP, $value->order_parameters_experiment, $DataExpStr, $DataExpValue, $DataExpError, $maxValue, $minValue, 'G2', $ind);
                             foreach ($trayectoria->experimentsOP as $keyOP => $valueOP) {
 
                                 if (!is_null($valueOP->path)) {
                                     if (!empty(trim($valueOP->path))) {
-                                      genDataParamOrdeExperiment($GitHubURLEXP, $valueOP->path, $DataExpStr, $DataExpValue, $DataExpError, $maxValue, $minValue, 'G2', $ind);
+                                      genDataParamOrderExperiment(
+                                            $GitHubURLEXP, 
+                                            $valueOP->path, 
+                                            $DataExpStr, 
+                                            $DataExpValue, 
+                                            $DataExpError, 
+                                            $maxValue, 
+                                            $minValue, 
+                                            'G2', 
+                                            $ind,
+                                            $nlip
+                                        );
                                       $DataExpStrArray[] = $DataExpStr;
                                       $DataExpValueArray[] = $DataExpValue;
                                         $DataExpLabelArray[] = $valueOP->doi;
@@ -2153,25 +1860,31 @@ $DataExpLabelArray = array();
                             } // Foreach
                         }
                     }
-                    //echo 'DrawChart("myChartOrderParamLipidsg2' . $nlip . '",[' . $DataStr . '],[' . $DataValue . '],' . json_encode($DataExpStr) . ',' . json_encode($DataExpValue) . ',1,"line","Tail S2","C-H bond","SCH",1,5,true,true,false,true,"");';
                     echo 'DrawChartArray("myChartOrderParamLipidsg2' . $nlip . '",[' . $DataStr . '],[' . $DataValue . '],' . json_encode($DataExpStrArray) . ',' . json_encode($DataExpValueArray) . ','.json_encode($DataExpLabelArray).',1,"line","Tail S2","C-H bond","SCH",1,5,true,true,false,true,"");';
                     echo "\r\n";
 
                     genDataParamOrdeFusion($GitHubURL, $value->order_parameters_file, $DataStr, $DataValue, $DataError, $maxValue, $minValue, 'G3');
                   if (!is_null($value->order_parameters_experiment)) {
                         if (!empty(trim($value->order_parameters_experiment))) {
-                            //die('3');
-                            //genDataParamOrdeExperiment($GitHubURLEXP, $value->order_parameters_experiment, $DataExpStr, $DataExpValue, $DataExpError, $maxValue, $minValue, 'G3', $ind);
                               $DataExpStrArray = array();
                               $DataExpValueArray = array();
                               $DataExpLabelArray = array();
                                 foreach ($trayectoria->experimentsOP as $keyOP => $valueOP) {
                                     if (!is_null($valueOP->path)) {
                                         if (!empty(trim($valueOP->path))) {
-                                          genDataParamOrdeExperiment($GitHubURLEXP, $valueOP->path, $DataExpStr, $DataExpValue, $DataExpError, $maxValue, $minValue, 'G3', $ind);
+                                          genDataParamOrderExperiment($GitHubURLEXP, 
+                                            $valueOP->path, 
+                                            $DataExpStr, 
+                                            $DataExpValue, 
+                                            $DataExpError, 
+                                            $maxValue, 
+                                            $minValue, 
+                                            'G3', 
+                                            $ind,
+                                            $nlip);
                                           $DataExpStrArray[] = $DataExpStr;
                                           $DataExpValueArray[] = $DataExpValue;
-                                              $DataExpLabelArray[] = $valueOP->doi;
+                                          $DataExpLabelArray[] = $valueOP->doi;
                                           //$DataExpErrorArray[] = $DataExpError;
                                         }
                                     }
@@ -2196,28 +1909,13 @@ $DataExpLabelArray = array();
             if (!empty(trim($trayectoria->TrayectoriasAnalysisHeteromoleculas->order_parameters_experiment))) {
                 //die('4');
                 if (urlFileExist2($GitHubURLEXP . $trayectoria->TrayectoriasAnalysisHeteromoleculas->order_parameters_experiment)) {
-                    genDataParamOrdeExperiment($GitHubURLEXP, $trayectoria->TrayectoriasAnalysisHeteromoleculas->order_parameters_experiment, $DataStr, $DataValue, $DataError, $maxValue, $minValue, '', '');
+                    genDataParamOrderExperiment($GitHubURLEXP, $trayectoria->TrayectoriasAnalysisHeteromoleculas->order_parameters_experiment, $DataStr, $DataValue, $DataError, $maxValue, $minValue, '', '');
 
                     echo 'DrawChart("myChartOrderParamEXP",[' . $DataStr . '],[' . $DataValue . '],"","",1,"line","Order parameters","","SCH",1,5,true,true,false,false,"");';
                 }
             }
         }
-        /*
-echo  ($GitHubURLEXP);
-echo ($trayectoria->analisis->form_factor_experiment);
-die();
-*/
-      /*  $FFpath = $trayectoria->experimentsFF->implode('path');
-
-        if (!is_null($FFpath)) {
-            if (!empty($FFpath)) {
-                if (urlFileExist2($GitHubURLEXP . $FFpath)) {
-                    if (genData2($GitHubURLEXP, $FFpath . '/FormFactor.json', $DataStr, $DataValue, $maxValue, $minValue, 1)) {
-                        echo 'DrawChart("myChartFormFactEXP",[' . $DataStr . '],[' . $DataValue . '],"","",1,"line","Form factor","Qz (\u{212B}\u{AF}\u{B9}) ","Normalized |F(qz)|  (theta/\u{212B}\u{B2})",1,0,true,true,true,false,"");';
-                    }
-                }
-            }
-        }*/
+      
         // ANALISIS ANALISIS ANALISIS ANALISIS ANALISIS
 
         if (!is_null($trayectoria->analisis)) {
@@ -2228,34 +1926,20 @@ die();
                 }
             }
             if (urlFileExist2($GitHubURL . $trayectoria->analisis->form_factor_file)) {
-
-              /*  if (!is_null($trayectoria->analisis->form_factor_experiment)) {
-                    if (genData2('https://www.databank.nmrlipids.fi/storage/', $trayectoria->analisis->form_factor_experiment . '/FormFactor.json', $DataExpStr, $DataExpValue, $maxValue, $minValue, $trayectoria->analisis->form_factor_scaling)) {
-                    }
-                }*/
                 // Datos experimentales con el nuevo formato de mysql_tablename
                 // EXPERIMENT  EXPERIMENT  EXPERIMENT  EXPERIMENT  EXPERIMENT  EXPERIMENT
                 $FFpath = $trayectoria->experimentsFF->implode('path');
-
                 if (genData2($GitHubURL, $trayectoria->analisis->form_factor_file, $DataStr, $DataValue, $maxValue, $minValue, 1)) {
-
                     $DataExpValueArray = array();
                     $DataExpLabelsArray = array();
                     foreach ($trayectoria->experimentsFF as $keyFF => $valueFF) {
                       genData2Array($GitHubURLEXP, $valueFF->path, $DataExpStr, $DataExpValue, $maxValue, $minValue, 1);
-//                      echo($GitHubURLEXP.$valueFF->path);
                       $DataExpValueArray[] = $DataExpValue;
                       $DataExpLabelsArray[] = $valueFF->doi;
                     }
                       $cleanDataExp = str_replace('"',"",json_encode($DataExpValueArray));
                         echo 'DrawChartArray2("myChartFormFact",[' . $DataValue . '],' . $cleanDataExp . ','.json_encode($DataExpLabelsArray).',0.01,"line","Form factor","Qz (\u{212B}\u{AF}\u{B9}) ","  |F(Qz)|  ",1,0,true,true,true,true,"linear");';
                         echo "\r\n";
-
-                    /*} else {
-                        //echo 'DrawChart("myChartFormFact",[' . $DataStr . '],[' . $DataValue . '],"","",0.01,"line","Form factor","Qz (\u{212B}\u{AF}\u{B9}) ","  |F(Qz)|  ",1,0,true,true,true,false,"linear");';
-                        echo 'DrawChart("myChartFormFact",[],[' . $DataValue . '],"","",0.01,"line","Form factor","Qz (\u{212B}\u{AF}\u{B9}) ","  |F(Qz)|  ",1,0,true,true,true,false,"linear");';
-                        echo "\r\n";
-                    }*/
                 }
             }
         }

@@ -19,7 +19,7 @@ class PeptidosLength extends Filtro
         $this->fields = 'length';
         $this->columna = 'length';
         $this->visible = true;
-        $this->join_count = " COUNT(CASE WHEN peptides.length = '%s' THEN 1 ELSE NULL END) AS %s ";
+        $this->join_count = " COUNT(CASE WHEN peptides.length = '%s' THEN 1 ELSE NULL END) AS `%s` ";
         $this->where = " pep_length.%s = 1 ";
         $this->join = "INNER JOIN(
                       SELECT pep_length.id

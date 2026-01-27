@@ -14,7 +14,7 @@ return [
     */
 
     'name' => env('APP_NAME', 'NMRLipids'),
-    'version' => '2.0.0-prealpha-2', // Application version
+    'version' => '2.0.0-prealpha-4', // Application version
 
     /*
     |--------------------------------------------------------------------------

@@ -21,7 +21,7 @@ class Membranas extends Filtro
         $this->table = 'membranes';
         $this->fields = 'id'; // Y no hay name en esta base de datos,
         $this->modelo = new Membrana();
-        $this->join_count = "COUNT(CASE WHEN membranes.id = '%s' THEN 1 ELSE NULL END) AS %s";//"COUNT(CASE WHEN membranes.name = '%s' THEN 1 ELSE NULL END) AS %s";
+        $this->join_count = "COUNT(CASE WHEN membranes.id = '%s' THEN 1 ELSE NULL END) AS `%s`";//"COUNT(CASE WHEN membranes.name = '%s' THEN 1 ELSE NULL END) AS `%s`";
         $this->where = "  membrane.%s = 1 ";
         $this->join = "INNER JOIN(
                        SELECT membrane.id

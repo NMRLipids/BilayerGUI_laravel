@@ -19,7 +19,7 @@ class PeptidosSecuencia extends Filtro
         $this->fields = 'sequence';
         $this->columna = 'sequence';
         $this->visible = true;
-        $this->join_count = " COUNT(CASE WHEN peptides.sequence LIKE '%%%s%%' THEN 1 ELSE NULL END) AS %s ";
+        $this->join_count = " COUNT(CASE WHEN peptides.sequence LIKE '%%%s%%' THEN 1 ELSE NULL END) AS `%s` ";
         $this->where = " pep_sequence.%s = 1 ";
         $this->join = "INNER JOIN(
                       SELECT pep_sequence.id

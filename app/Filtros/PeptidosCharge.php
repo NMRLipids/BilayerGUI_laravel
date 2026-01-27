@@ -19,7 +19,7 @@ class PeptidosCharge extends Filtro
         $this->fields = 'total_charge';
         $this->columna = 'total_charge';
         $this->visible = true;
-        $this->join_count = " COUNT(CASE WHEN peptides.total_charge = '%s' THEN 1 ELSE NULL END) AS %s ";
+        $this->join_count = " COUNT(CASE WHEN peptides.total_charge = '%s' THEN 1 ELSE NULL END) AS `%s` ";
         $this->where = " pep_total_charge.%s = 1 ";
         $this->join = "INNER JOIN(
                       SELECT pep_total_charge.id

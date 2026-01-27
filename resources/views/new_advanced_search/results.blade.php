@@ -320,15 +320,7 @@ use App\Trayectoria;
                                                 $listUnique = array_unique($listCampos);
 
                                                 echo implode('<br>', $listUnique);
-                                                echo '<br>';
-                                                if (strlen(implode(', ', $tempData['hm_short_name'])) > 0) {
-                                                    echo implode(', ', $tempData['hm_short_name']);
-                                                    echo '(';
-                                                    echo implode(', ', $tempData['hm_leaflet1']);
-                                                    echo ':';
-                                                    echo implode(', ', $tempData['hm_leaflet2']);
-                                                    echo ')';
-                                                }
+                                               
                                                 ?>
                                             </td>
 

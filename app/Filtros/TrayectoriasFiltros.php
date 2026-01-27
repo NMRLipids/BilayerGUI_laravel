@@ -2,9 +2,7 @@
 
 namespace App\Filtros;
 
-use App\Agua;
 use App\Trayectoria;
-use Illuminate\Database\Eloquent\Builder;
 
 class TrayectoriasFiltros extends Filtro
 {
@@ -24,7 +22,7 @@ class TrayectoriasFiltros extends Filtro
         $this->countpiece = "trajectories.".$this->columna."";
         if ($countfix!="") $this->countpiece = $countfix;
 
-        $this->join_count = " COUNT(CASE WHEN  $this->countpiece  = '%s' THEN 1 ELSE NULL END) AS %s ";
+        $this->join_count = " COUNT(CASE WHEN  $this->countpiece  = '%s' THEN 1 ELSE NULL END) AS `%s` ";
         $this->where = $columna.".%s = 1 ";
         $this->join = " INNER JOIN(
                                   SELECT ".$this->columna.".id

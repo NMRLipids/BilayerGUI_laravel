@@ -48,8 +48,6 @@ foreach ($listaIdsSesson as $key => $value) {
                     <div class="search_result" style="padding: 1rem">
                         @if (count($lipidos) == 0 and
                                 count($iones) == 0 and
-                                //count($moleculas) == 0 and
-                                count($aguas) == 0 and
                                 count($temperatures) == 0 and
                                 count($membranas) == 0)
                             Your query has returned no data. Simple search only works for lipids and/or ions. See <a target="_blank" href="https://nmrlipids.github.io/moleculesAndMapping.html">Molecules and Mapping</a> for a list of allowed molecules. For other parameters, try the Advanced Search.<br>
@@ -68,19 +66,7 @@ foreach ($listaIdsSesson as $key => $value) {
                                         </span>
                                     </div>
                                 @endforeach
-                                @if (count($moleculas) > 0)
-                                    @foreach ($moleculas as $molecula)
-                                        <div class="col-2 p-1">
-                                            <span class="badge badge-secondary">@lang('Lípido') </span>
-                                            <span>
-                                                <a href="{{ route('new_advanced_search.results') . '?moleculas_operador[1]=or&moleculas[1]=' . $molecula->molecule }}"
-                                                    class="">
-                                                    {!! resaltar_texto($molecula->molecule, $texto) !!}</a>
-                                            </span>
-                                        </div>
-                                    @endforeach
-                                @endif
-
+                               
 
                             </div>
                         @endif

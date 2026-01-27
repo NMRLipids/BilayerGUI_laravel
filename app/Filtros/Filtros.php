@@ -12,7 +12,7 @@ class Filtros
             //new PeptidosSecuencia(),
             //new PeptidosActivity(),
             //new PeptidosCharge(),
-            new Moleculas(),
+            
             new Iones(),
             //new Aguas(), // movido a filtrosTrayectoria
             //new Membranas(),
@@ -74,7 +74,6 @@ class Filtros
             //new RankingHeteromolecules(),
             //new RankingLipids(),
 
-            new Moleculas(),
             new Iones(),
             //new Aguas(),// movido a filtrosTrayectoria
             new Membranas(),

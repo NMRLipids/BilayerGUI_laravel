@@ -20,7 +20,7 @@ class Peptidos extends Filtro
         $this->columna = 'name';
         $this->visible = true;
         // para hacer las subconsultas
-        $this->join_count ="COUNT( CASE WHEN peptides.name = '%s' THEN 1 ELSE NULL END ) AS %s";
+        $this->join_count ="COUNT( CASE WHEN peptides.name = '%s' THEN 1 ELSE NULL END ) AS `%s`";
         $this->where = "peptid.%s = 1";
         $this->join ="INNER JOIN(
                           SELECT peptid.id

@@ -18,7 +18,7 @@ class Lipidos extends Filtro
         $this->visible = true;
         $this->table = 'lipids';
         $this->fields = 'molecule';
-        $this->join_count = " COUNT(CASE WHEN  trajectories_lipids.lipid_name  = '%s' THEN 1 ELSE NULL END) AS %s ";
+        $this->join_count = " COUNT(CASE WHEN  trajectories_lipids.lipid_name  = '%s' THEN 1 ELSE NULL END) AS `%s` ";
         $this->where = "lipid.%s = 1 ";
         $this->join = " INNER JOIN(
                                   SELECT lipid.id

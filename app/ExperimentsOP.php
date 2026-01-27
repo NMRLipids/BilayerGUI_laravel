@@ -16,7 +16,7 @@ class ExperimentsOP extends Model
     public function trajectories()
         {
             return $this->belongsToMany(
-                Trajectory::class,
+                Trayectoria::class,
                 'trajectories_experiments_OP',
                 'experiment_id',
                 'trajectory_id'

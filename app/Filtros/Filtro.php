@@ -147,36 +147,18 @@ class Filtro
             if ($key == "columna") $fieldName = $value;
         }
 
-        //echo $tableName." :: ".$fieldName."<br>";
         $query = "";
         $listOptions = array();
-        if ($tableName != "" and $fieldName != "") {
-            // Este if es para poder poner letras y no las sequencia de la base de datos
-            /*if ($tableName=="peptides" AND $fieldName="sequence"){
-            $listOptions = array("A","R","N","D","C","Q","E","G","H","I","L","K","M","F","P","S","T","W","Y","V");
-          } else {*/
-
-
-            // HACK ::  this is for fuse heteromolecules and lipids in list option!!!
-            if ($tableName == "heteromolecules" || $tableName == "lipids") {
-
-                if ($tableName == "lipids") {
-                    $listOptions = array();
-                    $query = DB::table('lipids')->select('molecule' . ' as valor')->groupBy('molecule')->OrderBy('molecule', 'asc')->get();
-
-                    foreach ($query as $key => $value) {
-                        foreach ($value as $key2 => $value2) {
-                            $listOptions[] = $value2;
-                        }
+        if ($tableName and $fieldName) {
+           
+            if ($tableName == "lipids") {
+                $listOptions = array();
+                $query = DB::table('lipids')->select('molecule' . ' as valor')->groupBy('molecule')->OrderBy('molecule', 'asc')->get();
+                foreach ($query as $key => $value) {
+                    foreach ($value as $key2 => $value2) {
+                        $listOptions[] = $value2;                        }
                     }
-                    $query = DB::table('heteromolecules')->select('molecule' . ' as valor')->groupBy('molecule')->OrderBy('molecule', 'asc')->get();
 
-                    foreach ($query as $key => $value) {
-                        foreach ($value as $key2 => $value2) {
-                            $listOptions[] = $value2;
-                        }
-                    }
-                }
             } else {
                 $query = DB::table($tableName)->select($fieldName . ' as valor')->groupBy($fieldName)->OrderBy($fieldName, 'asc')->get();
                 $listOptions = array();
@@ -188,7 +170,6 @@ class Filtro
             }
 
 
-            //}
         }
 
         if ($tableName == "" and $fieldName != "") {

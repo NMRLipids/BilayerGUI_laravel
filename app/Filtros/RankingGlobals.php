@@ -19,8 +19,8 @@ class RankingGlobals extends Filtro
         $this->table = 'ranking_global';
         $this->fields = 'quality_total';
 
-        //$this->join_count = "COUNT( CASE WHEN ranking_global.quality_total >= %s AND ranking_global.quality_total <= %s  THEN 1 ELSE NULL END ) AS %s";
-        $this->join_count = "COUNT( CASE WHEN  ranking_global.quality_total >= '%s' AND ranking_global.quality_total <= '%s' THEN 1 ELSE NULL END ) AS %s";
+        //$this->join_count = "COUNT( CASE WHEN ranking_global.quality_total >= %s AND ranking_global.quality_total <= %s  THEN 1 ELSE NULL END ) AS `%s`";
+        $this->join_count = "COUNT( CASE WHEN  ranking_global.quality_total >= '%s' AND ranking_global.quality_total <= '%s' THEN 1 ELSE NULL END ) AS `%s`";
         $this->where = "%s = 1";
         //$this->where = "ranking_global.%s = 1";
         $this->join = "INNER JOIN(

@@ -19,7 +19,7 @@ class Iones extends Filtro
         $this->table = 'ions';
         $this->fields = 'name';
         $this->modelo = new Ion();
-        $this->join_count = "COUNT( CASE WHEN trajectories_ions.ion_name = '%s' THEN 1 ELSE NULL END ) AS %s";
+        $this->join_count = "COUNT( CASE WHEN trajectories_ions.ion_name = '%s' THEN 1 ELSE NULL END ) AS `%s`";
         $this->where = "ion.%s = 1";
         $this->join = "INNER JOIN(
                           SELECT ion.id
