@@ -6,7 +6,7 @@ Modified June 2025 - January 2026
 - Adapted to new database structure
 - Added loading of lipid, experiment metadata and cross-references
 
-Path: Python/GUI_DB_Update.py
+Path: Python/UI_DB_Update.py
 Description: Script to update the NMRLipids database with new entries
 
 
@@ -29,11 +29,13 @@ import pymysql
 import argparse
 import numpy as np
 import numbers
-from importlib import import_module
-import DatabankLib as dbl # requires the package to be pre-installed
-from DatabankLib import *
-from DatabankLib.core import *
-from DatabankLib.settings import *
+from fairmd.lipids import *
+from fairmd.lipids.core import *
+from fairmd.lipids.molecules import *
+
+
+
+
 
 
 
@@ -41,7 +43,7 @@ from DatabankLib.settings import *
 # It DOES NOT require the package to be pre-installed
 #sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 #dbl = import_module("../Databank/DatabankLib", "DatabankLib")
-NMRDict = import_module("DatabankLib.settings.molecules")
+
 #core = import_module("../Databank/DatabankLib.core", "core")
 #sys.path.pop(0)
 
@@ -471,18 +473,16 @@ def UpdateEntry(Table: str, LipidInformation: dict, Condition: dict):
 
 
 # --- Load lipid metadata and insert cross-references ---
-def load_lipid_metadata(metadata_path, database):
-    with open(metadata_path, 'r') as f:
-        meta = yaml.safe_load(f)
-
+def load_lipid_metadata(lipid, database):
+    meta = lipid.metadata or {}
     lipid_LipidInfo = meta.get('NMRlipids', {})
     bioschema = meta.get('bioschema_properties', {})
     sameas = meta.get('sameAs', {})
 
     # Insert lipid into lipids table
-    molecule_id = lipid_LipidInfo.get('id', '')
+    molecule_id = lipid.name
     if not molecule_id:
-        raise ValueError(f"Error in metadata path {metadata_path}Lipid ID cannot be empty")
+        raise ValueError(f"Error in metadata, Lipid name cannot be empty")
         
     lipid_data = {
         'molecule': molecule_id,
@@ -680,14 +680,15 @@ if __name__ == '__main__':
 
     # Load the lipid and experiment metadata and cross-references only if no systems specified
     if not args.systems:
-    # Load lipid metadata and cross-references
-        data_path = os.path.join(NMLDB_MOL_PATH, 'membrane')
-        for path, _, files in os.walk(data_path):
-            for file in files:
-                if file.endswith("metadata.yaml"):
-                    metadata_path = os.path.join(path, file)
-                    if args.debug: print(f"Loading metadata from {metadata_path}")
-                    load_lipid_metadata(metadata_path, database)
+        if True:
+            if args.debug: 
+                print("\nLoading lipid metadata and cross-references...\n")
+        # Load lipid metadata and cross-references
+            lipids = lipids_set
+            for lipid in lipids:
+                load_lipid_metadata(lipid, database)
+
+        exit (0)
 
 
 # -- TABLE `experiments`
