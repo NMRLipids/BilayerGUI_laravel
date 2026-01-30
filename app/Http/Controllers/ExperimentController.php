@@ -102,11 +102,11 @@ function formatOPData($data) {
         
         // Categorize by G1, G2, or G3
         if (strpos($newKey, 'G1') === 0) {
-            $result['G1'][$newKey] = $value[0][0];
+            $result['G1'][$newKey] = $value[0];
         } elseif (strpos($newKey, 'G2') === 0) {
-            $result['G2'][$newKey] = $value[0][0];
+            $result['G2'][$newKey] = $value[0];
         } elseif (strpos($newKey, 'G3') === 0) {
-            $result['G3'][$newKey] = $value[0][0];
+            $result['G3'][$newKey] = $value[0];
         }
     }
     

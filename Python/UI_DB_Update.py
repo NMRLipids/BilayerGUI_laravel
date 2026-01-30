@@ -32,6 +32,7 @@ import numbers
 from fairmd.lipids import *
 from fairmd.lipids.core import *
 from fairmd.lipids.molecules import *
+from fairmd.lipids.experiment import *
 
 
 
@@ -432,46 +433,6 @@ def CreateEntry(Table: str, LipidInformation: dict) -> int:
         return ID
 
 
-def UpdateEntry(Table: str, LipidInformation: dict, Condition: dict):
-    '''
-    Updates an entry in a table.
-
-    Parameters
-    ----------
-    Table : str
-        Name of the table.
-    LipidInformation : dict
-        Values to add.
-    Condition : dict
-        Conditions to select the entry.
-    '''
-
-    # Create a cursor
-    with database.cursor() as cursor:
-        # Execute the query updating an entry
-        query = SQL_Update(Table, LipidInformation, Condition)
-        composed_query_str = cursor.mogrify(query)
-        if args.debug: 
-            print("Composed Query String (Before Execution):")
-            print(composed_query_str)
-        try:
-            cursor.execute(query)
-            # Commit the changes
-            database.commit()
-        except pymysql.Error as err:
-            print(f"Error: {err}")
-            # You can also use it here to log the failed query:
-            print("Failed Query String:")
-            print(composed_query_str)
-            raise err
-        finally:
-            if cursor:
-                cursor.close()  
-    if args.debug: print("Entry {} in table {} was updated".format(Condition["id"], Table))
-    return None
-
-
-
 # --- Load lipid metadata and insert cross-references ---
 def load_lipid_metadata(lipid, database):
     meta = lipid.metadata or {}
@@ -538,7 +499,7 @@ def load_lipid_metadata(lipid, database):
 
 
 
-def check_exp(exp, README) -> bool:
+def check_exp(expobj) -> bool:
     '''
     Check if an experiment is valid to be inserted into the DB.
     Parameters
@@ -552,10 +513,11 @@ def check_exp(exp, README) -> bool:
     :return: True if the experiment is valid, False otherwise
     
     '''
-
+    exp = expobj.exp_id
+    README = expobj.metadata or {}
     if args.debug: print(f"Processing experiment at path: {exp}")
     if (not README):
-        print(f"WARNING: README.yaml in experiment path '{exp}' is empty or invalid. Skipping experiment.", file=sys.stderr)
+        print(f"WARNING: Empty metadata for path '{exp}' is. Skipping experiment.", file=sys.stderr)
         return False
     section_from_path = os.path.basename(os.path.normpath(exp))
     section_from_readme = README.get("SECTION")
@@ -576,35 +538,48 @@ def check_exp(exp, README) -> bool:
         return False
     return True
 
-def load_experiment_composition(Exp_ID, README, ExpInfo=None) -> None:
+def load_experiment_composition(database, Exp_ID, expobj, ExpInfo=None) -> None:
     '''
     Load membrane and solution composition for an experiment.
     
     Parameters
     ----------
-    Exp_ID : int
-        The experiment ID to link compositions to.
-    README : dict
-        The README metadata containing composition information.
+    expobj : Experiment object
+        The experiment object containing composition information.
+    ExpInfo : dict, optional
+        Additional experiment information.
     Returns
     -------
     None
     '''
     # Load membrane composition
-    for lipid_name, lipid_data in README.get("MEMBRANE_COMPOSITION", README.get("MOLAR_FRACTIONS", {})).items():
+    README = expobj.metadata or {}
+    for lipid_name, lipid_data in expobj.metadata.get("MEMBRANE_COMPOSITION", expobj.metadata.get("MOLAR_FRACTIONS", {})).items():
         lipid_id = UPSERT(database, 'lipids', {'molecule': lipid_name})
         if ExpInfo and ExpInfo.get('type') == 'OP':
-            # For OP experiments, we store OP data from the json file
-            # find the json file in the experiment path and store its contents in the DB
-            op_path = osp.join(PATH_EXPERIMENTS_OP, ExpInfo['path'],f"{lipid_name}_Order[_]*Parameters.json")
-            files = glob.glob(op_path)
-            if not files:
-                print(f"WARNING: No order parameter JSON file found for lipid {lipid_name} in experiment path '{op_path}'", file=sys.stderr)
-                continue
-            op_json_file = files.pop()
-            if args.debug: print(f"Loading order parameter data from {op_json_file} for lipid {lipid_name}")
-            with open(op_json_file, 'r') as f:
-                op_data = json.load(f)
+            # For OP experiments, read OP data from the experiment object
+            # Access the `data` attribute separately so we can handle
+            # errors raised by the property accessor (e.g. ExperimentError).
+            op_data = {}
+            try:
+                _data = expobj.data
+            except ExperimentError as e:
+                if args.debug:
+                    print(f"Warning reading OP data for lipid {lipid_name}: {e}", file=sys.stderr)
+                op_data = {}
+            else:
+                if isinstance(_data, dict):
+                    op_data = _data.get(lipid_name, {})
+                else:
+                    try:
+                        op_data = _data[lipid_name]
+                    except (TypeError, KeyError, IndexError, AttributeError) as exc:
+                        if args.debug:
+                            print(f"Warning reading OP data for lipid {lipid_name}: {exc}", file=sys.stderr)
+                        op_data = {}
+
+        
+        
         comp_data = {
             'experiment_id': Exp_ID,
             'lipid_id': lipid_id,
@@ -624,7 +599,7 @@ def load_experiment_composition(Exp_ID, README, ExpInfo=None) -> None:
         UPSERT(database, 'experiments_solution_composition', ion_comp_data)
         if args.debug: print ("Linked ion {} to experiment {}, {}".format(compound_name, Exp_ID, compound_data))
 
-def load_experiment_properties(id, data) -> None:
+def load_experiment_properties(database, id, expobj) -> None:
     '''
     Load properties for an experiment.
     
@@ -638,6 +613,7 @@ def load_experiment_properties(id, data) -> None:
     -------
     None
     '''
+    data = expobj.metadata or {}
     # Insert properties from README into the properties table
     for prop, value in data.items():
         if prop in ['ARTICLE_DOI', 'DATA_DOI', 'DOI', 'SECTION', 'MEMBRANE_COMPOSITION', 'MOLAR_FRACTIONS', 'SOLUTION_COMPOSITION', 'ION_CONCENTRATIONS']:   
@@ -659,20 +635,21 @@ def load_experiment_properties(id, data) -> None:
                 else 'string'
         }
         # Create new property entry for each property
-        prop_id = CreateEntry('experiment_property', prop_data)
+        prop_id = UPSERT(database, 'experiment_property', prop_data)
         # Link experiment and property
         if args.debug: print ("Linking property {}:{} to experiment ID {}".format(prop_id,prop, id))
         LinkEntries('experiments_properties_linker', {'experiment_id': id, 'property_id': prop_id})
         
-# List to store failed entries
 
-FAILS = []
 
 # =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 # MAIN PROGRAM
 # =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 
 if __name__ == '__main__':
+
+    # List to store failed entries
+    FAILS = []
 
     # Load the configuration of the connection
     config = json.load(open(args.config, "r"))
@@ -688,97 +665,36 @@ if __name__ == '__main__':
             for lipid in lipids:
                 load_lipid_metadata(lipid, database)
 
-        exit (0)
-
-
 # -- TABLE `experiments`
-
-        # Find files with order parameters experiments
-        EXP_OP = []
-        PATH_EXPERIMENTS_OP = osp.join(NMLDB_EXP_PATH, "OrderParameters")
-
-        # Get the path to every README.yaml file with experimental data
-        for path, _, files in os.walk(PATH_EXPERIMENTS_OP):
-            for file in files:
-                if file == "README.yaml":
-                    EXP_OP.append(osp.relpath(path, PATH_EXPERIMENTS_OP))
-                    continue
-
+# Iterate over each experiment for types OP and FF
+        if args.debug: 
+            print("\nStarting the processing of the experiments...\n")       
         # Iterate over each experiment
-        for expOP in EXP_OP:
-            # Get the DOI of the experiment and the path to the README.yaml file
-            with open(osp.join(PATH_EXPERIMENTS_OP, expOP, 'README.yaml')) as File:
-                README = yaml.load(File, Loader=yaml.FullLoader)
-            if not check_exp(expOP, README):
-                continue
-            section_from_path = os.path.basename(os.path.normpath(expOP))         
-            ExpInfo = {
-                "article_doi": README.get("ARTICLE_DOI", README.get("DOI", ""))  ,
-                "data_doi": README.get("DATA_DOI", ""),
-                "section" : README.get("SECTION", section_from_path),
-                "type" : "OP",
-                "path": expOP
-            }
-            # Entry in the DB with the LipidInfo of the experiment
-            Exp_ID = UPSERT(database, 'experiments', ExpInfo)
-            if args.debug: print ("Inserted experiment {} of type OP".format(Exp_ID))
-            # Now add the membrane composition if available
-            load_experiment_composition(Exp_ID, README, ExpInfo=ExpInfo)
-            load_experiment_properties(Exp_ID, README)
- 
-    # -- TABLE `experiments_FF`
-        # Find files with form factor experiments
-        EXP_FF = []
-        PATH_EXPERIMENTS_FF = osp.join(NMLDB_EXP_PATH, "FormFactors")
-
-        # Get the path to every README.yaml file with experimental data
-        for path, _, files in os.walk(PATH_EXPERIMENTS_FF):
-            for file in files:
-                if file == "README.yaml":
-                    EXP_FF.append(osp.relpath(path, PATH_EXPERIMENTS_FF))
-                    continue
-
-        # Iterate over each experiment
-        for expFF in EXP_FF:
-            # Get the DOI of the experiment and the path to the README.yaml file
-            with open(osp.join(PATH_EXPERIMENTS_FF, expFF, 'README.yaml')) as File:
-                README = yaml.load(File, Loader=yaml.FullLoader)
-            section_from_path = os.path.basename(os.path.normpath(expFF))
-            if not check_exp(expFF, README):
-                continue
-            exp_path_full = osp.join(PATH_EXPERIMENTS_FF, expFF)
+        for exp_type in ('OPExperiment','FFExperiment'):
+            for exp in ExperimentCollection.load_from_data(exp_type):
+                # get metadata
+                metadata = exp.metadata or {}
+                section_from_path = os.path.basename(exp.exp_id)  
+                if not check_exp(exp): continue
             # Load form factor data file (assuming only one .json file per experiment)
-            form_factor_files = glob.glob(osp.join(exp_path_full, '*.json'))
-            form_factor_data = None
-            if form_factor_files:
-                if args.debug: print(f"Found form factor data files in experiment path '{exp_path_full}': {form_factor_files}")
-                with open(form_factor_files[0], 'r') as ff_file:
-                    form_factor_data = json.load(ff_file)
-                # You can process form_factor_data as needed here  
-            else:
-                print(f"WARNING: No form factor data files found in experiment path '{exp_path_full}'")
-            
-            ExpInfo = {
-                        "article_doi": README.get("ARTICLE_DOI", README.get("DOI", ""))  ,
-                        "data_doi": README.get("DATA_DOI", ""),
-                        "section" : README.get("SECTION", section_from_path),
-                        "type" : "FF",
-                        "data": json.dumps(form_factor_data) if form_factor_data else None,
-                        "path": expFF
-                    }
-            # Entry in the DB with the LipidInfo of the experiment
-            Exp_ID = UPSERT(database, 'experiments', ExpInfo)
-            if args.debug: print ("Inserted experiment {} of type FF".format(Exp_ID))
-            # Now add the membrane composition if available
-            load_experiment_composition(Exp_ID, README, ExpInfo=ExpInfo)
-            load_experiment_properties(Exp_ID, README)
+                form_factor_data = exp.data if exp_type == 'FFExperiment' else None
 
+                expInfo = {
+                            "article_doi": metadata.get("ARTICLE_DOI", metadata.get("DOI", ""))  ,
+                            "data_doi": metadata.get("DATA_DOI", ""),
+                            "section" : metadata.get("SECTION", section_from_path),
+                            "type" : exp_type[:2],  # 'FF' or 'OP'
+                            "data": json.dumps(form_factor_data) if form_factor_data else None,
+                            "path": exp
+                        }
+                # Entry in the DB with the LipidInfo of the experiment
+                exp_ID = UPSERT(database, 'experiments', expInfo)
+                if args.debug: print ("Inserted experiment {} of type {}".format(exp_ID, exp_type[:2]))
+                # Now add the membrane composition if available
+                load_experiment_composition(database, exp_ID, exp, ExpInfo=expInfo)
+                load_experiment_properties(database, exp_ID, exp)
 
-                    
-                    
-  
-    # -- TABLE `forcefields`, `lipids_forcefields` and others
-    
+    # -- TABLE `trajectories, `forcefields`, `lipids_forcefields` and others
     systems = dbl.core.initialize_databank()
     Skipped_Systems_FF = []
     Skipped_Systems_AUTHOR = []
@@ -837,11 +753,7 @@ if __name__ == '__main__':
     # -- TABLE `forcefields`
             # Collect the LipidInformation about the forcefield
             assert "FF" in README and README["FF"]
-            #"ERROR: The forcefield name is missing or invalid in the Simulation README file." + PATH_SIMULATION
-            #assert "FF_DATE" in README and README["FF_DATE"] , \
-            #"ERROR: The forcefield date is missing in the Simulation README file."  + README["path"]   
-            #assert "FF_SOURCE" in README, \
-            #"ERROR: The forcefield source is missing in the Simulation README file." + README["path"]   
+           
             FFInfo = {
                 "name":   README["FF"],
                 "date":   README["FF_DATE"] or "Unknown",
