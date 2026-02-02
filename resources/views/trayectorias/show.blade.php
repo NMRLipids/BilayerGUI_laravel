@@ -796,20 +796,7 @@ use Illuminate\Support\Collection;
                                                     echo '<span ><b>Download Mapping file</b>  </span></br>';
                                                     echo '</a>';
 
-                                                    foreach ($trayectoria->ranking_lipids as $ranking_lipido) {
-                                                        if ($ranking_lipido->lipid_id == $lipido->id) {
-                                                            //  echo($ranking_lipido->ranking_total);
-                                                            //echo("<br><span> Ranking total </span>");
-                                                            //echo($ranking_lipido->quality_total);
-                                                            echo '<span>Quality (ranking)</span><br>';
-                                                            echo '<ul>';
-                                                            echo '<li>Total : ' . filtraValor($ranking_lipido->quality_total) . ' ( ' . filtraValor($ranking_lipido->ranking_total) . ' )</li>';
-                                                            echo '<li>Headgroups : ' . filtraValor($ranking_lipido->quality_hg) . ' ( ' . filtraValor($ranking_lipido->ranking_hg) . ' )</li>';
-                                                            echo '<li>Tail 1: ' . filtraValor($ranking_lipido->{"quality_sn-1"}) . ' ( ' . filtraValor($ranking_lipido->{"ranking_sn-1"}) . ' )</li>';
-                                                            echo '<li>Tail 2: ' . filtraValor($ranking_lipido->{"quality_sn-2"}) . ' ( ' . filtraValor($ranking_lipido->{"ranking_sn-2"}) . ' )</li>';
-                                                            echo '</ul>';
-                                                        }
-                                                    }
+                                                   
 
                                                     ?>
                                                 </div>
@@ -916,24 +903,7 @@ use Illuminate\Support\Collection;
                                         </div>
 
                                         <div class="row p-2">
-                                            <div class="col-sm-6 col-md-6">
-                                                <?php
-                                                //if (isset($trayectoria->ranking_global->quality_total))
-                                                //echo ($trayectoria->ranking_global->quality_total);
-
-                                                //echo("<span class='txt-titulo'> Ranking total </span>");
-                                                //echo($trayectoria->ranking_global->ranking_total);
-                                                echo "<span class='txt-titulo'>Quality (ranking)</span><br>";
-                                                echo '<ul>';
-                                                echo '<li>Total : ' . filtraValor($trayectoria->ranking_global->quality_total) . ' ( ' . filtraValor($trayectoria->ranking_global->ranking_total) . ' )</li>';
-                                                echo '<li>Headgroups : ' . filtraValor($trayectoria->ranking_global->quality_hg) . ' ( ' . filtraValor($trayectoria->ranking_global->ranking_hg) . ' )</li>';
-                                                echo '<li>Tail 1: ' . filtraValor($trayectoria->ranking_global->{"quality_sn-1"}) . ' ( ' . filtraValor($trayectoria->ranking_global->{"ranking_sn-1"}) . ' )</li>';
-                                                echo '<li>Tail 2: ' . filtraValor($trayectoria->ranking_global->{"quality_sn-2"}) . ' ( ' . filtraValor($trayectoria->ranking_global->{"ranking_sn-2"}) . ' )</li>';
-                                                echo '</ul>';
-
-                                                ?>
-
-                                            </div>
+                                            
 
                                             <div class="col-sm-6 col-md-6">
 
