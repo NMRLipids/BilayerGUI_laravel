@@ -31,27 +31,19 @@ import numpy as np
 import numbers
 from fairmd.lipids import *
 from fairmd.lipids.core import *
+import fairmd.lipids as dbl
+import fairmd.lipids.core as NMRDict
 from fairmd.lipids.molecules import *
-from fairmd.lipids.experiment import *
+from fairmd.lipids.experiment import ExperimentCollection, ExperimentError
 
-
-
-
-
-
-
-# IMPORTLIB imports just `core` and `databankio` to avoid additional dependecies.
-# It DOES NOT require the package to be pre-installed
-#sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
-#dbl = import_module("../Databank/DatabankLib", "DatabankLib")
-
-#core = import_module("../Databank/DatabankLib.core", "core")
-#sys.path.pop(0)
 
 
 # most of paths should be inserted into the DB relative to repo root
 def genRpath(apath):
-    return osp.relpath(apath, dbl.NMLDB_DATA_PATH)
+    return osp.relpath(apath, dbl.FMDL_DATA_PATH)
+
+## ICICIC: set paths
+
 
 # =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 # ARGUMENTS
@@ -71,6 +63,14 @@ parser.add_argument(
 parser.add_argument(
     "-s", "--systems", type=str, nargs='+',  # REQUIRED
     help=""" Path of the system(s). """)
+
+# Force even in case of errors and exceptions, now explicit
+parser.add_argument(
+    "-f", "--force", action='store_true',
+    help=''' Force the insertion of entries even in case of errors/exceptions.
+    Default: %(default)s ''')   
+
+
 
 # Debug mode
 parser.add_argument(
@@ -574,6 +574,8 @@ def load_experiment_composition(database, Exp_ID, expobj, ExpInfo=None) -> None:
                     try:
                         op_data = _data[lipid_name]
                     except (TypeError, KeyError, IndexError, AttributeError) as exc:
+                        if not args.force:
+                            raise exc
                         if args.debug:
                             print(f"Warning reading OP data for lipid {lipid_name}: {exc}", file=sys.stderr)
                         op_data = {}
@@ -647,7 +649,8 @@ def load_experiment_properties(database, id, expobj) -> None:
 # =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 
 if __name__ == '__main__':
-
+    if args.debug:
+        from dumper import dump
     # List to store failed entries
     FAILS = []
 
@@ -695,7 +698,7 @@ if __name__ == '__main__':
                 load_experiment_properties(database, exp_ID, exp)
 
     # -- TABLE `trajectories, `forcefields`, `lipids_forcefields` and others
-    systems = dbl.core.initialize_databank()
+    systems = initialize_databank()
     Skipped_Systems_FF = []
     Skipped_Systems_AUTHOR = []
     Linked_Experiments_OP = []
@@ -707,6 +710,12 @@ if __name__ == '__main__':
             print("Only the following systems will be processed:")
             print(args.systems)
             print("")
+
+
+    # Iterate over the loaded systems/simulations
+    # We need to process first the forcefields and lipids_forcefields
+    # Specify the FMDL_SIMU_PATH from the environment variable
+    FMDL_SIMU_PATH = os.getenv('FMDL_SIMU_PATH', dbl.FMDL_SIMU_PATH)
 
     for _README in systems:
         README = _README.readme
@@ -720,7 +729,7 @@ if __name__ == '__main__':
                 print("System path: " + README["path"] + "\n")
 
             # The location of the files
-            PATH_SIMULATION = osp.join(NMLDB_SIMU_PATH, README["path"])
+            PATH_SIMULATION = osp.join(FMDL_SIMU_PATH, README["path"])
 
             # In the case a field in the README does not exist, set its value to 0
             README["AUTHORS_CONTACT"] = README.get("AUTHORS_CONTACT", README.get("AUTHOR", "Unknown author"))
@@ -799,68 +808,14 @@ if __name__ == '__main__':
                     Lipids[key] = README["COMPOSITION"][key]["COUNT"]
                     Lipids_ID[key] = Lip_ID
 
-    # --- TEMPORARY -----
-    # Must be chenged when the final structure is ready (???)
-    # If the LIPID_FragmentQuality.json file will be defined for every system
-    # this part can be deleted and just read the quality (try at the end of this
-    # part). At this moment the ranking is not necessary in the DB, the web
-    # already provides the result sorted by quality.
-                    PATH_RANKING = osp.join(NMLDB_DATA_PATH, "Ranking",)
-                    Lipid_Ranking[key] = {}
-                    # Find the position of the system in the ranking
-                    for file in glob.glob(osp.join(PATH_RANKING, key) + "*"):
-
-                        if args.debug: print("Processing ranking:", file)
-
-                        # Kind of ranking (total, headgroup...)
-                        kind = re.search('_(.*)_', file).group(1)
-
-                        # Open the ranking file
-                        with open(file) as FILE:
-                            RANKING_LIST = json.load(FILE)
-
-                            # Find the position of the system in the ranking
-                            for SIM in range(len(RANKING_LIST)):
-
-                                if README["path"] in \
-                                        RANKING_LIST[SIM]["system"]["path"]:
-                                    Lipid_Ranking[key][kind] = SIM + 1
-
-                                    if Store:
-                                        Lipid_Quality[key] = RANKING_LIST[SIM][key]
-                                        Store = False
-
-                            # If it does not have an assigned value, use None
-                            if kind not in Lipid_Ranking[key]:
-                                Lipid_Ranking[key][kind] = 0
-                    # If the ranking file was not found, set all values to 0
-                    # Read the quality file of the lipid (this will remain if the rest
-                    # is removed)
-                    try:
-                        with open(osp.join(PATH_SIMULATION, key +
-                                           '_FragmentQuality.json')) as FILE:
-                            Lipid_Quality[key] = json.load(FILE)
-                    except Exception:
-                        Lipid_Quality[key] = {
-                            "total": 0,
-                            "headgroup": 0,
-                            "sn-1": 0,
-                            "sn-2": 0}
-
-                    for t in ["total", "headgroup", "sn-1", "sn-2"]:
-                        try:
-                            Lipid_Quality[key][t] = Lipid_Quality[key][t]\
-                                if not np.isnan(Lipid_Quality[key][t]) else 0
-                        except Exception:
-                            Lipid_Quality[key][t] = 0
-    # ------------------
+   
 
     # -- TABLE `ions`
             # Empty dictionary for the LipidInfo of the ions
             Ions = {}
             # Find the ions in the composition
             for key in README["COMPOSITION"]:
-                if key in NMRDict.molecules_set and key != "SOL": 
+                if key in NMRDict.solubles_set and key != "SOL": 
                     # Collect the LipidInfo of the ions
                     LipidInfo = {
                         "forcefield_id": FF_ID,
@@ -1038,7 +993,12 @@ if __name__ == '__main__':
 
                     # Perform the mean
                     APL = np.mean(ApL[int(len(ApL[:, 0])/2):, 1])
-            except Exception:
+            except Exception as e:
+                if args.debug:
+                    print("WARNING: Could not compute area per lipid.")
+                    print("Exception: {}".format(e))
+                if not args.force:
+                    raise e;
                 APL = 0
 
             # Form factor quality
@@ -1052,17 +1012,34 @@ if __name__ == '__main__':
             try:
                 with open(osp.join(PATH_SIMULATION, 'SYSTEM_quality.json')) as FILE:
                     QUALITY_SYSTEM = json.load(FILE)
-            except Exception:
+            except Exception as e:
+                if args.debug:
+                    print("WARNING: Could not load SYSTEM_quality.json file.")
+                    print("Exception: {}".format(e))
+                
+
                 QUALITY_SYSTEM = {
                     "total": 0,
                     "headgroup": 0,
                     "tails": 0}
+            # Find the form factor experiment path
+            FFExp = ''
+            if "EXPERIMENT" in README and "FORMFACTOR" in README["EXPERIMENT"] and \
+                isinstance(README["EXPERIMENT"]["FORMFACTOR"], list) and \
+                README["EXPERIMENT"]["FORMFACTOR"] and \
+                 README["EXPERIMENT"]["FORMFACTOR"][0]:
+                try:
+                    FFExp = genRpath(
+                        osp.join(FMDL_EXP_PATH, README["EXPERIMENT"]["FORMFACTOR"][0]))
+                except Exception as e:
+                    if args.debug:
+                        print(f"WARNING: Could not generate path for form factor experiment. {README['EXPERIMENT']['FORMFACTOR']} ")
+                        print("Exception: {}".format(e))
+                        dump(README)
+                    if not args.force:
+                        raise e
 
-            try:
-                FFExp = genRpath(
-                    osp.join(PATH_EXPERIMENTS_FF, README["EXPERIMENT"]["FORMFACTOR"]))
-            except Exception:
-                FFExp = ''
+                    
 
             # Collect the LipidInformation of the analysis of the trajectory
             LipidInfo = {
@@ -1070,9 +1047,9 @@ if __name__ == '__main__':
                 "bilayer_thickness":      BLT,
                 "area_per_lipid":         APL,
                 "area_per_lipid_file":    genRpath(
-                    osp.join(NMLDB_SIMU_PATH, README["path"], 'apl.json')),
+                    osp.join(FMDL_SIMU_PATH, README["path"], 'apl.json')),
                 "form_factor_file":       genRpath(
-                    osp.join(NMLDB_SIMU_PATH, README["path"], 'FormFactor.json')),
+                    osp.join(FMDL_SIMU_PATH, README["path"], 'FormFactor.json')),
                 "quality_total":          QUALITY_SYSTEM["total"],
                 "quality_headgroups":     QUALITY_SYSTEM["headgroup"],
                 "quality_tails":          QUALITY_SYSTEM["tails"],
@@ -1081,43 +1058,46 @@ if __name__ == '__main__':
                 "form_factor_scaling":    FFQ[1]
                 }
 
-            # Collect the minimal LipidInformation of the analysis of the trajectory
-            Minimal = {"trajectory_id": Trj_ID}
-
             # Entry in the DB with the LipidInfo of the analysis of the simulation
             _ = UPSERT(database, 'trajectories_analysis', LipidInfo)
 
     # -- TABLE `trajectories_analysis_lipids`
             for lipid in Lipids:
-                try:
-                    OPExp = genRpath(osp.join(
-                        PATH_EXPERIMENTS_OP,
-                        list(README["EXPERIMENT"]["ORDERPARAMETER"][lipid].values())[0],
-                        lipid + '_OrderParameters.json')
-                        )
-                except Exception:
-                    OPExp = ''
+                OPExp = ''
+                # Find the order parameters experiment path
+                if "EXPERIMENT" in README and "ORDERPARAMETER" in README.get("EXPERIMENT", {}) and \
+                   README["EXPERIMENT"]["ORDERPARAMETER"] and \
+                   lipid in README["EXPERIMENT"]["ORDERPARAMETER"] and \
+                     README["EXPERIMENT"]["ORDERPARAMETER"][lipid]:
+
+                    try:
+                        OPExp = genRpath(osp.join(
+                            FMDL_EXP_PATH, 'OrderParameters',
+                            README["EXPERIMENT"]["ORDERPARAMETER"][lipid][0],
+                            lipid + '_OrderParameters.json')
+                            )
+                    except Exception as e:
+                        if args.debug:
+                            print("WARNING: Could not generate path for order parameters experiment for lipid {}.".format(lipid))
+                            print("Exception: {}".format(e))
+                        if not args.force:
+                            raise e
 
                 # Collect the LipidInformation of each lipid in the simulation
                 LipidInfo = {
                     "trajectory_id":                Trj_ID,
                     "lipid_id":                     Lipids_ID[lipid],
-                    "quality_total":                Lipid_Quality[lipid]["total"],
-                    "quality_hg":                   Lipid_Quality[lipid]["headgroup"],
-                    "quality_sn-1":                 Lipid_Quality[lipid]["sn-1"],
-                    "quality_sn-2":                 Lipid_Quality[lipid]["sn-1"],
+                    
                     "order_parameters_file":        genRpath(
-                        osp.join(NMLDB_SIMU_PATH, README["path"],
+                        osp.join(FMDL_SIMU_PATH, README["path"],
                                  lipid + 'OrderParameters.json')),
                     "order_parameters_experiment":  OPExp,
                     "order_parameters_quality":     genRpath(
-                        osp.join(NMLDB_SIMU_PATH, README["path"],
+                        osp.join(FMDL_SIMU_PATH, README["path"],
                                  lipid + '_OrderParameters_quality.json'))
                     }
-
-                # The minimal LipidInformation that identifies the lipid in the simulation
-                Minimal = {"trajectory_id": Trj_ID,
-                           "lipid_id":      Lipids_ID[lipid]}
+                if args.debug:
+                    print("Processing trajectory analysis lipid:", lipid, LipidInfo)               
 
                 # Entry in the DB with the LipidInfo of the analysis of the lipid
                 # in the simulation
@@ -1138,152 +1118,50 @@ if __name__ == '__main__':
                 # simulation
                 _ = UPSERT(database, 'trajectories_analysis_ions', LipidInfo)
 
-    # --- TEMPORAL -----
-    # The table may be removed in the future, and the quality included in the
-    # trajectory_analysis table.
-
-    # -- TABLE `ranking_global`
-            # Empty dictionary for the ranking
-            
-            Ranking = {}
-            
-            for file in glob.glob(osp.join(PATH_RANKING, "SYSTEM") + "*"):
-
-                # Type of ranking
-                kind = re.search('_(.*)_', file.split("/")[-1]).group(1)
-
-                # Open the ranking file
-                with open(file) as FILE:
-                    RANKING_LIST = json.load(FILE)
-
-                    # Find the position of the system in the ranking
-                    for SIM in range(len(RANKING_LIST)):
-                        if README["path"] in RANKING_LIST[SIM]["system"]["path"]:
-                            Ranking[kind] = SIM + 1
-
-                    # If it does not have an assigned value, use None
-                    if kind not in Ranking:
-                        Ranking[kind] = 4242
-            """
-            """
-            # Collect the LipidInformation of the position of the system in the ranking
-            LipidInfo = {
-                "trajectory_id": Trj_ID,
-                "ranking_total": Ranking["total"],
-                "ranking_hg":    Ranking["headgroup"],
-                "ranking_tails": Ranking["tails"],
-                "quality_total": QUALITY_SYSTEM["total"],
-                "quality_hg":    QUALITY_SYSTEM["headgroup"],
-                "quality_tails": QUALITY_SYSTEM["tails"]
-                }
-
-            # The minimal LipidInformation about the system
-            Minimal = {"trajectory_id": Trj_ID}
-
-            # Entry in the DB with the LipidInfo of ranking
-            _ = UPSERT(database, 'ranking_global', LipidInfo)
+      
     # ------------------
-    # -- TABLE `ranking_lipids`
-            # Empty dictionary for the ranking
-            Ranking_lipids = {}
-            
-            for lipid in Lipids:
-                Ranking_lipids[lipid] = {}
-
-                for file in glob.glob(osp.join(PATH_RANKING, lipid) + "*"):
-                    # Type of ranking
-                    kind = re.search('_(.*)_', file).group(1)
-
-                    # Open the ranking file
-                    with open(file) as FILE:
-                        RANKING_LIST = json.load(FILE)
-
-                        # Find the position of the system in the ranking
-                        for SIM in range(len(RANKING_LIST)):
-                            if README["path"] in RANKING_LIST[SIM]["system"]["path"]:
-                                Ranking_lipids[lipid][kind] = SIM + 1
-
-                for t in ["total", "headgroup", "sn-1", "sn-2"]:
-                    try:
-                        Ranking_lipids[lipid][t] = Ranking_lipids[lipid][t] \
-                            if not np.isnan(Ranking_lipids[lipid][t]) else 4242
-                    except Exception:
-                        Ranking_lipids[lipid][t] = 4242
-
-                # Collect the LipidInformation of the position of the system in the ranking
-                LipidInfo = {
-                    "trajectory_id": Trj_ID,
-                    "lipid_id":      Lipids_ID[lipid],
-                    "ranking_total": Ranking_lipids[lipid]["total"],
-                    "ranking_hg":    Ranking_lipids[lipid]["headgroup"],
-                    "ranking_sn-1":  Ranking_lipids[lipid]["sn-1"],
-                    "ranking_sn-2":  Ranking_lipids[lipid]["sn-2"],
-                    "quality_total": Lipid_Quality[lipid]["total"],
-                    "quality_hg":    Lipid_Quality[lipid]["headgroup"],
-                    "quality_sn-1":  Lipid_Quality[lipid]["sn-1"],
-                    "quality_sn-2":  Lipid_Quality[lipid]["sn-2"]
-                    }
-
-                # The minimal LipidInformation about the system
-                Minimal = {"trajectory_id": Trj_ID,
-                           "lipid_id":      Lipids_ID[lipid]}
-
-                # Entry in the DB with the LipidInfo of ranking
-                _ = UPSERT(database, 'ranking_lipids', LipidInfo)
+    # -- TABLE `trajectories_experiments_OP` and `trajectories_experiments_FF`        
     # ------------------
             
    
-            if "EXPERIMENT" in README:
-                if "ORDERPARAMETER" in README.get("EXPERIMENT", {}):
+            if "EXPERIMENT" in README and "ORDERPARAMETER" in README.get("EXPERIMENT", {}) and README["EXPERIMENT"]["ORDERPARAMETER"]:
                     # -- TABLE `trajectories_experiments_OP`
                     # The Order Parameters experiments associated to the simulation
 
-                    ExpOP = README["EXPERIMENT"]["ORDERPARAMETER"]
-                    if args.debug:
-                        print("Found ORDERPARAMETER experiments for system: " +
-                            README["path"])
-                    # Iterate over the lipids
-                    for mol in ExpOP:
-                        # Check if there is an experiment associated to the lipid
-                        if type(ExpOP[mol]) is list or type(ExpOP[mol]) is dict or len(ExpOP[mol]) > 0:
-                            #print("Processing Trajectory {} lipid:{}".format(README["path"], mol))                     
-                            for path in ExpOP[mol]:
-                                exp_path = osp.join(PATH_EXPERIMENTS_OP, path)
-                                if not osp.exists(exp_path):
-                                    print("WARNING: Experiment path does not exist: " +
-                                          exp_path + " for system: " +
-                                          README["path"], file=sys.stderr)  
-                                    continue
-                                for file in os.listdir(exp_path):
-                                    if file.endswith(".json") and file.startswith(mol + '_'):
-                                        if args.debug:
-                                            print("Linking trajectory {} with experiment {} for lipid {}".format(
-                                                Trj_ID, file, mol))
-                                        Linked_Experiments_OP.append(README["path"] + ":" + mol +" ID:" + str(Trj_ID))
-                                        exp_id = CheckEntry(
-                                                    'experiments_OP', {
-                                                      #"article_doi": path,
-                                                    "path": path})
-                                        if not exp_id:
-                                            print("WARNING: Experiment not found in DB: " +
-                                                  path + " for system: " +
-                                                  README["path"], file=sys.stderr)  
-                                            continue
-                                        LipidInfo = {
-                                            "trajectory_id": Trj_ID,
-                                            "lipid_id": Lipids_ID[mol],
-                                            "experiment_id": exp_id,
-                                        }        
-                                        _ =  UPSERT(database, 'trajectories_experiments_OP', LipidInfo)
-                        
-                else:
-                    if args.debug:
-                        print("WARNING: No ORDERPARAMETER experiments found for system: " +
-                              README["path"], file=sys.stderr)  
+                ExpOP = README["EXPERIMENT"]["ORDERPARAMETER"]
+                if args.debug:
+                    print("Found ORDERPARAMETER experiments for system: " +
+                        README["path"])
+                # Iterate over the lipids
+                for mol in ExpOP:
+                    # Check if there is an experiment associated to the lipid
+                    if type(ExpOP[mol]) is list or type(ExpOP[mol]) is dict or len(ExpOP[mol]) > 0:
+                        #print("Processing Trajectory {} lipid:{}".format(README["path"], mol))                     
+                        for path in ExpOP[mol]:                              
+                            if args.debug:
+                                print("Linking trajectory {} with experiment {} for lipid {}".format(
+                                    Trj_ID, path, mol))
+                            Linked_Experiments_OP.append(README["path"] + ":" + mol +" ID:" + str(Trj_ID))
+                            exp_id = CheckEntry(
+                                        'experiments_OP', {
+                                        "path": path})
+                            if not exp_id:
+                                print("WARNING: Experiment not found in DB: " +
+                                        path + " for system: " +
+                                        README["path"], file=sys.stderr)  
+                                continue                               
+                            LipidInfo = {
+                                "trajectory_id": Trj_ID,
+                                "lipid_id": Lipids_ID[mol],
+                                "experiment_id": exp_id,
+                            }        
+                            _ =  UPSERT(database, 'trajectories_experiments_OP', LipidInfo)
+                
             else:
                 if args.debug:
-                    print("WARNING: No EXPERIMENT section found for system: " +
-                      README["path"], file=sys.stderr)                
+                    print("WARNING: No ORDERPARAMETER experiments found for system: " +
+                            README["path"], file=sys.stderr)  
+                    
     # -- TABLE `trajectories_experiments_FF`
                 if "FORMFACTOR" in README.get("EXPERIMENT", {}):
                     # The Form Factor experiments associated to the simulation
@@ -1328,10 +1206,10 @@ if __name__ == '__main__':
             print("Exception loading system:" + README["path"], file=sys.stderr)
             traceback.print_exc()
             print ("------------------------------------------------------\n", file=sys.stderr)
-
+            if not args.force:
+                raise err
             FAILS.append(README["path"])
-
-    
+  
 ####################
 
     if FAILS:

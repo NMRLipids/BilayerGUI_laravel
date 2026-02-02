@@ -18,7 +18,7 @@ if __name__ == "__main__":
     systems = core.initialize_databank()
 
     for system in systems:
-        path = os.path.join(dbl.NMLDB_SIMU_PATH, system['path'])
+        path = os.path.join(dbl.FMDL_SIMU_PATH, system['path'])
         outfilename = os.path.join(path, 'conf.pdb')
         if os.path.isfile(outfilename):
             continue

@@ -362,48 +362,14 @@ CREATE TABLE `migrations` (
 -- Table structure for table `ranking_global`
 --
 
-DROP TABLE IF EXISTS `ranking_global`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `ranking_global` (
-  `id` bigint NOT NULL AUTO_INCREMENT,
-  `trajectory_id` bigint NOT NULL,
-  `ranking_total` bigint NOT NULL,
-  `ranking_hg` float NOT NULL,
-  `ranking_tails` float NOT NULL,
-  `quality_total` float NOT NULL,
-  `quality_hg` float NOT NULL,
-  `quality_tails` float NOT NULL,
-  PRIMARY KEY (`id`) USING BTREE,
-  KEY `trajectory_id` (`trajectory_id`)
-) ENGINE=MyISAM AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4;
-/*!40101 SET character_set_client = @saved_cs_client */;
+-- Ranking of trajectories based on global properties has been removed.
 
 
 --
 -- Table structure for table `ranking_lipids`
 --
 
-DROP TABLE IF EXISTS `ranking_lipids`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `ranking_lipids` (
-  `id` bigint NOT NULL AUTO_INCREMENT,
-  `trajectory_id` bigint NOT NULL,
-  `lipid_id` int NOT NULL,
-  `ranking_total` int NOT NULL,
-  `ranking_hg` int NOT NULL,
-  `ranking_sn-1` int NOT NULL,
-  `ranking_sn-2` int NOT NULL,
-  `quality_total` float NOT NULL,
-  `quality_hg` float NOT NULL,
-  `quality_sn-1` float NOT NULL,
-  `quality_sn-2` float NOT NULL,
-  PRIMARY KEY (`id`) USING BTREE,
-  KEY `trajectory_id` (`trajectory_id`),
-  KEY `lipid_id` (`lipid_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4;
-/*!40101 SET character_set_client = @saved_cs_client */;
+-- Ranking of trajectories based on lipid-specific properties has been removed.
 
 --
 -- Table structure for table `trajectories`
@@ -497,10 +463,6 @@ CREATE TABLE `trajectories_analysis_lipids` (
   `id` bigint NOT NULL AUTO_INCREMENT,
   `trajectory_id` bigint unsigned NOT NULL,
   `lipid_id` bigint unsigned NOT NULL,
-  `quality_total` varchar(255) NOT NULL,
-  `quality_hg` varchar(255) NOT NULL,
-  `quality_sn-1` varchar(255) NOT NULL,
-  `quality_sn-2` varchar(255) NOT NULL,
   `order_parameters_file` varchar(255) NOT NULL,
   `order_parameters_quality` varchar(255) NOT NULL,
   `order_parameters_experiment` varchar(255) NOT NULL,
