@@ -22,15 +22,16 @@ import os.path as osp
 import re
 import traceback
 import sys
-import glob
 import json
 import yaml
 import pymysql
+import math
 import argparse
 import numpy as np
 import numbers
 from fairmd.lipids import *
 from fairmd.lipids.core import *
+from fairmd.lipids.api import *
 import fairmd.lipids as dbl
 import fairmd.lipids.core as NMRDict
 from fairmd.lipids.molecules import *
@@ -42,8 +43,9 @@ from fairmd.lipids.experiment import ExperimentCollection, ExperimentError
 def genRpath(apath):
     return osp.relpath(apath, dbl.FMDL_DATA_PATH)
 
-## ICICIC: set paths
-
+# Helper function to replace NaN with None
+def rnan(x):
+    return None if isinstance(x, float) and math.isnan(x) else x
 
 # =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 # ARGUMENTS
@@ -70,6 +72,11 @@ parser.add_argument(
     help=''' Force the insertion of entries even in case of errors/exceptions.
     Default: %(default)s ''')   
 
+# Strict systems mode
+parser.add_argument(
+    "--strict_systems", action='store_true',
+    help=''' Strict mode for systems: raise errors if fields are missing in the README.
+    Default: %(default)s ''')
 
 
 # Debug mode
@@ -184,7 +191,6 @@ def UPSERT(conn, table, data) -> int | None:
         cursor.execute(sql, values)
 
         return cursor.lastrowid if pk else None
-
 
 
 
@@ -688,7 +694,7 @@ if __name__ == '__main__':
                             "section" : metadata.get("SECTION", section_from_path),
                             "type" : exp_type[:2],  # 'FF' or 'OP'
                             "data": json.dumps(form_factor_data) if form_factor_data else None,
-                            "path": exp
+                            "path": exp.exp_id
                         }
                 # Entry in the DB with the LipidInfo of the experiment
                 exp_ID = UPSERT(database, 'experiments', expInfo)
@@ -697,7 +703,8 @@ if __name__ == '__main__':
                 load_experiment_composition(database, exp_ID, exp, ExpInfo=expInfo)
                 load_experiment_properties(database, exp_ID, exp)
 
-    # -- TABLE `trajectories, `forcefields`, `lipids_forcefields` and others
+    # Load the systems to be processed
+    
     systems = initialize_databank()
     Skipped_Systems_FF = []
     Skipped_Systems_AUTHOR = []
@@ -717,8 +724,22 @@ if __name__ == '__main__':
     # Specify the FMDL_SIMU_PATH from the environment variable
     FMDL_SIMU_PATH = os.getenv('FMDL_SIMU_PATH', dbl.FMDL_SIMU_PATH)
 
-    for _README in systems:
-        README = _README.readme
+    for system in systems:
+        README = system.readme or {}
+        if args.force:
+            # In force mode, ignore systems with missing README, just print warnings
+            try:
+                assert README, "ERROR: README is empty for system: " + system.exp_id
+                assert 'ID' in README, "ERROR: 'ID' field is missing in README for system: " + system.exp_id
+            except AssertionError as e:
+                print(e, file=sys.stderr)
+                continue
+        else:
+            # In normal mode, raise errors in the README4
+            assert README, "ERROR: README is empty for system: " + system.exp_id
+            assert 'ID' in README, "ERROR: 'ID' field is missing in README for system: " + system.exp_id
+
+
         if args.systems:
             if README["path"] not in args.systems:
                 continue
@@ -732,37 +753,56 @@ if __name__ == '__main__':
             PATH_SIMULATION = osp.join(FMDL_SIMU_PATH, README["path"])
 
             # In the case a field in the README does not exist, set its value to 0
-            README["AUTHORS_CONTACT"] = README.get("AUTHORS_CONTACT", README.get("AUTHOR", "Unknown author"))
-            README["FF"] = README.get("FF", "Unknown FF")
-            for field in [
+            
+            if not args.strict_systems:
+                # In force mode, ignore missing fields in the README
+                # ID field is already checked above and must exist
+                for field in [
                     'AUTHORS_CONTACT', 'COMPOSITION', 'CPT', 'DATEOFRUNNING', 
                     'DOI', 'FF', 'FF_DATE', 'FF_SOURCE', 'GRO', 'LOG',
                     'NUMBER_OF_ATOMS', 'PREEQTIME', 'PUBLICATION', 'SOFTWARE',
                     'SOFTWARE_VERSION', 'SYSTEM', 'TEMPERATURE', 'TIMELEFTOUT', 'TOP',
                     'TPR', 'TRAJECTORY_SIZE', 'TRJ', 'TRJLENGTH', 'TYPEOFSYSTEM',
-                    'WARNINGS', 'ID']:
-                if field not in README:
-                    README[field] = None
-            if not README["FF"]:
+                    'WARNINGS']:
+                    if field not in README:
+                        README[field] = None
+            else:   
+                # In normal mode, raise errors for missing fields in the README 
+                for field in [
+                    'AUTHORS_CONTACT', 'COMPOSITION', 'CPT', 'DATEOFRUNNING', 
+                    'DOI', 'FF', 'FF_DATE', 'FF_SOURCE', 'GRO', 'LOG',
+                    'NUMBER_OF_ATOMS', 'PREEQTIME', 'PUBLICATION', 'SOFTWARE',
+                    'SOFTWARE_VERSION', 'SYSTEM', 'TEMPERATURE', 'TIMELEFTOUT', 'TOP',
+                    'TPR', 'TRAJECTORY_SIZE', 'TRJ', 'TRJLENGTH', 'TYPEOFSYSTEM', 'ID']:
+                    assert field in README, \
+                    "ERROR: Field '" + field + "' is missing in the README file. " + \
+                    "Check the README file in system: " + README["path"] + "\n"
+            # Now check for FF and AUTHORS_CONTACT fields
+            
+            if not README["FF"] and not args.strict_systems:
                 # Skip this system if the forcefield is not defined
                 if args.debug:
                     print("WARNING: The forcefield is not defined in the README file. ")
-                    print("Skipping system: " + README["path"] + "\n")
-                Skipped_Systems_FF.append(README["path"])
-                continue
-            if not README["AUTHORS_CONTACT"]:
-                # Skip this system if the forcefield is not defined
+                    print("System: " + README["path"] + "\n")
+                    README["FF"] = "Unknown"
+            else: 
+                if not README["FF"]:
+                    print("ERROR: The forcefield is not defined in the README file. ")
+                    print("System: " + README["path"] + "\n")
+                    raise ValueError("Forcefield is not defined in README.")
+            if not README["AUTHORS_CONTACT"] and not args.strict_systems:
                 if args.debug: 
-                    print("WARNING: The AUTHOR is not defined in the README file. ")
-                    print("Skipping system: " + README["path"] + "\n")
-                Skipped_Systems_AUTHOR.append(README["path"])
-                continue
-
+                    print("WARNING: The AUTHORS_CONTACT is not defined in the README file. ")
+                    print("System: " + README["path"] + "\n")
+                    README["AUTHORS_CONTACT"] = "Unknown"
+            else:
+                if not README["AUTHORS_CONTACT"]:
+                    print("ERROR: The AUTHORS_CONTACT is not defined in the README file. ")
+                    print("System: " + README["path"] + "\n")
+                    raise ValueError("AUTHORS_CONTACT is not defined in README.")
 
     # -- TABLE `forcefields`
-            # Collect the LipidInformation about the forcefield
-            assert "FF" in README and README["FF"]
-           
+            # Collect the LipidInfo of the FF           
             FFInfo = {
                 "name":   README["FF"],
                 "date":   README["FF_DATE"] or "Unknown",
@@ -875,14 +915,22 @@ if __name__ == '__main__':
             # Collect the LipidInformation about the simulation
             # Without water you have pure booze!
             if not README.get("COMPOSITION") or not isinstance(README.get("COMPOSITION"), dict):
-                raise RuntimeError( 
-                "ERROR: COMPOSITION section is mandatory and must be a dictionary of lipids\n" +
-                "Check the simulation README file in " +
-                PATH_SIMULATION)
-            if "SOL" not in README["COMPOSITION"]:
+                if args.force:
+                    print("WARNING: COMPOSITION section is missing or invalid in the README file. ", file=sys.stderr)
+                    print("Using empty composition as drop in replacement which is BAD! Check README file in", README["path"],"\n", file=sys.stderr)
+                    README["COMPOSITION"] = {}
+                else:
+                    raise ValueError( 
+                        "ERROR: COMPOSITION section is mandatory (without --force) and must be a dictionary of lipids\n" +
+                        "Check the simulation README file in " + PATH_SIMULATION)
+            if "SOL" not in README["COMPOSITION"] and not args.strict_systems:
                 print("WARNING: Water is missing in the composition. ", file=sys.stderr)
-                print("Using IMPLICIT as drop in replacement which is BAD! Check README file in", README["path"],"\n", file=sys.stderr)
-                 
+                print("Using IMPLICIT as drop in replacement. Check README file in", README["path"],"\n", file=sys.stderr)
+            else:
+                if "SOL" not in README["COMPOSITION"]:
+                    raise ValueError( 
+                        "ERROR: Water (SOL) must be defined in the COMPOSITION section (without --force)\n" +
+                        "Check the simulation README file in " + PATH_SIMULATION)     
 
             trajectoryInfo = {
                 "id":              README["ID"],
@@ -904,15 +952,6 @@ if __name__ == '__main__':
                 "water_resname":   README.get("COMPOSITION").get("SOL", {"NAME": "IMPLICIT"} ).get("NAME"),
                 }
 
-            # The LipidInformation that defines the trajectory
-            Minimal = {
-                "id":            README["ID"],
-                "forcefield_id": FF_ID,
-                "membrane_id":   Mem_ID,
-                "git_path":      README["path"],
-                "system":        README["SYSTEM"]
-                }
-
             # Entry in the DB with the LipidInfo of the trajectory
             Trj_ID = UPSERT(database, 'trajectories', trajectoryInfo)
 
@@ -926,12 +965,6 @@ if __name__ == '__main__':
                     "lipid_name":    lipid,
                     "leaflet_1":     Lipids[lipid][0],
                     "leaflet_2":     Lipids[lipid][1]
-                    }
-
-                # The minimal LipidInformation that identifies the lipid
-                Minimal = {
-                    "trajectory_id": Trj_ID,
-                    "lipid_id":      Lipids_ID[lipid]
                     }
 
                 # Entry in the DB with the LipidInfo of the lipids in the simulation
@@ -956,72 +989,45 @@ if __name__ == '__main__':
                     "ion_name":      ion,
                     "number":        Ions[ion][1]}
 
-                # The minimal LipidInformation that identifies the ion
-                Minimal = {
-                    "trajectory_id": Trj_ID,
-                    "ion_id":        Ions[ion][0]}
-
+               
                 # Entry in the DB with the LipidInfo of the ions in the simulation
                 TrjI_ID[ion] = UPSERT(database, 'trajectories_ions', LipidInfo)
 
    
     # -- TABLE `trajectories_membranes``
 
-            LipidInfo = {
+            trajectories_membranesInfo = {
                 "trajectory_id": Trj_ID,
                 "membrane_id": Mem_ID,
                 "name": README["SYSTEM"]}
-
-            _ = UPSERT(database, 'trajectories_membranes', LipidInfo)
+            _ = UPSERT(database, 'trajectories_membranes', trajectories_membranesInfo)
 
     # -- TABLE `trajectories_analysis`
-            # Find the bilayer thickness
+            # Get the bilayer thickness
             try:
-                with open(osp.join(PATH_SIMULATION, 'thickness.json')) as FILE:
-                    BLT = json.load(FILE)
-            except Exception:
-                BLT = 0
+                BLT = get_thickness(system)
+            except Exception as e:
+                if args.debug:
+                    print("WARNING: Could not compute bilayer thickness.")
+                    print("Exception: {}".format(e))
+                if args.strict_systems:
+                    raise e
+                BLT = None
 
-            # Find the area per lipid
+            # Find the mean area per lipid
             try:
-                with open(osp.join(PATH_SIMULATION, 'apl.json')) as FILE:
-                    # Load the file
-                    ApL = json.load(FILE)
-
-                    # Transform the dictionary into an array
-                    ApL = np.array([[float(key), float(ApL[key])] for key in ApL])
-
-                    # Perform the mean
-                    APL = np.mean(ApL[int(len(ApL[:, 0])/2):, 1])
+                APL = get_mean_ApL(system)
             except Exception as e:
                 if args.debug:
                     print("WARNING: Could not compute area per lipid.")
                     print("Exception: {}".format(e))
-                if not args.force:
-                    raise e;
-                APL = 0
+                if args.strict_systems:
+                    raise e
+                APL = None
 
             # Form factor quality
-            try:
-                with open(osp.join(PATH_SIMULATION, 'FormFactorQuality.json')) as FILE:
-                    FFQ = json.load(FILE)
-            except Exception:
-                FFQ = [4242, 0]
-
-            # Read the quality file for the whole system
-            try:
-                with open(osp.join(PATH_SIMULATION, 'SYSTEM_quality.json')) as FILE:
-                    QUALITY_SYSTEM = json.load(FILE)
-            except Exception as e:
-                if args.debug:
-                    print("WARNING: Could not load SYSTEM_quality.json file.")
-                    print("Exception: {}".format(e))
+            FFQ = get_quality(system, part = 'total', lipid = None, experiment = 'FF')
                 
-
-                QUALITY_SYSTEM = {
-                    "total": 0,
-                    "headgroup": 0,
-                    "tails": 0}
             # Find the form factor experiment path
             FFExp = ''
             if "EXPERIMENT" in README and "FORMFACTOR" in README["EXPERIMENT"] and \
@@ -1039,27 +1045,26 @@ if __name__ == '__main__':
                     if not args.force:
                         raise e
 
-                    
+            
 
             # Collect the LipidInformation of the analysis of the trajectory
-            LipidInfo = {
+            trajectories_analysis_data = {
                 "trajectory_id":          Trj_ID,
-                "bilayer_thickness":      BLT,
-                "area_per_lipid":         APL,
+                "bilayer_thickness":      rnan(BLT) if not isinstance(BLT, list) else [rnan(x) for x in BLT],
+                "area_per_lipid":         rnan(APL),
                 "area_per_lipid_file":    genRpath(
                     osp.join(FMDL_SIMU_PATH, README["path"], 'apl.json')),
                 "form_factor_file":       genRpath(
                     osp.join(FMDL_SIMU_PATH, README["path"], 'FormFactor.json')),
-                "quality_total":          QUALITY_SYSTEM["total"],
-                "quality_headgroups":     QUALITY_SYSTEM["headgroup"],
-                "quality_tails":          QUALITY_SYSTEM["tails"],
-                "form_factor_experiment": FFExp,
-                "form_factor_quality":    FFQ[0],
-                "form_factor_scaling":    FFQ[1]
+                "op_quality_total":          rnan(get_quality(system, part = 'total', lipid = None, experiment = 'OP')),
+                "op_quality_headgroups":     rnan(get_quality(system, part = 'headgroup', lipid = None, experiment = 'OP')),
+                "op_quality_tails":          rnan(get_quality(system, part = 'tails', lipid = None, experiment = 'OP')),
+                "ff_quality":    rnan(FFQ), # FFQ,
+                "ff_scaling":    None,
                 }
 
             # Entry in the DB with the LipidInfo of the analysis of the simulation
-            _ = UPSERT(database, 'trajectories_analysis', LipidInfo)
+            _ = UPSERT(database, 'trajectories_analysis', trajectories_analysis_data)
 
     # -- TABLE `trajectories_analysis_lipids`
             for lipid in Lipids:
@@ -1183,6 +1188,11 @@ if __name__ == '__main__':
                                                              path, file))
                                                     })
                                     if not exp_id:
+                                        if args.strict_systems:
+                                            raise ValueError("ERROR: Experiment not found in DB: " +
+                                                path + " for system: " +
+                                                README["path"])
+                                               # If strict mode is enabled, stop processing the system
                                         print("WARNING: Experiment not found in DB: " +
                                                 path + " for system: " +
                                                 README["path"], file=sys.stderr)  

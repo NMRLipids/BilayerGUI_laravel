@@ -34,25 +34,7 @@ class Trayectoria extends AppModel
         return 'trajectory_id';
     }
 
-    function ranking_global() {
-      //$ranking_global = $this->belongsToMany(Lipido::class, TrayectoriasLipidos::getTableName())->withPivot('leaflet_1', 'leaflet_2');
-      //DB::enableQueryLog();
-      $ranking_global =$this->hasOne(RankingGlobal::class);
-      //dd(DB::getQueryLog());
-      return $ranking_global;
-
-    }
-
     
-
-    function ranking_lipids() {
-      //DB::enableQueryLog();
-      $ranking_lipid = $this->hasMany(RankingLipids::class);
-      //dd(DB::getQueryLog());
-      return $ranking_lipid;
-
-    }
-
 
     
 
