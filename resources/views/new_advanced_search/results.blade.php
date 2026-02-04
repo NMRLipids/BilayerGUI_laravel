@@ -247,6 +247,7 @@ use App\Trayectoria;
                                 <thead class="thead-light">
                                     <tr>
                                         <th>@lang('Compare')</th>
+                                        <th>Order parameters quality</th>
                                         <th>@lang('ID')</th>
                                         <!--<th>@lang('FF') (@lang('resolución'))</th>-->
                                         <th>@lang('Lipidos')</th>
@@ -296,7 +297,17 @@ use App\Trayectoria;
                                                     {{ $Cheked }} onclick="PressCheck(this)">
                                             </td>
 
-                                           
+                                            <td>
+                                                <?php
+                                                if (empty(implode(', ', $tempData['op_quality_total'])) || implode(', ', $tempData['op_quality_total']) == '4242') {
+                                                    echo 'N/A';
+                                                } else {
+                                                    echo (implode(', ', $tempData['op_quality_total']));
+                                                }
+
+                                                ?>
+
+                                            </td>
                                             <td>{{ implode(', ', $tempData['id']) }}</td>
 
                                             <td>

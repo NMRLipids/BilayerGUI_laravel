@@ -249,20 +249,19 @@ use Illuminate\Support\Collection;
         }
     }
 
-    function genDataParamOrderExperiment($GitHubURL, $FileUrl, &$labelData, &$data, &$dataerror, &$maxData, &$minData, $Grupo, $ind, $lipid_id)
+    // Get the data from the experiment membrane composition
+    function genDataParamOrderExperiment($experiment, &$labelData, &$data, &$dataerror, &$maxData, &$minData, $Grupo, $ind, $lipid_id)
     {
-        $jsonFileUrl = '';
-
-         //if (strlen($FileUrl)==0) return;
-        if ($lipid_id != '') {
-            
-            $jsonFileUrl = $GitHubURL . $FileUrl . '/' . $lipid_id. '_Order_Parameters.json'; //10
-        } else {
-            $jsonFileUrl = $GitHubURL . $FileUrl; //10
-        }
+       
         $jsonFile = '';
+        $composition = $experiment->getMembraneCompositionsByLipid($lipid_id)->first();
+        if ($composition) {
+            $jsonFile = $composition->data;
+        } else {
+            error_log('No composition data found for lipid id ' . $lipid_id . ' in experiment id ' . $experiment->id);  
+            return;
+        }
 
-        $jsonFile = file_get_contents($jsonFileUrl);
 
         $jsonFile = str_replace('NaN', 0.0, $jsonFile);
 
@@ -287,15 +286,15 @@ use Illuminate\Support\Collection;
 
                 if (is_array($Values)) {
 
-                    if (is_numeric($Values[0][0])) {
+                    if (is_numeric($Values[0])) {
 
                         if ($Grupo == '') {
                           //echo("D");
                             $labelData[] =  CleanLabel($label);
 
-                            $data[] = $Values[0][0];
+                            $data[] = $Values[0];
 
-                            $dataerror = $dataerror . '{y:' . $Values[0][0] . '},';
+                            $dataerror = $dataerror . '{y:' . $Values[0] . '},';
 
                         } else {
 
@@ -309,9 +308,9 @@ use Illuminate\Support\Collection;
 
                                     $labelData[] = CleanLabel($label);
 
-                                    $data[]= $Values[0][0];
+                                    $data[]= $Values[0];
 
-                                    $dataerror[] = $Values[0][0];
+                                    $dataerror[] = $Values[1];
 
                                  }
                             } else {
@@ -320,9 +319,9 @@ use Illuminate\Support\Collection;
                                   if($Grupo == 'G3') {
                                         $labelData[] = $labelCleaned;
 
-                                        $data[] = $Values[0][0];
+                                        $data[] = $Values[0];
 
-                                        $dataerror[] = $Values[0][0];
+                                        $dataerror[] = $Values[1];
 
 
                                 }
@@ -601,12 +600,8 @@ use Illuminate\Support\Collection;
                     </div>
                     <div class="card-header txt-white">
                         <h3>
-                            Order parameters quality =
-                            <?php
-                            if (isset($trayectoria->ranking_global->quality_total)) {
-                                echo filtraValor($trayectoria->ranking_global->quality_total);
-                            }
-                            ?>
+                            Order parameters quality = {{ $trayectoria->trajectories_analysis->op_quality_total ?? 'N/A' }}
+                          
                         </h3>
                     </div>
 
@@ -829,6 +824,7 @@ use Illuminate\Support\Collection;
                                     $nlip = 1;
                                     foreach ($trayectoria->TrayectoriaAnalisisLipidosfunc as $key => $value) {
                                         $lipidName = '';
+                                        $lipid_id = $value->lipid_id;
                                         foreach ($trayectoria->lipidos as $key222 => $value222) {
                                             /* echo($key222."<br>");
                              echo($value222->molecule."<br>");
@@ -907,6 +903,25 @@ use Illuminate\Support\Collection;
 
                                             <div class="col-sm-6 col-md-6">
 
+                                                <span class="txt-titulo">Quality of Order Parameters :</span>
+                                                <span class="txt-dato">
+                                                    {{ $trayectoria->analisis->op_quality_total ?? 'N/A' }}</span><br>
+                                                <span class="txt-titulo">OP Quality of headgroups:    
+                                                   
+                                                    {{ $trayectoria->analisis->op_quality_headgroups ?? 'N/A' }}
+                                                </span>
+                                                <br>
+                                                <span class="txt-titulo">OP Quality of tails:
+                                                    {{ $trayectoria->analisis->op_quality_tails ?? 'N/A' }}
+                                                </span>
+                                                <br>
+                                                <span class="txt-titulo">FF Quality:
+                                                    {{ $trayectoria->analisis->ff_quality ?? 'N/A' }}
+                                                </span>
+                                                <br><br>
+                                                    
+                                            </div>
+                                            <div class="col-sm-6 col-md-6"> 
                                                 <span class="txt-titulo">Bilayer thickness :
                                                     <?php
                                                     //if (isset($trayectoria->bilayer_thickness))
@@ -918,7 +933,7 @@ use Illuminate\Support\Collection;
 
                                                 <span class="txt-titulo">Area per lipid :
                                                     <?php
-                                                    //if (isset($trayectoria->bilayer_thickness))
+                                                    //if (isset($trayectori a->bilayer_thickness))
                                                     echo round($trayectoria->analisis->area_per_lipid, 1) . ' &Aring;<sup>2</sup>';
                                                     //var_dump($trayectoria->analisis);
                                                     ?>
@@ -946,7 +961,7 @@ use Illuminate\Support\Collection;
                                     if ($trayectoria->TrayectoriasAnalysisHeteromoleculas->order_parameters_experiment != null) {
                                         echo ('<div class="row p-2">
                                                     <div class="col-sm-12 col-md-12 chart-container-half">
-                                                        <h3>Order Parameters : ' . $trayectoria->TrayectoriasHeteromoleculas->molecule_name . '</h3>
+                                                        <h3>Order Parameters: ' . $trayectoria->TrayectoriasHeteromoleculas->molecule_name . '</h3>
                                                         <a href="' . $GitHubURLEXP . "/" . substr($trayectoria->TrayectoriasAnalysisHeteromoleculas->order_parameters_experiment, 14) . '">Download JSON</a>
                                                         <canvas id="myChartOrderParamEXP" > </canvas>
                                                     </div>
@@ -963,7 +978,7 @@ use Illuminate\Support\Collection;
                                         if ($value->order_parameters_experiment != null) {
 
                                             $lipidName = "";
-
+                                            $lipid_id = $value->lipid_id;
                                             foreach ($trayectoria->lipidos as $key222 => $value222) {
                                                 if ($value222->id == $value->lipid_id) {
                                                     $lipidName = $value222->molecule;
@@ -1768,27 +1783,23 @@ die();
 
                     $DataExpStrArray = array();
                     $DataExpValueArray = array();
-$DataExpLabelArray = array();
-                    // HACK CARGA DE EXPERIMETOS VAN A SER MAS DE UNO ASI QUE A VER SOMO SE HACE ESTO...
+                    $DataExpLabelArray = array();
                     // HACK (english) LOADING EXPERIMENTS THEY WILL BE MORE THAN () ONE SO LET'S SEE HOW TO DO THIS...
                     // Problem is that now we have multiple experimental data for the same order parameter simulation data.
                     // So we have to load all the experimental data and plot them together with the simulation data
-                    foreach ($trayectoria->experimentsOP as $keyOP => $valueOP) {
-
-                        if (!is_null($valueOP->path)) {
-                            if (!empty(trim($valueOP->path))) {
-                              genDataParamOrderExperiment($GitHubURLEXP, 
-                              $valueOP->path, 
+                    foreach ($trayectoria->experimentsOP as $keyOP => $valueOP) {                       
+                              genDataParamOrderExperiment(
+                              $valueOP,
                               $DataExpStr, 
                               $DataExpValue, 
                               $DataExpError, $maxValue, $minValue, 'G1', $ind, 
-                              $nlip);
+                              $lipid_id             
+                              );
                               
                               $DataExpStrArray[] = $DataExpStr;
                               $DataExpValueArray[] = $DataExpValue;
                               $DataExpLabelArray[] = $valueOP->doi;
-                            }
-                        }
+                       
                     } // Foreach
 
                     // DIBUJAMOS LA PRIMERA GRAFICA
@@ -1806,12 +1817,8 @@ $DataExpLabelArray = array();
                           $DataExpValueArray = array();
                           $DataExpLabelArray = array();
                             foreach ($trayectoria->experimentsOP as $keyOP => $valueOP) {
-
-                                if (!is_null($valueOP->path)) {
-                                    if (!empty(trim($valueOP->path))) {
                                       genDataParamOrderExperiment(
-                                            $GitHubURLEXP, 
-                                            $valueOP->path, 
+                                            $valueOP, 
                                             $DataExpStr, 
                                             $DataExpValue, 
                                             $DataExpError, 
@@ -1819,15 +1826,13 @@ $DataExpLabelArray = array();
                                             $minValue, 
                                             'G2', 
                                             $ind,
-                                            $nlip
+                                            $lipid_id
                                         );
                                       $DataExpStrArray[] = $DataExpStr;
                                       $DataExpValueArray[] = $DataExpValue;
                                         $DataExpLabelArray[] = $valueOP->doi;
                                       //$DataExpErrorArray[] = $DataExpError;
-                                    }
-                                }
-                            } // Foreach
+                                    
                         }
                     }
                     echo 'DrawChartArray("myChartOrderParamLipidsg2' . $nlip . '",[' . $DataStr . '],[' . $DataValue . '],' . json_encode($DataExpStrArray) . ',' . json_encode($DataExpValueArray) . ','.json_encode($DataExpLabelArray).',1,"line","Tail S2","C-H bond","SCH",1,5,true,true,false,true,"");';
@@ -1840,10 +1845,8 @@ $DataExpLabelArray = array();
                               $DataExpValueArray = array();
                               $DataExpLabelArray = array();
                                 foreach ($trayectoria->experimentsOP as $keyOP => $valueOP) {
-                                    if (!is_null($valueOP->path)) {
-                                        if (!empty(trim($valueOP->path))) {
-                                          genDataParamOrderExperiment($GitHubURLEXP, 
-                                            $valueOP->path, 
+                                          genDataParamOrderExperiment(
+                                            $valueOP, 
                                             $DataExpStr, 
                                             $DataExpValue, 
                                             $DataExpError, 
@@ -1851,7 +1854,7 @@ $DataExpLabelArray = array();
                                             $minValue, 
                                             'G3', 
                                             $ind,
-                                            $nlip);
+                                            $lipid_id);
                                           $DataExpStrArray[] = $DataExpStr;
                                           $DataExpValueArray[] = $DataExpValue;
                                           $DataExpLabelArray[] = $valueOP->doi;
@@ -1866,10 +1869,9 @@ $DataExpLabelArray = array();
                     echo 'DrawChartArray("myChartOrderParamLipidsg3' . $nlip . '",[' . $DataStr . '],[' . $DataValue . '],' . json_encode($DataExpStrArray) . ',' . json_encode($DataExpValueArray) . ','.json_encode($DataExpLabelArray).',1,"line","Headgroup","C-H bond","SCH",1,5,true,true,false,true,"");';
                     echo "\r\n";
                     $nlip++;
-                } else {
-                    // echo "console.log('FilenotFound" . $GitHubURL . "')";
-                }
+               
             }
+        
         }
 
         // HETERO MOLECULES Experiment

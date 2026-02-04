@@ -47,11 +47,12 @@ class NewAdvancedSearchController extends Controller
 
     `ions`.molecule as ion_short_name,
     `trajectories_ions`.number as number_ions,
-    `trajectories_analysis`.form_factor_quality,
+    `trajectories_analysis`.ff_quality,
+    `trajectories_analysis`.op_quality_total,
 
     `trajectories_lipids`.leaflet_1,`trajectories_lipids`.leaflet_2,
 
-    
+
     (SELECT
             COUNT(trajectories_experiments_OP.id)
         FROM
@@ -72,7 +73,8 @@ class NewAdvancedSearchController extends Controller
     
     $Joins = " left join `trajectories_lipids` on `trajectories`.`id` = `trajectories_lipids`.`trajectory_id`
 
-   
+    
+
 
     left join `trajectories_ions` on `trajectories`.`id` = `trajectories_ions`.`trajectory_id`
  
@@ -87,7 +89,7 @@ class NewAdvancedSearchController extends Controller
 
      left join `membranes` on `membranes`.`id` = `trajectories_membranes`.`membrane_id` ";
 
-    $GroupBy = " group By trajectories.id ";
+    $GroupBy = " group By trajectories.id, `trajectories_analysis`.`op_quality_total` ";
 
     $baseQuery = "select
     %s
@@ -95,7 +97,7 @@ class NewAdvancedSearchController extends Controller
     from trajectories
     %s
     WHERE %s %s
-    
+    ORDER BY `trajectories_analysis`.`op_quality_total` DESC
     ";
 
     //

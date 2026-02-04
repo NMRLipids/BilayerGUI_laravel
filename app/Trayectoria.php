@@ -34,7 +34,10 @@ class Trayectoria extends AppModel
         return 'trajectory_id';
     }
 
-    
+   
+    function trajectories_analysis() {
+      return $this->hasOne(TrayectoriaAnalisis::class, 'trajectory_id', 'id');
+    }
 
     
 
@@ -80,10 +83,7 @@ class Trayectoria extends AppModel
     }
 
 
-    /*function peptidos() {
-        //return $this->belongsToMany(Peptido::class, TrayectoriasPeptidos::getTableName())->withPivot('bulk');
-        return $this->belongsToMany(Peptido::class, TrayectoriasPeptidos::getTableName())->withPivot('peptide_id');
-    }*/
+    
 
     function iones() {
         return $this->belongsToMany(Ion::class, TrayectoriasIones::getTableName());//->withPivot('bulk');
