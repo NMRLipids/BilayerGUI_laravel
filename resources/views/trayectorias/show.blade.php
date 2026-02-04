@@ -772,27 +772,38 @@ use Illuminate\Support\Collection;
                                         <div class="col-xs-12 col-lg-6 d-flex flex-wrap cardlipids">
 
                                             <div class=" m-2 w-100" style="width: 18rem;">
-                                                <div class=" ">
+                                                <div class="card-header text-left bg-card-header">
                                                     <h5 class=" ">{{ $lipido->molecule }}</h5>
-
-
+                                                    <ul>
+                                                        <li>
+                                                            Quality total: 
+                                                            {{ $trayectoria->get_trajectory_analysis_lipids_by_lipid($lipido->id)?->op_quality_total ?? 'N/A' }}
+                                                        </li>
+                                                        <li>
+                                                            Quality headgroups: 
+                                                            {{ $trayectoria->get_trajectory_analysis_lipids_by_lipid($lipido->id)?->op_quality_headgroups ?? 'N/A' }}
+                                                        </li>
+                                                        <li>
+                                                            Quality tails: 
+                                                            {{ $trayectoria->get_trajectory_analysis_lipids_by_lipid($lipido->id)?->op_quality_tails ?? 'N/A' }}
+                                                        </li>
+                                                    </ul>
+                                                </div>
+                                                <div class="card-body text-center">
                                                     <?php
-
                                                     $pathToPeptid = '/molecule2D/' . $lipido->molecule . '.png';
                                                     if (file_exists(public_path('storage' . $pathToPeptid))) {
                                                         echo '<a class="portfolio-box" href="' . asset('storage/' . $pathToPeptid) . '" title="Click to Zoom">';
                                                         echo '<span ><b>Show Lipid</b>  </span></br>';
                                                         echo '</a>';
                                                     }
+
                                                     $mappingFile = $lipido->getMappingByForcefield($trayectoria->campo_de_fuerza);
                                                     $pathToScr =$GitHubURL . 'Molecules/membrane/' . $lipido->molecule .'/'. $mappingFile;
                                                     
                                                     echo '<a href="' . $pathToScr  . '" title="Download Mapping file" target="_blank">';
                                                     echo '<span ><b>Download Mapping file</b>  </span></br>';
                                                     echo '</a>';
-
-                                                   
-
                                                     ?>
                                                 </div>
                                             </div>
@@ -826,14 +837,11 @@ use Illuminate\Support\Collection;
                                         $lipidName = '';
                                         $lipid_id = $value->lipid_id;
                                         foreach ($trayectoria->lipidos as $key222 => $value222) {
-                                            /* echo($key222."<br>");
-                             echo($value222->molecule."<br>");
-                             echo($value->lipid_id."<br>");*/
+                                   
                                             if ($value222->id == $value->lipid_id) {
                                                 $lipidName = $value222->molecule;
                                             }
                                         }
-                                        //$clave = array_search($value->lipid_id,$trayectoria->lipidos);
                                 ?>
                                         <div class="row p-2">
                                             <div class="col">
@@ -1774,13 +1782,9 @@ die();
             $nlip = 1;
 
             foreach ($trayectoria->TrayectoriaAnalisisLipidosfunc as $key => $value) {
-                if (urlFileExist2($GitHubURL . $value->order_parameters_file)) {
+                if (isset($value->order_parameters_file) and urlFileExist2($GitHubURL . $value->order_parameters_file)) {
                     $ind =0; //LeeIndices($GitHubURL, $value->order_parameters_file); // indices de texto...
-
-
-                    // $value->order_parameters_file ESTO SALE DE LA TABLA VIENE LA RUTA Y EL FICHERO.
                     genDataParamOrdeFusion($GitHubURL, $value->order_parameters_file, $DataStr, $DataValue, $DataError, $maxValue, $minValue, 'G1');
-
                     $DataExpStrArray = array();
                     $DataExpValueArray = array();
                     $DataExpLabelArray = array();
@@ -1794,12 +1798,10 @@ die();
                               $DataExpValue, 
                               $DataExpError, $maxValue, $minValue, 'G1', $ind, 
                               $lipid_id             
-                              );
-                              
+                              );                             
                               $DataExpStrArray[] = $DataExpStr;
                               $DataExpValueArray[] = $DataExpValue;
-                              $DataExpLabelArray[] = $valueOP->doi;
-                       
+                              $DataExpLabelArray[] = $valueOP->doi;                   
                     } // Foreach
 
                     // DIBUJAMOS LA PRIMERA GRAFICA

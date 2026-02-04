@@ -39,12 +39,13 @@ class Trayectoria extends AppModel
       return $this->hasOne(TrayectoriaAnalisis::class, 'trajectory_id', 'id');
     }
 
-    
-
-    function TrayectoriaAnalisisLipidosfunc() {
-      return $this->hasMany(TrayectoriaAnalisisLipidos::class);
+    function trajectories_analysis_lipids() {
+      return $this->hasMany(TrayectoriaAnalisisLipidos::class, 'trajectory_id', 'id');
     }
 
+    function get_trajectory_analysis_lipids_by_lipid($lipid_id) {
+      return $this->hasMany(TrayectoriaAnalisisLipidos::class, 'trajectory_id', 'id')->where('lipid_id', $lipid_id)->first();
+    }
   
 
 
@@ -93,11 +94,8 @@ class Trayectoria extends AppModel
     }
     
     function membranas() {
-      //dd(TrayectoriasMembranas::getTableName());
-        //$res = $this->belongsToMany(Membrana::class, TrayectoriasMembranas::getTableName());
-
+      
         $res = $this->belongsToMany(Membrana::class, Trayectoria::getTableName(),'id');
-        //dd($res);
         return $res;
     }
 
