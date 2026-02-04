@@ -1092,7 +1092,9 @@ if __name__ == '__main__':
                 LipidInfo = {
                     "trajectory_id":                Trj_ID,
                     "lipid_id":                     Lipids_ID[lipid],
-                    
+                    "op_quality_headgroups":         rnan(get_quality(system, part = 'headgroup', lipid = lipid, experiment = 'OP')),
+                    "op_quality_tails":              rnan(get_quality(system, part = 'tails', lipid = lipid, experiment = 'OP')),
+                    "op_quality_total":              rnan(get_quality(system, part = 'total', lipid = lipid, experiment = 'OP')),
                     "order_parameters_file":        genRpath(
                         osp.join(FMDL_SIMU_PATH, README["path"],
                                  lipid + 'OrderParameters.json')),
