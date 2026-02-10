@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chart.js Playground</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+        }
+        .chart-container {
+            position: relative;
+            height: 500px;
+            margin: 20px 0;
+        }
+        .controls {
+            margin: 20px 0;
+            padding: 15px;
+            background-color: #f9f9f9;
+            border-radius: 5px;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 8px 16px;
+            margin: 3px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 13px;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        .data-editor {
+            margin: 20px 0;
+            padding: 15px;
+            background-color: #f9f9f9;
+            border-radius: 5px;
+        }
+        .data-editor label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #333;
+        }
+        .data-editor input,
+        .data-editor textarea {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-family: monospace;
+            box-sizing: border-box;
+        }
+        .data-editor textarea {
+            resize: vertical;
+            min-height: 60px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Chart.js Playground</h1>
+        
+        <div class="controls">
+            <button onclick="changeChartType('line')">Line Chart</button>
+            <button onclick="changeChartType('bar')">Bar Chart</button>
+            <button onclick="changeChartType('scatter')">Scatter Plot</button>
+            <button onclick="enableDotWhisker()">Dot + Whisker</button>
+            <button onclick="changeChartType('pie')">Pie Chart</button>
+            <button onclick="changeChartType('doughnut')">Doughnut Chart</button>
+            <button onclick="changeChartType('radar')">Radar Chart</button>
+            <button onclick="randomizeData()">Randomize Data</button>
+            <button onclick="toggleLines()">Toggle Lines</button>
+            <button onclick="normalizeDatasets()">Normalize Datasets</button>
+        </div>
+
+        <div class="data-editor">
+            <label for="datasetInput">Dataset (raw JSON):</label>
+            <textarea id="datasetInput" rows="20"></textarea>          
+        </div>
+
+        <div class="chart-container">
+            <canvas id="myChart"></canvas>
+        </div>
+    </div>
+
+    <script>
+        let myChart;
+
+        // Function to build labels from data
+        function buildXaxisFromData(data) {
+            const labelSet = new Set();
+            data.datasets.forEach(dataset => {
+                dataset.data.forEach(point => {
+                    if (point.C && point.H) {
+                        labelSet.add(point.C + point.H);
+                    }
+                });
+            });
+            return Array.from(labelSet).sort();
+        }
+
+        // Function to add x,y indices to data based on labels
+        function enrichDataWithIndices(data) {
+            const labels = buildXaxisFromData(data);
+            data.labels = labels;
+            
+            data.datasets.forEach(dataset => {
+                dataset.data = dataset.data.map(point => ({
+                    ...point,
+                    x: labels.indexOf(point.C + point.H),
+                    y: point.OP
+                }));
+            });
+            return data;
+        }
+        
+        const initialData = ({
+            datasets: [{
+                label: 'Dataset 1',
+                data: [
+                    {C: 'C1', H: 'H11', OP: -0.18, err: 0.01},
+                    {C: 'C1', H: 'H12', OP: -0.17, err: 0.02},
+                    {C: 'C2', H: 'H2X', OP: -0.05, err: 0.02},
+                    {C: 'C2', H: 'H25', OP: -0.12, err: 0.015},
+                    {C: 'C3', H: 'H31', OP: -0.22, err: 0.025},
+                    {C: 'C3', H: 'H32', OP: -0.19, err: 0.018}
+                ],
+                backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                borderColor: 'rgba(255, 99, 132, 1)',
+                borderWidth: 2
+            },
+            {
+                label: 'Dataset 2',
+                data: [
+                    {C: 'C1', H: 'H11', OP: -0.16, err: 0.012},
+                    {C: 'C1', H: 'H12', OP: -0.15, err: 0.022},
+                    {C: 'C2', H: 'H2X', OP: -0.08, err: 0.018},
+                    {C: 'C2', H: 'H25', OP: -0.14, err: 0.02},
+                    {C: 'C3', H: 'H31', OP: -0.20, err: 0.028},
+                    {C: 'C3', H: 'H32', OP: -0.21, err: 0.016}
+                ],
+                backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                borderColor: 'rgba(54, 162, 235, 1)',
+                borderWidth: 2
+            }]
+        });
+
+        const whiskerPlugin = {
+            id: 'whiskerPlugin',
+            afterDatasetsDraw(chart, args, pluginOptions) {
+                if (!pluginOptions || !pluginOptions.enabled) return;
+                const { ctx, scales } = chart;
+                const yScale = scales.y;
+                if (!yScale) return;
+
+                chart.data.datasets.forEach((dataset, datasetIndex) => {
+                    const meta = chart.getDatasetMeta(datasetIndex);
+                    if (!meta || meta.hidden) return;
+
+                    dataset.data.forEach((point, index) => {
+                        if (!point || point.OP == null || point.err == null) return;
+                        const element = meta.data[index];
+                        if (!element) return;
+
+                        const x = element.x;
+                        const yTop = yScale.getPixelForValue(point.OP + point.err);
+                        const yBottom = yScale.getPixelForValue(point.OP - point.err);
+                        const capWidth = pluginOptions.capWidth || 8;
+
+                        ctx.save();
+                        ctx.strokeStyle = dataset.borderColor || '#333';
+                        ctx.lineWidth = pluginOptions.lineWidth || 1;
+
+                        ctx.beginPath();
+                        ctx.moveTo(x, yTop);
+                        ctx.lineTo(x, yBottom);
+                        ctx.stroke();
+
+                        ctx.beginPath();
+                        ctx.moveTo(x - capWidth / 2, yTop);
+                        ctx.lineTo(x + capWidth / 2, yTop);
+                        ctx.moveTo(x - capWidth / 2, yBottom);
+                        ctx.lineTo(x + capWidth / 2, yBottom);
+                        ctx.stroke();
+
+                        ctx.restore();
+                    });
+                });
+            }
+        };
+
+        const config = {
+            type: 'line',
+            data: initialData,
+            plugins: [whiskerPlugin],
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                parsing: {
+                    yAxisKey: 'OP'
+                },
+                plugins: {
+                    legend: {
+                        position: 'top',
+                    },
+                    title: {
+                        display: true,
+                        text: 'Chart.js Playground'
+                    },
+                    whiskerPlugin: {
+                        enabled: false,
+                        capWidth: 8,
+                        lineWidth: 1
+                    },
+                    tooltip: {
+                        callbacks: {
+                            title: function(context) {
+                                const dataPoint = context[0].raw;
+                                return dataPoint.C + dataPoint.H;
+                            },
+                            label: function(context) {
+                                const dataPoint = context.raw;
+                                return 'OP: ' + dataPoint.OP.toFixed(3) + ' ± ' + dataPoint.err.toFixed(3);
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        };
+
+        // Initialize the chart
+        const ctx = document.getElementById('myChart');
+        myChart = new Chart(ctx, config);
+
+        // Initialize the JSON editor with current data
+        syncJSONEditor();
+
+        // Function to change chart type
+        function changeChartType(type) {
+            myChart.config.type = type;
+            
+            // Adjust options based on chart type
+            if (type === 'pie' || type === 'doughnut') {
+                myChart.config.options.scales = {};
+            } else if (type === 'radar') {
+                myChart.config.options.scales = {
+                    r: {
+                        beginAtZero: true
+                    }
+                };
+            } else {
+                myChart.config.options.scales = {
+                    x: {
+                        type: 'category'
+                    },
+                    y: {
+                        beginAtZero: true
+                    }
+                };
+            }
+            
+            myChart.update();
+        }
+
+        // Function to randomize data
+        function randomizeData() {
+            myChart.data.datasets.forEach(dataset => {
+                dataset.data = dataset.data.map(point => ({
+                    ...point,
+                    OP: (Math.random() - 0.5) * 0.5,
+                    err: Math.random() * 0.03 + 0.005
+                }));
+            });
+            myChart.update();
+            syncJSONEditor();
+        }
+
+        // Enable dot-and-whisker plot (scatter with std whiskers)
+        function enableDotWhisker() {
+            myChart.config.type = 'scatter';
+            myChart.data.datasets.forEach(dataset => {
+                dataset.showLine = false;
+            });
+            myChart.options.plugins.whiskerPlugin.enabled = !myChart.options.plugins.whiskerPlugin.enabled;
+            myChart.update();
+            syncJSONEditor();
+        }
+
+        // Function to toggle connecting lines
+        function toggleLines() {
+            myChart.data.datasets.forEach(dataset => {
+                dataset.showLine = !dataset.showLine;
+            });
+            myChart.update();
+            syncJSONEditor();
+        }
+
+        // Function to normalize datasets by inserting null values for missing x-labels
+        function normalizeDatasets() {
+            if (!myChart.data.datasets || myChart.data.datasets.length === 0) return;
+            
+            // Get all unique labels from the chart
+            const allLabels = new Set(myChart.data.labels);
+            
+            // For each dataset, ensure all labels are present
+            myChart.data.datasets.forEach(dataset => {
+                const dataMap = new Map();
+                
+                // Map existing data points by their C+H key
+                dataset.data.forEach(point => {
+                    if (point && point.C && point.H) {
+                        dataMap.set(point.C + point.H, point);
+                    }
+                });
+                
+                // Rebuild data array with all labels
+                dataset.data = myChart.data.labels.map(label => {
+                    if (dataMap.has(label)) {
+                        return dataMap.get(label);
+                    } else {
+                        // Extract C and H from the label
+                        const C = label.slice(0, 2);
+                        const H = label.slice(2);
+                        return { C, H, OP: null, err: null };
+                    }
+                });
+            });
+            
+            myChart.update();
+            syncJSONEditor();
+            console.log('Datasets normalized with null values for missing x-labels');
+        }
+
+        // Function to update chart from JSON input
+        function updateChartFromJSON() {
+            try {
+                const jsonInput = document.getElementById('datasetInput').value;
+                let data = JSON.parse(jsonInput);
+                
+                // Rebuild labels and indices from the data
+                data = enrichDataWithIndices(data);
+                
+                // Update chart data
+                myChart.data = data;
+                myChart.update();
+                
+                console.log('Chart updated successfully!');
+            } catch (error) {
+                alert('Invalid JSON format: ' + error.message);
+            }
+        }
+
+        // Function to sync JSON editor with current chart data
+        function syncJSONEditor() {
+            const datasetInput = document.getElementById('datasetInput');
+            datasetInput.value = JSON.stringify(myChart.data, null, 2);
+        }
+    </script>
+</body>
+</html>
