@@ -29,6 +29,7 @@ import math
 import argparse
 import numpy as np
 import numbers
+from loguru import logger as mylogger
 from fairmd.lipids import *
 from fairmd.lipids.core import *
 from fairmd.lipids.api import *
@@ -36,7 +37,7 @@ import fairmd.lipids as dbl
 import fairmd.lipids.core as NMRDict
 from fairmd.lipids.molecules import *
 from fairmd.lipids.experiment import ExperimentCollection, ExperimentError
-
+from fairmd.lipids.auxiliary.opconvertor import build_nice_OPdict
 
 
 # most of paths should be inserted into the DB relative to repo root
@@ -78,6 +79,18 @@ parser.add_argument(
     help=''' Strict mode for systems: raise errors if fields are missing in the README.
     Default: %(default)s ''')
 
+# Strict experiments mode
+parser.add_argument(
+    "--strict_experiments", action='store_true',
+    help=''' Strict mode for experiments: raise errors if fields are missing in the README.
+    Default: %(default)s ''')  
+
+parser.add_argument(
+        "--level", 
+        default="INFO", 
+        choices=["TRACE", "DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"],
+        help="Set the logging level (default: INFO)"
+    )
 
 # Debug mode
 parser.add_argument(
@@ -85,6 +98,18 @@ parser.add_argument(
     help=''' Activate the debug mode. Default: %(default)s ''')     
 
 args = parser.parse_args()
+logger = mylogger
+
+if args.level.upper() == "TRACE":
+    logger = mylogger.bind(name="UI_DB_Update")
+
+logger.remove()  # Remove default logger
+# This format removes the module (__main__), function (<module>), and line number (93)
+# It only shows the timestamp (optional) and the message.
+logger.add(sys.stderr, 
+    format="<green>{time:HH:mm:ss}</green> | <level>{level: <8}</level> | {message}",
+    level=args.level.upper(), 
+)
 
 
 # =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
@@ -183,11 +208,10 @@ def UPSERT(conn, table, data) -> int | None:
     with conn.cursor() as cursor:
         cursor.execute("SET SESSION sql_mode='STRICT_ALL_TABLES';")
         # Print query for debugging only if debug mode > 1
-        if args.debug > 1: 
-            print(f"Executing UPSERT on table {table} with data {data}")
-            query = cursor.mogrify(sql, values)
-            print("Prepared Query String:")
-            print(query)
+        logger.debug(f"Executing UPSERT on table {table} with data {data}")
+        query = cursor.mogrify(sql, values)
+        logger.trace("Prepared Query String:")
+        logger.trace(query)
         cursor.execute(sql, values)
 
         return cursor.lastrowid if pk else None
@@ -345,10 +369,8 @@ def CheckEntry(Table: str, LipidInformation: dict = {}) -> int:
             else:
                 return None   
         except pymysql.Error as err:
-            print(f"Error: {err}")
-            # You can also use it here to log the failed query:
-            print("Failed Query String:")
-            print(composed_query_str)
+            logger.exception("Error executing query: {}".format(err))
+            logger.debug(composed_query_str)
             raise err
 
         finally:
@@ -413,7 +435,7 @@ def CreateEntry(Table: str, LipidInformation: dict) -> int:
     # Create a cursor
     with database.cursor() as cursor:
         # Execute the query creating a new entry
-        if args.debug: print(f"Executing query to create entry in {Table} with values {LipidInformation}")
+        logger.debug(f"Creating entry in {Table} with values {LipidInformation}")
         res = cursor.execute(SQL_Create(Table, LipidInformation), tuple(LipidInformation.values()))
         ID = cursor.lastrowid
     # Commit the changes
@@ -457,7 +479,7 @@ def load_lipid_metadata(lipid, database):
         'mapping': lipid_LipidInfo.get('mapping', molecule_id),
     }
     lipid_id = UPSERT(database, 'lipids', lipid_data)
-    if args.debug: print ("Inserted/Updated lipid {} with ID {}".format(molecule_id, lipid_id))
+    logger.debug(f"Inserted/Updated lipid {molecule_id} with ID {lipid_id}")
 
     # Insert synonyms
     synonyms = bioschema.get('alternateNames', [])
@@ -467,8 +489,7 @@ def load_lipid_metadata(lipid, database):
             'synonym': synonym
         }
         UPSERT(database, 'lipids_synonyms', synonym_data)
-        if args.debug: print ("Inserted synonym {} for lipid ID {}".format(synonym, lipid_id)) 
-
+        logger.debug(f"Inserted synonym {synonym} for lipid ID {lipid_id}") 
     # Insert bioschema properties as properties (optional, can be extended)
     for prop, value in bioschema.items():
         if prop in ['@context', '@type', 'name', 'alternateName', 'description']:   
@@ -483,7 +504,7 @@ def load_lipid_metadata(lipid, database):
         prop_id = UPSERT(database, 'properties', prop_data)
         # Link lipid and property
         LinkEntries('lipid_properties', {'lipid_id': lipid_id, 'property_id': prop_id})
-        if args.debug: print ("Linked property {} to lipid ID {}".format(prop, lipid_id))
+        logger.debug(f"Linked property {prop} to lipid ID {lipid_id}")
 
     # Insert cross-references
     for db_name, ext_id in sameas.items():
@@ -502,6 +523,7 @@ def load_lipid_metadata(lipid, database):
             'external_url': ''
         }
         UPSERT(database, 'cross_references', crossref_data)
+        logger.debug(f"Inserted cross-reference to {db_name} with external ID {ext_id} for lipid ID {lipid_id}")
 
 
 
@@ -521,26 +543,26 @@ def check_exp(expobj) -> bool:
     '''
     exp = expobj.exp_id
     README = expobj.metadata or {}
-    if args.debug: print(f"Processing experiment at path: {exp}")
+    logger.debug(f"Processing experiment at path: {exp}")
     if (not README):
-        print(f"WARNING: Empty metadata for path '{exp}' is. Skipping experiment.", file=sys.stderr)
+        logger.warning(f"WARNING: Empty metadata for path '{exp}' is. Skipping experiment.")
         return False
     section_from_path = os.path.basename(os.path.normpath(exp))
     section_from_readme = README.get("SECTION")
     if section_from_readme:
         if str(section_from_readme) != str(section_from_path):
-            print(f"WARNING: Section in README ('{section_from_readme}') does not match section from path ('{section_from_path}') in experiment path '{exp}'. Skipping experiment.", file=sys.stderr)
+            logger.warning(f"WARNING: Section in README ('{section_from_readme}') does not match section from path ('{section_from_path}') in experiment path '{exp}'. Skipping experiment.")
             return False
     # check if experiment path follows expected structure doi1/doi2/section
     if exp.count('/') != 2:
-        print(f"WARNING: Experiment path '{exp}' does not follow expected structure (doi1/doi2/section). Skipping experiment.", file=sys.stderr)
+        logger.warning(f"WARNING: Experiment path '{exp}' does not follow expected structure (doi1/doi2/section). Skipping experiment.")
         return False
     # check if section is numeric, skip if not
     if not section_from_path.isdigit():
-        print(f"WARNING: Section '{section_from_path}' in experiment path '{exp}' is not numeric. Skipping experiment.", file=sys.stderr)
+        logger.warning(f"Section '{section_from_path}' in experiment path '{exp}' is not numeric. Skipping experiment.")
         return False
     if not README.get("ARTICLE_DOI") and not README.get("DOI"):
-        print(f"WARNING: ARTICLE_DOI is missing in README.yaml in experiment path '{exp}'. Skipping experiment.", file=sys.stderr)
+        logger.warning(f"ARTICLE_DOI is missing in README.yaml in experiment path '{exp}'. Skipping experiment.")
         return False
     return True
 
@@ -562,40 +584,51 @@ def load_experiment_composition(database, Exp_ID, expobj, ExpInfo=None) -> None:
     README = expobj.metadata or {}
     for lipid_name, lipid_data in expobj.metadata.get("MEMBRANE_COMPOSITION", expobj.metadata.get("MOLAR_FRACTIONS", {})).items():
         lipid_id = UPSERT(database, 'lipids', {'molecule': lipid_name})
+        op_data = {}
         if ExpInfo and ExpInfo.get('type') == 'OP':
             # For OP experiments, read OP data from the experiment object
             # Access the `data` attribute separately so we can handle
-            # errors raised by the property accessor (e.g. ExperimentError).
-            op_data = {}
+            # errors raised by the property accessor (e.g. ExperimentError). 
+            _data = None          
             try:
                 _data = expobj.data
             except ExperimentError as e:
-                if args.debug:
-                    print(f"Warning reading OP data for lipid {lipid_name}: {e}", file=sys.stderr)
-                op_data = {}
+                    logger.warning(f"Problem reading OP data for lipid {lipid_name}: {e}")
+                    if args.strict_experiments:
+                        raise e
+            if isinstance(_data, dict):
+                op_data = _data.get(lipid_name, {})
             else:
-                if isinstance(_data, dict):
-                    op_data = _data.get(lipid_name, {})
-                else:
-                    try:
-                        op_data = _data[lipid_name]
-                    except (TypeError, KeyError, IndexError, AttributeError) as exc:
-                        if not args.force:
-                            raise exc
-                        if args.debug:
-                            print(f"Warning reading OP data for lipid {lipid_name}: {exc}", file=sys.stderr)
-                        op_data = {}
-
-        
-        
+                try:
+                    # Some experiments may have no data at all, or data in an unexpected format. Handle this gracefully.
+                    op_data = _data[lipid_name] 
+                except (TypeError, KeyError, IndexError, AttributeError) as exc:
+                    logger.warning(f"Problem reading OP data for lipid {lipid_name}")
+                    #logger.exception(exc)
+                    if args.strict_experiments:
+                        raise exc
+                    op_data = {}       
+        if op_data:
+            lipid_object = Lipid(lipid_name)
+            lipid_object.register_mapping()
+            print(f"Nice_OP_dict: for lipid {lipid_name} in experiment {README.get('DOI', 'unknown')}")
+            try:
+                op_data = build_nice_OPdict(op_data, lipid_object)
+            except Exception as e:
+                logger.warning(f"Problem building OP dict in experiment {README.get('DOI', 'unknown')} for lipid {lipid_name}")
+                #logger.exception(e)
+                if args.strict_experiments:
+                    raise e
+                op_data = {}    
+                
         comp_data = {
             'experiment_id': Exp_ID,
             'lipid_id': lipid_id,
             'mol_fraction': float(lipid_data),
-            'data': json.dumps(op_data) if ExpInfo and ExpInfo.get('type') == 'OP' else None,
+            'data': json.dumps(op_data) if op_data and ExpInfo and ExpInfo.get('type') == 'OP' else None,
         }
         UPSERT(database, 'experiments_membrane_composition', comp_data)
-        if args.debug: print (" -- Linked lipid {} to experiment {}, {}".format(lipid_name, Exp_ID, lipid_data))
+        logger.debug(f"Linked lipid {lipid_name} to experiment {Exp_ID}, {lipid_data}")
     
     # Load solution composition
     for compound_name, compound_data in (README.get("SOLUTION_COMPOSITION", README.get("ION_CONCENTRATIONS", {})) or {}).items():
@@ -605,7 +638,7 @@ def load_experiment_composition(database, Exp_ID, expobj, ExpInfo=None) -> None:
             'concentration': float(compound_data),
         }
         UPSERT(database, 'experiments_solution_composition', ion_comp_data)
-        if args.debug: print ("Linked ion {} to experiment {}, {}".format(compound_name, Exp_ID, compound_data))
+        logger.debug(f"Linked ion {compound_name} to experiment {Exp_ID}, {compound_data}")
 
 def load_experiment_properties(database, id, expobj) -> None:
     '''
@@ -645,7 +678,7 @@ def load_experiment_properties(database, id, expobj) -> None:
         # Create new property entry for each property
         prop_id = UPSERT(database, 'experiment_property', prop_data)
         # Link experiment and property
-        if args.debug: print ("Linking property {}:{} to experiment ID {}".format(prop_id,prop, id))
+        logger.debug(f"Linking property {prop_id}:{prop} to experiment ID {id}")
         LinkEntries('experiments_properties_linker', {'experiment_id': id, 'property_id': prop_id})
         
 
@@ -655,10 +688,15 @@ def load_experiment_properties(database, id, expobj) -> None:
 # =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 
 if __name__ == '__main__':
-    if args.debug:
-        from dumper import dump
+    
     # List to store failed entries
     FAILS = []
+    lipids_counts = 0
+    experiments_op_counts = 0
+    experiments_ff_counts = 0
+    systems_counts = 0
+    propper_op_count = 0
+    systems_with_issues_counts = 0
 
     # Load the configuration of the connection
     config = json.load(open(args.config, "r"))
@@ -667,17 +705,16 @@ if __name__ == '__main__':
     # Load the lipid and experiment metadata and cross-references only if no systems specified
     if not args.systems:
         if True:
-            if args.debug: 
-                print("\nLoading lipid metadata and cross-references...\n")
+            logger.info("Loading lipid metadata and cross-references")
         # Load lipid metadata and cross-references
             lipids = lipids_set
             for lipid in lipids:
                 load_lipid_metadata(lipid, database)
+                lipids_counts += 1
 
 # -- TABLE `experiments`
 # Iterate over each experiment for types OP and FF
-        if args.debug: 
-            print("\nStarting the processing of the experiments...\n")       
+        logger.info("Starting the processing of the experiments.")       
         # Iterate over each experiment
         for exp_type in ('OPExperiment','FFExperiment'):
             for exp in ExperimentCollection.load_from_data(exp_type):
@@ -698,10 +735,15 @@ if __name__ == '__main__':
                         }
                 # Entry in the DB with the LipidInfo of the experiment
                 exp_ID = UPSERT(database, 'experiments', expInfo)
-                if args.debug: print ("Inserted experiment {} of type {}".format(exp_ID, exp_type[:2]))
+                logger.debug(f"Inserted experiment {exp_ID} of type {exp_type[:2]}")
                 # Now add the membrane composition if available
                 load_experiment_composition(database, exp_ID, exp, ExpInfo=expInfo)
                 load_experiment_properties(database, exp_ID, exp)
+                if exp_type == 'OPExperiment':
+                    experiments_op_counts += 1
+                else:
+                    experiments_ff_counts += 1
+
 
     # Load the systems to be processed
     
@@ -710,13 +752,12 @@ if __name__ == '__main__':
     Skipped_Systems_AUTHOR = []
     Linked_Experiments_OP = []
     Linked_Experiments_FF = []
+
     # Iterate over the loaded systems
-    if args.debug: 
-        print("\nStarting the processing of the systems...\n")   
-        if args.systems:
-            print("Only the following systems will be processed:")
-            print(args.systems)
-            print("")
+    
+    if args.systems:
+        logger.info("Only the following systems will be processed:")
+        logger.info(args.systems)
 
 
     # Iterate over the loaded systems/simulations
@@ -725,6 +766,8 @@ if __name__ == '__main__':
     FMDL_SIMU_PATH = os.getenv('FMDL_SIMU_PATH', dbl.FMDL_SIMU_PATH)
 
     for system in systems:
+        has_issues = False
+        # Get the README metadata
         README = system.readme or {}
         if args.force:
             # In force mode, ignore systems with missing README, just print warnings
@@ -732,7 +775,7 @@ if __name__ == '__main__':
                 assert README, "ERROR: README is empty for system: " + system.exp_id
                 assert 'ID' in README, "ERROR: 'ID' field is missing in README for system: " + system.exp_id
             except AssertionError as e:
-                print(e, file=sys.stderr)
+                logger.error(e)
                 continue
         else:
             # In normal mode, raise errors in the README4
@@ -745,9 +788,8 @@ if __name__ == '__main__':
                 continue
         try:
             # if True:
-            if args.debug: 
-                print("\nCollecting data from system:")
-                print("System path: " + README["path"] + "\n")
+            logger.debug("\nCollecting data from system:")
+            logger.debug("System path: " + README["path"] + "\n")
 
             # The location of the files
             PATH_SIMULATION = osp.join(FMDL_SIMU_PATH, README["path"])
@@ -780,25 +822,25 @@ if __name__ == '__main__':
             # Now check for FF and AUTHORS_CONTACT fields
             
             if not README["FF"] and not args.strict_systems:
-                # Skip this system if the forcefield is not defined
-                if args.debug:
-                    print("WARNING: The forcefield is not defined in the README file. ")
-                    print("System: " + README["path"] + "\n")
-                    README["FF"] = "Unknown"
+                # Skip this system if the forcefield is not defined and we are in force mode, just print a warning
+                logger.warning("The forcefield is not defined in the README file. ")
+                logger.warning("System: " + README["path"] + "\n")
+                README["FF"] = "Unknown"
+                has_issues = True
             else: 
                 if not README["FF"]:
-                    print("ERROR: The forcefield is not defined in the README file. ")
-                    print("System: " + README["path"] + "\n")
+                    logger.error("The forcefield is not defined in the README file. ")
+                    logger.error("System: " + README["path"] + "\n")
                     raise ValueError("Forcefield is not defined in README.")
             if not README["AUTHORS_CONTACT"] and not args.strict_systems:
-                if args.debug: 
-                    print("WARNING: The AUTHORS_CONTACT is not defined in the README file. ")
-                    print("System: " + README["path"] + "\n")
-                    README["AUTHORS_CONTACT"] = "Unknown"
+                logger.warning("The AUTHORS_CONTACT is not defined in the README file. ")
+                logger.warning("System: " + README["path"] + "\n")
+                README["AUTHORS_CONTACT"] = "Unknown"
+                has_issues = True
             else:
                 if not README["AUTHORS_CONTACT"]:
-                    print("ERROR: The AUTHORS_CONTACT is not defined in the README file. ")
-                    print("System: " + README["path"] + "\n")
+                    logger.error("The AUTHORS_CONTACT is not defined in the README file. ")
+                    logger.error("System: " + README["path"] + "\n")
                     raise ValueError("AUTHORS_CONTACT is not defined in README.")
 
     # -- TABLE `forcefields`
@@ -835,9 +877,13 @@ if __name__ == '__main__':
                     # (loaded at the beginning of the script)
                     Lip_ID = CheckEntry('lipids', {"molecule": key})
                     if not Lip_ID:
-                        print("WARNING: Lipid {} not found in the DB. Adding it.".format(key))
+                        logger.warning("Lipid {} not found in the DB. Adding it.".format(key))  
                         # If it does not exist, create it
                         Lip_ID = UPSERT(database, 'lipids', LipidInfo)
+                        logger.debug(f"Inserted lipid {key} with ID {Lip_ID}")
+                        count_lipids += 1
+                        has_issues = True
+                    
                     # Link the lipid with the forcefield
                     LinkEntries('lipids_forcefields',
                                 {"lipid_id": Lip_ID,
@@ -868,10 +914,7 @@ if __name__ == '__main__':
                     Ion_ID = UPSERT(database, 'ions', LipidInfo)
 
                     # Store LipidInformation for further steps: Ions[name]=[ID,number]
-                    Ions[key] = [Ion_ID, README["COMPOSITION"][key]["COUNT"]]
-
-    
-          
+                    Ions[key] = [Ion_ID, README["COMPOSITION"][key]["COUNT"]]       
    
     # -- TABLE `membranes`
             # Find the proportion of each lipid in the leaflets
@@ -879,21 +922,27 @@ if __name__ == '__main__':
             Number = [[], []]
 
             for lipid in Lipids:
-                if args.debug:
-                    print("Processing lipid in membrane:", lipid, Lipids[lipid])
+                logger.debug(f"Processing lipid in membrane: {lipid}, {Lipids[lipid]}")
                 if len(Lipids[lipid]) != 2:
-                    raise RuntimeError("ERROR: Lipid COUNT fields must be a list of two values " +
+                    if not args.strict_systems:
+                        logger.warning("Lipid COUNT fields must be a list of two values " +
                                        "for leaflet 1 and leaflet 2 respectively. " +
                                        "Check the COMPOSITION field in the README file. " +
-                                       PATH_SIMULATION)    
+                                       PATH_SIMULATION + "\n" +
+                                       "Using [0,0] as drop in replacement which is BAD!")
+                        Lipids[lipid] = [0, 0]
+                        has_issues = True
+                    else:
+                        raise ValueError("ERROR: Lipid COUNT fields must be a list of two values " +
+                                    "for leaflet 1 and leaflet 2 respectively. " +
+                                    "Check the COMPOSITION field in the README file. " +
+                                    PATH_SIMULATION)    
                 if Lipids[lipid][0]:
                     Names[0].append(lipid)
                     Number[0].append(str(Lipids[lipid][0]))
                 if Lipids[lipid][1]:
                     Names[1].append(lipid)
                     Number[1].append(str(Lipids[lipid][1]))
-
-            
 
             Names = [':'.join(Names[0]), ':'.join(Names[1])]
             Number = [':'.join(Number[0]), ':'.join(Number[1])]
@@ -915,17 +964,19 @@ if __name__ == '__main__':
             # Collect the LipidInformation about the simulation
             # Without water you have pure booze!
             if not README.get("COMPOSITION") or not isinstance(README.get("COMPOSITION"), dict):
-                if args.force:
-                    print("WARNING: COMPOSITION section is missing or invalid in the README file. ", file=sys.stderr)
-                    print("Using empty composition as drop in replacement which is BAD! Check README file in", README["path"],"\n", file=sys.stderr)
+                if not args.strict_systems:
+                    logger.warning("COMPOSITION section is missing or invalid in the README file. ")
+                    logger.warning("Using empty composition as drop in replacement which is BAD! Check README file in " + README["path"] + "\n")
                     README["COMPOSITION"] = {}
+                    has_issues = True
                 else:
                     raise ValueError( 
                         "ERROR: COMPOSITION section is mandatory (without --force) and must be a dictionary of lipids\n" +
                         "Check the simulation README file in " + PATH_SIMULATION)
             if "SOL" not in README["COMPOSITION"] and not args.strict_systems:
-                print("WARNING: Water is missing in the composition. ", file=sys.stderr)
-                print("Using IMPLICIT as drop in replacement. Check README file in", README["path"],"\n", file=sys.stderr)
+                logger.warning("Water is missing in the composition. ")
+                logger.warning("Using Implitcit. Check README file in " + README["path"] + "\n")
+                has_issues = True
             else:
                 if "SOL" not in README["COMPOSITION"]:
                     raise ValueError( 
@@ -974,10 +1025,19 @@ if __name__ == '__main__':
     # -- TABLE `trajectories_ions`
             TrjI_ID = {}
             for ion in Ions:
-                if args.debug:
-                    print("Processing ion:", ion, Ions[ion])
+                logger.debug(f"Processing ion in trajectory: {ion}, {Ions[ion]}")
+                
                 if len(Ions[ion]) != 2:
-                    raise RuntimeError("ERROR: Ion counts must be a list of two values " +
+                    if not args.strict_systems:
+                        logger.warning("Ion counts must be a list of two values " +
+                                       "for leaflet 1 and leaflet 2 respectively. " +
+                                       "Check the COMPOSITION field in the README file. " +
+                                       PATH_SIMULATION + "\n" +
+                                       "Using [0,0] as drop in replacement which is BAD!")
+                        Ions[ion] = [Ions[ion][0], [0, 0]]
+                        has_issues = True
+                    else:
+                        raise ValueError("ERROR: Ion counts must be a list of two values " +
                                        "for leaflet 1 and leaflet 2 respectively. " +
                                        "Check the COMPOSITION field in the README file. " +
                                        PATH_SIMULATION)
@@ -1007,9 +1067,10 @@ if __name__ == '__main__':
             try:
                 BLT = get_thickness(system)
             except Exception as e:
+                has_issues = True
                 if args.debug:
-                    print("WARNING: Could not compute bilayer thickness.")
-                    print("Exception: {}".format(e))
+                    logger.warning("Could not compute bilayer thickness.")
+                    logger.warning("Exception: {}".format(e))
                 if args.strict_systems:
                     raise e
                 BLT = None
@@ -1018,9 +1079,9 @@ if __name__ == '__main__':
             try:
                 APL = get_mean_ApL(system)
             except Exception as e:
-                if args.debug:
-                    print("WARNING: Could not compute area per lipid.")
-                    print("Exception: {}".format(e))
+                has_issues = True
+                logger.warning("Could not compute area per lipid.")
+                logger.warning("Exception: {}".format(e))
                 if args.strict_systems:
                     raise e
                 APL = None
@@ -1038,14 +1099,12 @@ if __name__ == '__main__':
                     FFExp = genRpath(
                         osp.join(FMDL_EXP_PATH, README["EXPERIMENT"]["FORMFACTOR"][0]))
                 except Exception as e:
-                    if args.debug:
-                        print(f"WARNING: Could not generate path for form factor experiment. {README['EXPERIMENT']['FORMFACTOR']} ")
-                        print("Exception: {}".format(e))
-                        dump(README)
+                    has_issues = True
+                    logger.warning(f"Could not generate path for form factor experiment. {README['EXPERIMENT']['FORMFACTOR']} ")
+                    logger.warning("Exception: {}".format(e))
+                    dump(README)
                     if not args.force:
                         raise e
-
-            
 
             # Collect the LipidInformation of the analysis of the trajectory
             trajectories_analysis_data = {
@@ -1060,15 +1119,29 @@ if __name__ == '__main__':
                 "op_quality_headgroups":     rnan(get_quality(system, part = 'headgroup', lipid = None, experiment = 'OP')),
                 "op_quality_tails":          rnan(get_quality(system, part = 'tails', lipid = None, experiment = 'OP')),
                 "ff_quality":    rnan(FFQ), # FFQ,
-                "ff_scaling":    None,
+                "ff_scaling":    None, # Not implemented yet
                 }
 
             # Entry in the DB with the LipidInfo of the analysis of the simulation
             _ = UPSERT(database, 'trajectories_analysis', trajectories_analysis_data)
 
     # -- TABLE `trajectories_analysis_lipids`
+        # Get the order parameters data for the system
+            op_data = None
+            try:
+                op_data = get_OP(system)
+            except Exception as e:
+                logger.warning("Could not get order parameters data.")
+                logger.warning("Exception: {}".format(e))
+                has_issues = True
+                if args.strict_systems:
+                    raise e
+                op_data = None
+
             for lipid in Lipids:
                 OPExp = ''
+                logger.debug("Processing trajectory analysis {} lipid {}".format(system, lipid))               
+
                 # Find the order parameters experiment path
                 if "EXPERIMENT" in README and "ORDERPARAMETER" in README.get("EXPERIMENT", {}) and \
                    README["EXPERIMENT"]["ORDERPARAMETER"] and \
@@ -1083,13 +1156,41 @@ if __name__ == '__main__':
                             )
                     except Exception as e:
                         if args.debug:
-                            print("WARNING: Could not generate path for order parameters experiment for lipid {}.".format(lipid))
-                            print("Exception: {}".format(e))
+                            logger.warning("Could not generate path for order parameters experiment for lipid {}.".format(lipid))
+                            logger.warning("Exception: {}".format(e))
+                        has_issues = True
                         if not args.force:
                             raise e
+                lipid_obj = system.lipids[lipid]
+                #lipid_obj.register_mapping()
+                op_plot_data = None
 
+                if op_data and op_data[lipid] and lipid_obj:
+                    try:
+                        op_plot_data = build_nice_OPdict(op_data[lipid], lipid_obj)
+                    except Exception as e:
+                        logger.warning("Could not build OP plot data for system {} lipid {}.".format(system, lipid))
+                        logger.warning("Exception: {}".format(e))
+                        has_issues = True
+
+                if op_plot_data:  
+                    try:
+                        op_json = json.dumps(op_plot_data, allow_nan=False)
+                    except Exception as e:
+                        logger.warning("Could not serialize OP plot data for system {} lipid {}.".format(system, lipid))
+                        logger.warning("This is likely due to NaN or infinite values in the data. Check the OP data for this system and lipid.")  
+                        logger.warning("Exception: {}".format(e))
+                        has_issues = True
+
+                        if args.strict_systems:
+                            raise e    
+                else:
+                    op_json = None
+                if op_json:
+                    logger.debug("Successfully built OP plot data for system {} lipid {}.".format(system, lipid))
+                    propper_op_count += 1    
                 # Collect the LipidInformation of each lipid in the simulation
-                LipidInfo = {
+                trajectories_analysis_lipids_data = {
                     "trajectory_id":                Trj_ID,
                     "lipid_id":                     Lipids_ID[lipid],
                     "op_quality_headgroups":         rnan(get_quality(system, part = 'headgroup', lipid = lipid, experiment = 'OP')),
@@ -1101,14 +1202,13 @@ if __name__ == '__main__':
                     "order_parameters_experiment":  OPExp,
                     "order_parameters_quality":     genRpath(
                         osp.join(FMDL_SIMU_PATH, README["path"],
-                                 lipid + '_OrderParameters_quality.json'))
+                                 lipid + '_OrderParameters_quality.json')),
+                    "op_plot_data":  op_json
                     }
-                if args.debug:
-                    print("Processing trajectory analysis lipid:", lipid, LipidInfo)               
-
+                
                 # Entry in the DB with the LipidInfo of the analysis of the lipid
                 # in the simulation
-                _ = UPSERT(database, 'trajectories_analysis_lipids', LipidInfo)
+                _ = UPSERT(database, 'trajectories_analysis_lipids', trajectories_analysis_lipids_data)
 
    
     # -- TABLE `trajectory_analysis_ions`
@@ -1128,46 +1228,47 @@ if __name__ == '__main__':
       
     # ------------------
     # -- TABLE `trajectories_experiments_OP` and `trajectories_experiments_FF`        
-    # ------------------
-            
+    # ------------------            
    
             if "EXPERIMENT" in README and "ORDERPARAMETER" in README.get("EXPERIMENT", {}) and README["EXPERIMENT"]["ORDERPARAMETER"]:
                     # -- TABLE `trajectories_experiments_OP`
                     # The Order Parameters experiments associated to the simulation
 
                 ExpOP = README["EXPERIMENT"]["ORDERPARAMETER"]
-                if args.debug:
-                    print("Found ORDERPARAMETER experiments for system: " +
-                        README["path"])
                 # Iterate over the lipids
                 for mol in ExpOP:
                     # Check if there is an experiment associated to the lipid
                     if type(ExpOP[mol]) is list or type(ExpOP[mol]) is dict or len(ExpOP[mol]) > 0:
-                        #print("Processing Trajectory {} lipid:{}".format(README["path"], mol))                     
                         for path in ExpOP[mol]:                              
-                            if args.debug:
-                                print("Linking trajectory {} with experiment {} for lipid {}".format(
-                                    Trj_ID, path, mol))
-                            Linked_Experiments_OP.append(README["path"] + ":" + mol +" ID:" + str(Trj_ID))
+                            logger.debug("Linking trajectory {} with experiment {} for lipid {}".format(
+                                Trj_ID, path, mol))
                             exp_id = CheckEntry(
                                         'experiments_OP', {
                                         "path": path})
                             if not exp_id:
-                                print("WARNING: Experiment not found in DB: " +
+                                if args.strict_systems:
+                                    raise ValueError("ERROR: Experiment not found in DB: " +
                                         path + " for system: " +
-                                        README["path"], file=sys.stderr)  
-                                continue                               
+                                        README["path"])
+                                logger.warning("Experiment not found in DB: " +
+                                        path + ", referenced in system: " +
+                                        system + " for lipid: " + mol)
+                                has_issues = True
+                                continue
+
                             LipidInfo = {
                                 "trajectory_id": Trj_ID,
                                 "lipid_id": Lipids_ID[mol],
                                 "experiment_id": exp_id,
                             }        
                             _ =  UPSERT(database, 'trajectories_experiments_OP', LipidInfo)
-                
+                            if args.debug:
+                                logger.debug("Linked trajectory {} with experiment {} for lipid {}".format(
+                                    Trj_ID, path, mol))
+                            Linked_Experiments_OP.append(README["path"] + ":" + mol +" ID:" + str(Trj_ID))
+
             else:
-                if args.debug:
-                    print("WARNING: No ORDERPARAMETER experiments found for system: " +
-                            README["path"], file=sys.stderr)  
+                logger.debug("No related order parameter experiments recorded for system: {}".format(system))  
                     
     # -- TABLE `trajectories_experiments_FF`
                 if "FORMFACTOR" in README.get("EXPERIMENT", {}):
@@ -1177,9 +1278,9 @@ if __name__ == '__main__':
                     if ExpFF:
                         if type(ExpFF) is str:
                             ExpFF = [ExpFF]
-
                             for path in ExpFF:
-
+                                logger.debug("Linking trajectory {} with experiment {}".format(
+                                    Trj_ID, path))
                                 for file in os.listdir(osp.join(
                                         PATH_EXPERIMENTS_FF, path)):
                                     exp_id = CheckEntry(
@@ -1191,13 +1292,14 @@ if __name__ == '__main__':
                                                     })
                                     if not exp_id:
                                         if args.strict_systems:
-                                            raise ValueError("ERROR: Experiment not found in DB: " +
-                                                path + " for system: " +
-                                                README["path"])
+                                            raise ValueError("Referenced experiment not found in DB: " +
+                                                path + " referenced in system: " +
+                                                system)  
                                                # If strict mode is enabled, stop processing the system
-                                        print("WARNING: Experiment not found in DB: " +
-                                                path + " for system: " +
-                                                README["path"], file=sys.stderr)  
+                                        logger.warning("Referenced experiment not found in DB: " +
+                                                path + " referenced in system: " +
+                                                system)  
+                                        has_issues = True        
                                         continue
 
                                     if file.endswith(".json"):
@@ -1208,46 +1310,58 @@ if __name__ == '__main__':
 
                                         _ = UPSERT(database, 'trajectories_experiments_FF',
                                                     LipidInfo)
-                                        if args.debug:
-                                            print("Linking trajectory {} with experiment {}".format(
+                                        logger.debug("Linking trajectory {} with experiment {}".format(
                                                 Trj_ID, file)) 
                                         Linked_Experiments_FF.append(README["path"] +" ID:" + str(Trj_ID))
-
+                    else:
+                        logger.debug("No related form factor experiments recorded for system: {}".format(system))
+            if has_issues:
+                systems_with_issues_counts += 1
+            systems_counts += 1
         except Exception as err:
-            print ("------------------------------------------------------\n", file=sys.stderr)
-            print("Exception loading system:" + README["path"], file=sys.stderr)
-            traceback.print_exc()
-            print ("------------------------------------------------------\n", file=sys.stderr)
+            logger.error("Exception loading system: " + README["path"])
+            logger.error("Exception loading system:" + README["path"] + "\n" + str(err))
+            logger.traceback(err)
             if not args.force:
                 raise err
             FAILS.append(README["path"])
-  
+    
+    database.close()    
 ####################
 
+    logger.success("loaded {} lipids, metadata, and cross-references.".format(lipids_counts))
+    logger.success("loaded {} experiments of type OP.".format(experiments_op_counts))
+    logger.success("loaded {} experiments of type FF.".format(experiments_ff_counts))
+    logger.success("loaded {} systems.".format(systems_counts))
+    if propper_op_count:
+        logger.success("Properly processed {} system order parameter data.".format(propper_op_count))
+    else:
+        logger.error("No system order parameter data was properly processed. Check the OP data and the README files of the systems.")
+    if systems_with_issues_counts:
+        logger.warning("There were {} systems with at least one issue. \n Check the warnings above for details.".format(systems_with_issues_counts)) 
     if FAILS:
-        print(
+        logger.error(
             "\nThe following systems failed. Please check the files." +
             "\n" + "\n".join(FAILS)
             )
     if len(Skipped_Systems_FF) > 0:
-        print(
+        logger.error(
             "\nThe following systems were skipped due to missing forcefield information:" +
             "\n" + "\n".join(Skipped_Systems_FF)
             )
     if len(Skipped_Systems_AUTHOR) > 0:
-        print(
+        logger.error(
             "\nThe following systems were skipped due to missing author information:" +
             "\n" + "\n".join(Skipped_Systems_AUTHOR)
             )
     if len(Linked_Experiments_OP) >= 0:
-        print(
-            len(Linked_Experiments_OP), "ORDERPARAMETER experiments were linked to simulations."
+        logger.info(
+            "{} order parameter experiments were linked to simulations.".format(len(Linked_Experiments_OP))
             )
     if len(Linked_Experiments_FF) >= 0:
-        print(
-            len(Linked_Experiments_FF), "FORMFACTOR experiments were linked to simulations."
+        logger.info(
+            "{} form factor experiments were linked to simulations.".format(len(Linked_Experiments_FF))
             )   
     
 ####################
 
-    database.close()

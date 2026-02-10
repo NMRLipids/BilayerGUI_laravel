@@ -22,4 +22,12 @@ class ExperimentsOP extends Experiments
                 'trajectory_id'
             );
         }
+
+    public function membraneComposition()
+    {
+        return $this->hasMany(MembraneComposition::class, 'experiment_id', 'id');
+    }    
+
+    
+    
 }

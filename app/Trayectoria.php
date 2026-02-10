@@ -5,8 +5,6 @@ namespace App;
 use App\Lib\Coleccion;
 use App\TrayectoriaAnalisisLipidos;
 
-use App\RankingHeteromolecules;
-use App\RankingLipids;
 
 /**
  * Class Trayectoria
@@ -43,10 +41,13 @@ class Trayectoria extends AppModel
       return $this->hasMany(TrayectoriaAnalisisLipidos::class, 'trajectory_id', 'id');
     }
 
-    function get_trajectory_analysis_lipids_by_lipid($lipid_id) {
-      return $this->hasMany(TrayectoriaAnalisisLipidos::class, 'trajectory_id', 'id')->where('lipid_id', $lipid_id)->first();
+    function TrayectoriaAnalisisLipidos() {
+      return $this->hasMany(TrayectoriaAnalisisLipidos::class, 'trajectory_id', 'id')->where('lipid_id', '!=', null);
     }
-  
+
+    function get_trajectory_analysis_lipids_by_lipid($lipid_id) {
+      return $this->hasOne(TrayectoriaAnalisisLipidos::class, 'trajectory_id', 'id')->where('lipid_id', $lipid_id)->first();
+    }
 
 
     function lipidos() {
