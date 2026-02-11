@@ -1,8 +1,7 @@
 <head>
     <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no,maximum-scale=1.0, user-scalable=no" />
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <link rel="stylesheet" href="{{ asset('css/welcome-mobile.css') }}">
+    
     <meta name="description" content="FAIRMD Lipids Databank" />
     <meta name="author" content="NMRLipids Consortium" />
     <meta name="csrf-token" content="{{ csrf_token() }}" />
@@ -34,6 +33,7 @@
     <!-- Jquery UI plugin CSS-->
     <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
 
+    <link rel="stylesheet" href="{{ asset('css/welcome-mobile.css') }}">
     <!-- Core theme CSS (includes Bootstrap)-->
     <link href="{{ asset('css/styles.css') }}" rel="stylesheet" />
     <!--  SLIDER -->
@@ -42,8 +42,8 @@
     @yield('meta-tags')
     
      <!-- Styles -->
-     <link href="{{ asset('css/app.css') }}" rel="stylesheet">
-     <link href="{{ asset('css/custom.css') }}" rel="stylesheet">
+     <link href="{{ asset('css/app.css') }}" rel="stylesheet" />
+     <link href="{{ asset('css/custom.css') }}" rel="stylesheet"/>
 
 <!-- End Add template -->
 

@@ -5,42 +5,9 @@
 use App\Http\Controllers\StatisticsController;
 @endphp
 
-<script>
-    // Referencia: http://www.html5rocks.com/en/tutorials/speed/animations/
-    var last_known_scroll_position = 0;
-    var ticking = false;
-
-    function doSomething(scroll_pos) {
-        // Hacer algo con la posición del scroll
-        //console.log("scrolleo " + scroll_pos + "  " + window.innerHeight);
-        if (scroll_pos > 100 && scroll_pos < (window.innerHeight - 80)) {
-            $('footer').fadeOut();
-        } else {
-            $('footer').fadeIn();
-        }
-
-
-    }
-    /*
-    window.addEventListener('scroll', function(e) {
-      last_known_scroll_position = window.scrollY;
-
-      if (!ticking) {
-        window.requestAnimationFrame(function() {
-          doSomething(last_known_scroll_position);
-          ticking = false;
-        });
-      }
-      ticking = true;
-    });
-    */
-</script>
 
 <body id="page-top">
 
-    <!-- Fonts
-<link href="https://fonts.googleapis.com/css?family=Nunito:200,600" rel="stylesheet">
--->
     <!-- Navigation-->
     <nav class="navbar navbar-expand-lg navbar-light fixed-top py-3" id="mainNav">
         <div class="container px-4 px-lg-5">
@@ -58,10 +25,10 @@ use App\Http\Controllers\StatisticsController;
         </div>
     </nav>
 
-
+<div class="container-fluid p-0" style="display: flex; flex-direction: column; min-height: 100vh;">
     <!-- Masthead-->
     <header class="masthead">
-        <div class="container px-4 px-lg-5 ">
+        <div class="container" style="max-height: 100vh; width: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; margin-top: 1em; margin-bottom: 1em;">
             <div class="row gx-4 gx-lg-5  align-items-center justify-content-center text-center">
                 <div class="col-lg-8 align-self-end">
                     <h2 class="text-white font-weight-bold">
@@ -69,10 +36,9 @@ use App\Http\Controllers\StatisticsController;
                             src="{{ asset('storage/images/nmr_w_letras.png') }}" alt="">
                           (version <?php echo config('app.version'); ?>)
                     </h2>
-                    <hr class="divider" />
                 </div>
                 @if(config('app.debug'))
-                <div class="col-lg-8 alert alert-warning" role="alert">
+                <div class="col-lg-8 alert alert-warning" style="display: flex; flex-direction: column; padding: 1em;" role="alert">
                     <h5>⚠️ Development Preview</h5>
 
                     <div class="text-left">
@@ -97,7 +63,8 @@ use App\Http\Controllers\StatisticsController;
                     </div>
                 </div>
                 @endif
-                <div class="col-lg-8 align-self-baseline">
+                <div class="col-lg-8 align-self-baseline" style="display: flex; flex-direction: column; align-items: center; justify-content: center;">
+
                     <p class="text-white-80 mb-5">The FAIRMD Lipids databank user interface can be used to search data in the <a
                             href="https://github.com/NMRLipids/Databank">FAIRMD Lipids
                             Databank</a>.
@@ -152,23 +119,29 @@ use App\Http\Controllers\StatisticsController;
                                 href="https://nmrlipids.github.io/schemas/moleculesAndMapping.html#molecule-names">
                                 list of universal molecule and ion names that can be used in searches</a>.
                             You can search for trajectories by their ID by typing 'ID' followed by their numeric ID, for example,
-                            ID123. More options are available in Advanced search.</p>
+                            ID123. More options are available in Advanced search.
+                        </p>
+                        <p>Current content of the FAIRMD Lipids Databank:</p>
+                        <span class="text-white-75 mb-1" style="font-size: 0.9em;">
+                        {{ StatisticsController::totals() }}
+                        </span>
+                                                   
                     </div>
 
-                    <div class="col-12 m-4">
-                        <div style="text-align: center; font-size: 0.9em; color: #ffffff; padding: 1em;">
-                            {{ StatisticsController::totals() }}
-                        </div>                        
-                    </div>
-                    <!--<img class="img-fluid" alt="Responsive image" src="{{ asset('storage/images/supepmem1_100.jpg') }}" alt="">-->
+                   
                 </div>
+                
             </div>
         </div>
+        
     </header>
+    <!--div class="container" style=" height: 10em; display: flex; background-color: #00000000;">
+      &nbsp;  
+    </div-->
    
 
     <!-- About-->
-    <section class="page-section bg-primary" style="padding: 5em" id="about">
+    <section class="page-section bg-primary"  id="about" style="display: flex; align-items: center; justify-content: center;">
         <div class="container px-4 px-lg-5">
             <div class="row gx-4 gx-lg-5 justify-content-center">
                 <div class="col-lg-8 text-center">
@@ -254,7 +227,7 @@ use App\Http\Controllers\StatisticsController;
         </div>
     </section>
 
-
+</div>
 
     <script>
         $(function() {
