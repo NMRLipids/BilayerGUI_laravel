@@ -1,10 +1,9 @@
-<?php
-
-use App\Http\Controllers\StatisticsController;
-?>
 <!doctype html>
 <html class="welcome" lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 @include('layouts.head')
+@php
+use App\Http\Controllers\StatisticsController;
+@endphp
 
 <script>
     // Referencia: http://www.html5rocks.com/en/tutorials/speed/animations/
