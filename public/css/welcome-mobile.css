@@ -126,6 +126,7 @@ p {
         margin-bottom: 1em !important;
         display: flex;
         flex-direction: column;
+        min-width: 15rem;
         gap: 0.5em;
     }
     
