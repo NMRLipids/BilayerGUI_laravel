@@ -29,10 +29,7 @@ class StatisticsController extends Controller
         $CountPeptideActivity = Peptido::groupBy('activity')->select('activity', DB::raw('count(*) as total'))->get();
         $CountPeptideLength = Peptido::groupBy('length')->select('length', DB::raw('count(*) as total'))->get();
         $CountPeptideCharge = Peptido::groupBy('total_charge')->select('total_charge', DB::raw('count(*) as total'))->get();
-/*
-$CountPeptideElectrostatic_dipolar_moment = Peptido::groupBy('electrostatic_dipolar_moment')->select('electrostatic_dipolar_moment', DB::raw('count(*) as total'))->get();
-$CountPeptideHydrophobic_dipolar_moment = Peptido::groupBy('hydrophobic_dipolar_moment')->select('hydrophobic_dipolar_moment', DB::raw('count(*) as total'))->get();
-*/
+
 
         $CountPeptideElectrostatic_dipolar_moment = Peptido::groupBy('electrostatic_dipolar_moment')->select('electrostatic_dipolar_moment', DB::raw('count(*) as total'))->get();
         $CountPeptideHydrophobic_dipolar_moment = Peptido::groupBy('hydrophobic_dipolar_moment')->select('hydrophobic_dipolar_moment', DB::raw('count(*) as total'))->get();
@@ -43,14 +40,7 @@ $CountPeptideHydrophobic_dipolar_moment = Peptido::groupBy('hydrophobic_dipolar_
 
         $CountMembraneForcefield = Membrana::groupBy('forcefields.name')->join('forcefields','membranes.forcefield_id','=','forcefields.id')->select('forcefields.name', DB::raw('count(*) as total'))->get();
 
-        foreach ($CountPeptideElectrostatic_dipolar_moment as $key => $value) {
-            // code...
-            //  echo $key.' => '.$value.'<br>';
-            //echo $value->total_charge.':'.$value->total.'<br>';
-        }
-
-//var_dump ($CountMembranas);
-  //die();
+        
         return view('statistics.results', [
             'totalTrayectorias' => $TotalTrayectorias,
             'totalMembranas'=>$TotalMembranas,

@@ -15,11 +15,11 @@ use Illuminate\Filesystem\Filesystem;
 
 <div class="row">
     <div class="col">
-        <h5>Total trajectories</h5>
-        <h4>{{ $totalTrayectorias }}</h4>
+        <p>Total trajectories</p>
+        <p>{{ $totalTrayectorias }}</p>
     </div>
     <div class="col">
-        <h5>Total membranes</h5>
-        <h4>{{ $totalMembranas }}</h4>
+        <p>Total membranes</p>
+        <p>{{ $totalMembranas }}</p>
     </div>
 </div>

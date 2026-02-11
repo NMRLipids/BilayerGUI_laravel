@@ -1,4 +1,37 @@
-/* Mobile-First Responsive Design */
+/* Mobile-First Responsive Design with Relative Units */
+
+:root {
+    --spacing-unit: 1rem;
+    --font-size-base: 16px;
+}
+
+/* Base improvements */
+html, body {
+    overflow-x: hidden;
+    max-width: 100%;
+}
+
+img {
+    max-width: 100%;
+    height: auto;
+    display: block;
+}
+
+/* Typography - scales with browser zoom */
+body {
+    font-size: clamp(14px, 2vw, 16px);
+    line-height: 1.6;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    line-height: 1.3;
+}
+
+p {
+    margin-bottom: 1em;
+}
 
 /* Navigation adjustments for mobile */
 @media (max-width: 991px) {
@@ -7,7 +40,7 @@
     }
     
     .navbar-brand {
-        font-size: 1.1rem;
+        font-size: clamp(1rem, 4vw, 1.5rem);
     }
     
     .navbar-collapse {
@@ -17,208 +50,220 @@
     }
     
     .nav-link {
-        padding: 0.5rem 1rem !important;
+        padding: 0.5em 1em !important;
+        font-size: 1em;
     }
 }
 
 /* Masthead adjustments for mobile */
 @media (max-width: 768px) {
     .masthead {
-        padding: 6rem 1rem 3rem !important;
+        padding: 6rem 1rem 6rem !important;
     }
     
     .masthead h2 {
-        font-size: 1.5rem !important;
-        margin-top: 1rem;
+        font-size: clamp(1.2rem, 5vw, 2rem) !important;
+        margin-top: 1em;
+    }
+    
+    .masthead img {
+        max-width: 90%;
+        height: auto;
     }
     
     .col-lg-8 {
         max-width: 100% !important;
         flex: 0 0 100% !important;
+        padding: 0.5em !important;
     }
     
     .container.px-4.px-lg-5 {
-        padding-left: 1rem !important;
-        padding-right: 1rem !important;
-    }
-}
-
-/* Extra small devices (phones) */
-@media (max-width: 576px) {
-    .masthead {
-        padding: 5rem 0.5rem 2rem !important;
-    }
-    
-    .masthead h2 {
-        font-size: 1.2rem !important;
-    }
-    
-    .masthead img {
-        max-width: 80% !important;
-        height: auto;
-    }
-    
-    /* Search form layout */
-    .row {
-        margin-left: -0.5rem !important;
-        margin-right: -0.5rem !important;
-    }
-    
-    .col-9, .col-3 {
         padding-left: 0.5rem !important;
         padding-right: 0.5rem !important;
     }
     
-    .col-9 {
-        flex: 0 0 100% !important;
-        max-width: 100% !important;
+    .divider {
+        max-width: 100%;
+        margin: 1em auto;
+    }
+}
+
+/* Extra small devices (phones) */
+@media (max-width: 400px) {
+    .masthead {
+        padding: 6rem 1rem 10rem !important;
+        min-height: auto !important;
+        overflow-y: visible !important;
     }
     
-    .col-3 {
+    .masthead h2 {
+        font-size: clamp(1rem, 4vw, 1.5rem) !important;
+    }
+    
+    .masthead > div {
+        min-height: auto !important;
+    }
+    
+    /* Search form - stack on mobile */
+    .col-9, .col-3 {
         flex: 0 0 100% !important;
         max-width: 100% !important;
-        margin-top: 0.5rem;
+        margin-bottom: 0.5em;
+        padding: 0.25em !important;
     }
     
     .input-group {
-        margin-bottom: 1rem !important;
+        margin-bottom: 1em !important;
+        display: flex;
+        flex-direction: column;
+        gap: 0.5em;
     }
     
     .form-control, .btn {
-        font-size: 1rem;
-        padding: 0.75rem !important;
+        font-size: 1em;
+        padding: 0.75em !important;
+        min-height: 44px;
+        width: 100%;
     }
     
-    /* Alert box */
+    .input-group-append {
+        width: 100%;
+    }
+    
+    .input-group-append .btn {
+        width: 100%;
+    }
+    
+    /* Alert box - flexible padding */
     .alert {
-        margin: 1rem 0 !important;
-        padding: 1rem !important;
-        font-size: 0.9rem;
+        margin: 1em 0 !important;
+        padding: 1em !important;
+        font-size: 0.95em;
     }
     
     .alert h5 {
-        font-size: 1rem;
-        margin-bottom: 0.5rem;
+        font-size: 1.1em;
+        margin-bottom: 0.5em;
     }
     
     .alert ul {
-        margin-bottom: 0.5rem;
-        padding-left: 1.2rem;
+        margin: 0.5em 0 !important;
+        padding-left: 1.5em;
     }
     
     .alert li {
-        margin-bottom: 0.25rem;
-        font-size: 0.85rem;
+        margin-bottom: 0.25em;
+        font-size: 0.95em;
     }
     
     /* About section */
     .page-section {
-        padding: 3rem 1rem !important;
+        padding: 3em 1em !important;
     }
     
     .page-section h2 {
-        font-size: 1.5rem !important;
+        font-size: clamp(1.3rem, 5vw, 2rem) !important;
+        margin-bottom: 0.5em;
     }
     
     .page-section h3 {
-        font-size: 1.2rem !important;
+        font-size: clamp(1.1rem, 4vw, 1.5rem) !important;
+        margin-top: 1em;
+        margin-bottom: 0.5em;
     }
     
     .text-white-75, .txt_desc {
-        font-size: 0.95rem !important;
-        line-height: 1.5;
+        font-size: 1em !important;
+        line-height: 1.6;
     }
     
     .text-left {
         text-align: left;
     }
     
-    /* Links styling */
+    /* Links */
     a {
         word-break: break-word;
+        display: inline-block;
     }
     
-    /* Divider */
-    .divider {
-        max-width: 100%;
-        margin: 1rem auto;
+    /* Statistics box */
+    .col-12.m-4 > div {
+        padding: 1.5em !important;
+        font-size: 0.95em;
     }
 }
 
-/* Small tablets (landscape phones and small tablets) */
+/* Small tablets */
 @media (min-width: 577px) and (max-width: 768px) {
     .masthead {
         padding: 6rem 1.5rem 3rem !important;
     }
     
     .masthead h2 {
-        font-size: 1.8rem !important;
+        font-size: clamp(1.5rem, 5vw, 2rem) !important;
     }
     
     .col-9 {
-        flex: 0 0 70% !important;
-        max-width: 70% !important;
+        flex: 0 0 65% !important;
+        max-width: 65% !important;
     }
     
     .col-3 {
-        flex: 0 0 30% !important;
-        max-width: 30% !important;
+        flex: 0 0 35% !important;
+        max-width: 35% !important;
     }
     
     .page-section {
-        padding: 4rem 1.5rem !important;
+        padding: 4em 1.5rem !important;
     }
 }
 
-/* General touch-friendly improvements */
+/* Touch-friendly improvements */
 @media (hover: none) {
-    .btn, a, .nav-link {
+    .btn, a.btn, .nav-link {
         min-height: 44px;
-        min-width: 44px;
+        padding: 0.75em 1em !important;
         display: inline-flex;
         align-items: center;
         justify-content: center;
     }
     
-    .btn:active {
+    .btn:active, a.btn:active {
         opacity: 0.8;
     }
-}
-
-/* Typography improvements for mobile */
-@media (max-width: 768px) {
-    body {
-        font-size: 14px;
-        line-height: 1.6;
-    }
-    
-    h1, h2, h3, h4, h5, h6 {
-        word-wrap: break-word;
-        overflow-wrap: break-word;
-    }
-    
-    p {
-        margin-bottom: 1rem;
-    }
-}
-
-/* Prevent horizontal scroll */
-html, body {
-    overflow-x: hidden;
-    max-width: 100%;
-}
-
-/* Image responsiveness */
-img {
-    max-width: 100%;
-    height: auto;
-    display: block;
 }
 
 /* Footer adjustments */
 @media (max-width: 768px) {
     footer {
-        padding: 2rem 1rem !important;
-        font-size: 0.9rem;
+        padding: 2em 1rem !important;
+        font-size: 0.95em;
     }
+}
+
+/* Prevent layout shift on font resize */
+* {
+    box-sizing: border-box;
+}
+
+/* Ensure proper spacing scales */
+.row {
+    row-gap: 1em;
+}
+
+.mb-3, .mb-4, .mb-5 {
+    margin-bottom: 1em !important;
+}
+
+.mt-0, .mt-4 {
+    margin-top: 1em !important;
+}
+
+.text-white-80 {
+    color: rgba(255, 255, 255, 0.8);
+}
+
+.text-white-75 {
+    color: rgba(255, 255, 255, 0.75);
 }
