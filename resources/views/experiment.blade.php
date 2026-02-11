@@ -49,9 +49,12 @@
     border-color: var(--bs-pagination-disabled-border-color);
 }
 </style>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <script>
-
+    
+// Load chart.js from CDN
+// ICICIC make proper use of local copy of chart.js instead of CDN to avoid issues with CORS and ensure compatibility with our code
 function OPPlot(canvasId, dataValues, labels, legendText) {
     var ctx = document.getElementById(canvasId).getContext('2d');
     var myChart = new Chart(ctx, {
@@ -715,6 +718,5 @@ function DrawPlot(canvasId, data, labelsArray , step, chartType, title, labelX, 
 
     <!-- Bootstrap core JS--><script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
     <!-- Core theme JS-->
-    <script src="{{ asset('js/scripts.js') }}"></script>
    
 </body>
