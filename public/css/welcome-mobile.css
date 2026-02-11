@@ -1,0 +1,224 @@
+/* Mobile-First Responsive Design */
+
+/* Navigation adjustments for mobile */
+@media (max-width: 991px) {
+    .navbar {
+        padding: 0.5rem 0 !important;
+    }
+    
+    .navbar-brand {
+        font-size: 1.1rem;
+    }
+    
+    .navbar-collapse {
+        background-color: rgba(255, 255, 255, 0.95);
+        border-radius: 0.25rem;
+        margin-top: 0.5rem;
+    }
+    
+    .nav-link {
+        padding: 0.5rem 1rem !important;
+    }
+}
+
+/* Masthead adjustments for mobile */
+@media (max-width: 768px) {
+    .masthead {
+        padding: 6rem 1rem 3rem !important;
+    }
+    
+    .masthead h2 {
+        font-size: 1.5rem !important;
+        margin-top: 1rem;
+    }
+    
+    .col-lg-8 {
+        max-width: 100% !important;
+        flex: 0 0 100% !important;
+    }
+    
+    .container.px-4.px-lg-5 {
+        padding-left: 1rem !important;
+        padding-right: 1rem !important;
+    }
+}
+
+/* Extra small devices (phones) */
+@media (max-width: 576px) {
+    .masthead {
+        padding: 5rem 0.5rem 2rem !important;
+    }
+    
+    .masthead h2 {
+        font-size: 1.2rem !important;
+    }
+    
+    .masthead img {
+        max-width: 80% !important;
+        height: auto;
+    }
+    
+    /* Search form layout */
+    .row {
+        margin-left: -0.5rem !important;
+        margin-right: -0.5rem !important;
+    }
+    
+    .col-9, .col-3 {
+        padding-left: 0.5rem !important;
+        padding-right: 0.5rem !important;
+    }
+    
+    .col-9 {
+        flex: 0 0 100% !important;
+        max-width: 100% !important;
+    }
+    
+    .col-3 {
+        flex: 0 0 100% !important;
+        max-width: 100% !important;
+        margin-top: 0.5rem;
+    }
+    
+    .input-group {
+        margin-bottom: 1rem !important;
+    }
+    
+    .form-control, .btn {
+        font-size: 1rem;
+        padding: 0.75rem !important;
+    }
+    
+    /* Alert box */
+    .alert {
+        margin: 1rem 0 !important;
+        padding: 1rem !important;
+        font-size: 0.9rem;
+    }
+    
+    .alert h5 {
+        font-size: 1rem;
+        margin-bottom: 0.5rem;
+    }
+    
+    .alert ul {
+        margin-bottom: 0.5rem;
+        padding-left: 1.2rem;
+    }
+    
+    .alert li {
+        margin-bottom: 0.25rem;
+        font-size: 0.85rem;
+    }
+    
+    /* About section */
+    .page-section {
+        padding: 3rem 1rem !important;
+    }
+    
+    .page-section h2 {
+        font-size: 1.5rem !important;
+    }
+    
+    .page-section h3 {
+        font-size: 1.2rem !important;
+    }
+    
+    .text-white-75, .txt_desc {
+        font-size: 0.95rem !important;
+        line-height: 1.5;
+    }
+    
+    .text-left {
+        text-align: left;
+    }
+    
+    /* Links styling */
+    a {
+        word-break: break-word;
+    }
+    
+    /* Divider */
+    .divider {
+        max-width: 100%;
+        margin: 1rem auto;
+    }
+}
+
+/* Small tablets (landscape phones and small tablets) */
+@media (min-width: 577px) and (max-width: 768px) {
+    .masthead {
+        padding: 6rem 1.5rem 3rem !important;
+    }
+    
+    .masthead h2 {
+        font-size: 1.8rem !important;
+    }
+    
+    .col-9 {
+        flex: 0 0 70% !important;
+        max-width: 70% !important;
+    }
+    
+    .col-3 {
+        flex: 0 0 30% !important;
+        max-width: 30% !important;
+    }
+    
+    .page-section {
+        padding: 4rem 1.5rem !important;
+    }
+}
+
+/* General touch-friendly improvements */
+@media (hover: none) {
+    .btn, a, .nav-link {
+        min-height: 44px;
+        min-width: 44px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .btn:active {
+        opacity: 0.8;
+    }
+}
+
+/* Typography improvements for mobile */
+@media (max-width: 768px) {
+    body {
+        font-size: 14px;
+        line-height: 1.6;
+    }
+    
+    h1, h2, h3, h4, h5, h6 {
+        word-wrap: break-word;
+        overflow-wrap: break-word;
+    }
+    
+    p {
+        margin-bottom: 1rem;
+    }
+}
+
+/* Prevent horizontal scroll */
+html, body {
+    overflow-x: hidden;
+    max-width: 100%;
+}
+
+/* Image responsiveness */
+img {
+    max-width: 100%;
+    height: auto;
+    display: block;
+}
+
+/* Footer adjustments */
+@media (max-width: 768px) {
+    footer {
+        padding: 2rem 1rem !important;
+        font-size: 0.9rem;
+    }
+}
