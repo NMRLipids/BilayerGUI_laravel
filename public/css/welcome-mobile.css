@@ -33,8 +33,16 @@ p {
     margin-bottom: 1em;
 }
 
+.masthead {
+        padding: 15rem 1rem 10rem !important;
+}
+
 /* Navigation adjustments for mobile */
-@media (max-width: 991px) {
+@media (max-width: 1089px) {
+    .masthead {
+        padding: 15rem 1rem 10rem !important;
+    }
+
     .navbar {
         padding: 0.5rem 0 !important;
     }
@@ -56,10 +64,12 @@ p {
 }
 
 /* Masthead adjustments for mobile */
-@media (max-width: 768px) {
+@media (max-width: 866px) {
     .masthead {
-        padding: 6rem 1rem 6rem !important;
-    }
+        padding: 15rem 1rem 20rem !important;
+    	min-height: auto !important;
+        overflow-y: visible !important;
+	}
     
     .masthead h2 {
         font-size: clamp(1.2rem, 5vw, 2rem) !important;
@@ -89,9 +99,9 @@ p {
 }
 
 /* Extra small devices (phones) */
-@media (max-width: 400px) {
+@media (max-width: 577px) {
     .masthead {
-        padding: 6rem 1rem 10rem !important;
+        padding: 24rem 0.1rem 20rem !important;
         min-height: auto !important;
         overflow-y: visible !important;
     }
@@ -194,10 +204,10 @@ p {
     }
 }
 
-/* Small tablets */
+/* Small tablets or landscpae phone*/
 @media (min-width: 577px) and (max-width: 768px) {
     .masthead {
-        padding: 6rem 1.5rem 3rem !important;
+        padding: 15rem 1.5rem 30rem !important;
     }
     
     .masthead h2 {
