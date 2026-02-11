@@ -45,7 +45,7 @@ use App\Http\Controllers\StatisticsController;
     <!-- Navigation-->
     <nav class="navbar navbar-expand-lg navbar-light fixed-top py-3" id="mainNav">
         <div class="container px-4 px-lg-5">
-            <a class="navbar-brand" href="#page-top">NMRlipids Databank</a>
+            <a class="navbar-brand" href="#page-top">FAIRMD Lipids Databank</a>
             <button class="navbar-toggler navbar-toggler-right" type="button" data-bs-toggle="collapse"
                 data-bs-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false"
                 aria-label="Toggle navigation">
@@ -53,19 +53,7 @@ use App\Http\Controllers\StatisticsController;
             </button>
             <div class="collapse navbar-collapse" id="navbarResponsive">
                 <ul class="navbar-nav ms-auto my-2 my-lg-0">
-
-                    <!--  <li class="nav-item"><a class="nav-link" href="#services">Services</a></li>-->
-                    <li class="nav-item"><a class="nav-link" href="#about">About</a></li>
-                    <!--<li class="nav-item"><a class="nav-link" href="#portfolio">Project</a></li>-->
-                    <!--  @if (Route::has('login'))
-<li class="nav-item">
-                  @auth
-                                                                          <a class="nav-link" href="{{ url('/home') }}">Home</a>
-@else
-    <a  class="nav-link" href="{{ route('login') }}">Login</a>
-                  @endauth
-                </li>
-@endif-->
+                    <li class="nav-item"><a class="nav-link" href="#about">About</a></li>                    
                 </ul>
             </div>
         </div>
@@ -78,19 +66,45 @@ use App\Http\Controllers\StatisticsController;
             <div class="row gx-4 gx-lg-5  align-items-center justify-content-center text-center">
                 <div class="col-lg-8 align-self-end">
                     <h2 class="text-white font-weight-bold">
-                        <img class="img-fluid" alt="NMRLipids Databank Logo"
+                        <img class="img-fluid" alt="FAIRMD Lipids Databank Logo"
                             src="{{ asset('storage/images/nmr_w_letras.png') }}" alt="">
                           (version <?php echo config('app.version'); ?>)
                     </h2>
                     <hr class="divider" />
                 </div>
+                @if(config('app.debug'))
+                <div class="col-lg-8 alert alert-warning" role="alert">
+                    <h5>⚠️ Development Preview</h5>
+
+                    <div class="text-left">
+                   
+                    <br><small>Latest updates: </small>
+                    <ul>
+                        <li>Re-implemented the OP data plotting for simulations.</li>
+                        <li>OP plot now supports multiple groups and experiments per lipid, with data properly organized by lipid and group.</li>
+                        <li>Added proper handling of quality data</li>
+                        <li>OP data is now visualized as box-and-whisker plots using standard deviation.</li>
+                    </ul>
+                    Quick links to new functionality:
+                    <ul>
+                        
+                        <li><a href="/trajectories/803" style="color: green;">Simulation with experimental data and quality annotation</a></li>
+                        <li><a href="/trajectories/768" style="color: green;">Simulation with diverse lipid set</a></li>
+                        <li><a href="/experiments?page=1" style="color: green;">Experiments list</a></li>
+                        <li><a href="/experiment/FF/10.1016/j.bbamem.2012.05.007/1" style="color: green;">Form factor experiment with plot</a></li>
+                        <li><a href="/experiment/OP/10.1021/acs.jpcb.4c04719/4" style="color: green;">Order parameter experiment (plot currently defunct)</a></li>
+
+                    </ul>
+                    </div>
+                </div>
+                @endif
                 <div class="col-lg-8 align-self-baseline">
-                    <p class="text-white-80 mb-5">The NMRlipids databank user interface can be used to search data in the <a
-                            href="https://github.com/NMRlipids/Databank">NMRlipids
+                    <p class="text-white-80 mb-5">The FAIRMD Lipids databank user interface can be used to search data in the <a
+                            href="https://github.com/NMRLipids/Databank">FAIRMD Lipids
                             Databank</a>.
-                        For programmatic access, see NMRlipids <a
-                            href="https://github.com/NMRlipids/Databank">Databank-API</a>. For more details refer to the <a
-                            href="https://www.nature.com/articles/s41467-024-45189-z"> NMRlipids databank publication</a>.
+                        For programmatic access, see FAIRMD Lipids <a
+                            href="https://github.com/NMRLipids/Databank">Databank-API</a>. For more details refer to the <a
+                            href="https://www.nature.com/articles/s41467-024-45189-z"> FAIRMD Lipids databank publication</a>.
                     <div class="row">
                         <div class="col-9 p-xs-1 p-sm-2">
                             <form action="{{ route('search.results') }}" method="get">
@@ -138,7 +152,7 @@ use App\Http\Controllers\StatisticsController;
                              <a
                                 href="https://nmrlipids.github.io/schemas/moleculesAndMapping.html#molecule-names">
                                 list of universal molecule and ion names that can be used in searches</a>.
-                            You can search for trajectories by their ID by typing ‘ID’ followed by their numeric ID, for example,
+                            You can search for trajectories by their ID by typing 'ID' followed by their numeric ID, for example,
                             ID123. More options are available in Advanced search.</p>
                     </div>
 
@@ -161,29 +175,29 @@ use App\Http\Controllers\StatisticsController;
                 <div class="col-lg-8 text-center">
                     <h2 class="text-white mt-0">About</h2>
                     <hr class="divider divider-light" />
-                    <h3 class="text-white mt-0">What is NMRlipids Databank?</h2>
-                    <p class="text-white-75 mb-4 txt_desc text-left">NMRlipids Databank is a community-driven catalogue containing
+                    <h3 class="text-white mt-0">What is FAIRMD Lipids Databank?</h2>
+                    <p class="text-white-75 mb-4 txt_desc text-left">FAIRMD Lipids Databank is a community-driven catalogue containing
                         atomistic molecular dynamics (MD) simulations of biologically relevant
                         lipid membranes emerging from the <a href="http://nmrlipids.blogspot.com/"> NMRlipids open
                             collaboration</a>.
                         It has been designed to improve the <a href="https://www.go-fair.org/fair-principles/">Findability, Accessibility, Interoperability, and Reuse
                         (FAIR)</a> of MD simulation data.
-                        NMRlipids databank is implemented using an overlay databank structure and is described in detail in
+                        FAIRMD Lipids databank is implemented using an overlay databank structure and is described in detail in
                         the <a href="https://www.nature.com/articles/s41467-024-45189-z"> databank publication</a>. 
                         Please refer to the <a href="https://nmrlipids.github.io/">online documentation</a> of the system and its components</p>
-                    <h3 class="text-white mt-0">Using NMRlipids </h2>
+                    <h3 class="text-white mt-0">Using FAIRMD Lipids </h2>
                         <p class="text-white-75 mb-4 txt_desc text-left">
-                            NMRlipids consists of three main components:
+                            FAIRMD Lipids consists of three main components:
 
                             <ul     class="text-white-75 mb-4 txt_desc text-left">
-                                <li>NMRlipids Databank-GUI (this website)</li>
-                                <li>NMRlipids Databank-API</li>
+                                <li>FAIRMD Lipids Databank-GUI (this website)</li>
+                                <li>FAIRMD Lipids Databank-API</li>
                                 <li>The BilayerData repository</li>
                             </ul>
                         </p>
 
                     <p class="text-white-75 mb-4 txt_desc text-left">
-                        The NMRlipids Databank-GUI </a> can be used to browse and search the content of the
+                        The FAIRMD Lipids Databank-GUI </a> can be used to browse and search the content of the
                         Databank, to select the best available simulations for specific systems based on ranking lists,
                         and to perform comparisons between basic properties of membranes. It is implemented as a web
                         application using the <a href="https://laravel.com/">Laravel framework</a>. The source code is available on <a href="https://github.com/NMRLipids/BilayerGUI_laravel">GitHub</a>.
@@ -191,8 +205,8 @@ use App\Http\Controllers\StatisticsController;
                     </p>
 
                     <p class="text-white-75 mb-4 txt_desc text-left">
-                        The <a href="http://github.com/NMRlipids/Databank/"> NMRlipids Databank-API</a> provides
-                        programmatic access to all simulation data in the NMRlipids Databank. This enables a wide range of
+                        The <a href="http://github.com/NMRlipids/Databank/"> FAIRMD Lipids Databank-API</a> provides
+                        programmatic access to all simulation data in the FAIRMD Lipids Databank. This enables a wide range of
                         novel data-driven applications —
                         from construction of machine learning models that predict membrane properties to automatic
                         analysis of virtually any property across all simulations in the Databank.
@@ -200,13 +214,13 @@ use App\Http\Controllers\StatisticsController;
                     <p class="text-white-75 mb-4 txt_desc text-left">
                         <a
                             href="https://github.com/NMRLipids/databank-template/blob/main/scripts/"> Jupyter Notebooks</a>
-                        and other examples for applications of NMRlipids Databank-API are included on <a
+                        and other examples for applications of FAIRMD Lipids Databank-API are included on <a
                             href="https://github.com/NMRlipids/Databank">GitHub</a> and in the <a
-                            href="https://www.nature.com/articles/s41467-024-45189-z"> NMRlipids databank publication</a>.
+                            href="https://www.nature.com/articles/s41467-024-45189-z"> FAIRMD Lipids databank publication</a>.
                     </p>
 
                     <p class="text-white-75 mb-4 txt_desc text-left">
-                        The <a href="https://github.com/NMRLipids/BilayerData">BilayerData repository</a> is the main data storage of the NMRlipids
+                        The <a href="https://github.com/NMRLipids/BilayerData">BilayerData repository</a> is the main data storage of the FAIRMD Lipids
                         Databank. It contains the actual meta-data on MD simulation data and metadata describing simulations and molecules. The actual
                         trajectory files are stored in <a href="https://zenodo.org/">Zenodo</a> and linked to the BilayerData repository.
                         The repository is open for contributions from the community. Instructions for contributing data
@@ -215,14 +229,14 @@ use App\Http\Controllers\StatisticsController;
                     </p>
                     <h3 class="text-white mt-0">Citing and licensing</h2>
                     <p class="text-white-75 mb-4 txt_desc text-left">
-                        If you use the NMRlipids databank in your publications, please cite the NMRlipids <a
+                        If you use the FAIRMD Lipids databank in your publications, please cite the FAIRMD Lipids <a
                             href="https://www.nature.com/articles/s41467-024-45189-z">Databank
                             publication</a>,
                         as well as the trajectory entries and related publications whereever appropriate.
                         The data in the BilayerData repository are provided under a Creative Commons Attribution 4.0
                         International (CC-BY-4.0) license
                         (see <a href="https://github.com/NMRLipids/BilayerData/blob/main/LICENSE">LICENSE</a>).
-                        The code for the NMRlipids Databank-API is provided under the GNU General Public   
+                        The code for the FAIRMD Lipids Databank-API is provided under the GNU General Public   
                          license version 3 (GPLv3) (see <a
                             href="https://github.com/NMRLipids/Databank/blob/main/LICENSE.txt">LICENSE</a>). 
                         The user interface code is provided under an MIT license (see <a href="https://github.com/NMRLipids/BilayerGUI_laravel/blob/main/LICENSE">LICENSE</a>).  

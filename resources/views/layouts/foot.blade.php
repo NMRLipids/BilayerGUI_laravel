@@ -41,7 +41,7 @@
 <script>
     $(document).ready(function() {
 
-        console.log("cargando");
+        // console.log("Initializing SimpleLightbox for portfolio-box links");
         $('a.portfolio-box').simpleLightbox();
 
         $('[id^=jmolApplet]').css('z-index', 1);
