@@ -47,13 +47,17 @@ use App\Http\Controllers\StatisticsController;
                     <ul>
                         <li>Re-implemented the OP data plotting for simulations.</li>
                         <li>OP plot now supports multiple groups and experiments per lipid, with data properly organized by lipid and group.</li>
+                        <li>Added ApL and FF data plots on the trajectory pages.</li>
+                        <li>All plot data is now stored in the database tables directly.</li>
                         <li>Added proper handling of quality data</li>
                         <li>OP data is now visualized as box-and-whisker plots using standard deviation.</li>
+                        <li>Added a checkbox to toggle normalization of FF data between 0 and 1.</li>
+                        <li>Improved mobile responsive design.</li>
                     </ul>
                     Quick links to new functionality:
                     <ul>
                         
-                        <li><a href="/trajectories/805" style="color: green;">Simulation with multiple experimental data and quality annotation</a></li>
+                        <li><a href="/trajectories/5" style="color: green;">Simulation with multiple experimental data and quality annotation</a></li>
                         <li><a href="/trajectories/768" style="color: green;">Simulation with diverse lipid set</a></li>
                         <li><a href="/experiments?page=1" style="color: green;">Experiments list</a></li>
                         <li><a href="/experiment/FF/10.1016/j.bbamem.2012.05.007/1" style="color: green;">Form factor experiment with plot</a></li>
