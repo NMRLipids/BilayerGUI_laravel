@@ -207,8 +207,8 @@ def UPSERT(conn, table, data) -> int | None:
 
     with conn.cursor() as cursor:
         cursor.execute("SET SESSION sql_mode='STRICT_ALL_TABLES';")
-        # Print query for debugging only if debug mode > 1
-        logger.debug(f"Executing UPSERT on table {table} with data {data}")
+        # Print query for trace mode only
+        logger.trace(f"Executing UPSERT on table {table} with data {data}")
         query = cursor.mogrify(sql, values)
         logger.trace("Prepared Query String:")
         logger.trace(query)
@@ -1089,32 +1089,81 @@ if __name__ == '__main__':
             # Form factor quality
             FFQ = get_quality(system, part = 'total', lipid = None, experiment = 'FF')
                 
-            # Find the form factor experiment path
-            FFExp = ''
-            if "EXPERIMENT" in README and "FORMFACTOR" in README["EXPERIMENT"] and \
-                isinstance(README["EXPERIMENT"]["FORMFACTOR"], list) and \
-                README["EXPERIMENT"]["FORMFACTOR"] and \
-                 README["EXPERIMENT"]["FORMFACTOR"][0]:
-                try:
-                    FFExp = genRpath(
-                        osp.join(FMDL_EXP_PATH, README["EXPERIMENT"]["FORMFACTOR"][0]))
-                except Exception as e:
-                    has_issues = True
-                    logger.warning(f"Could not generate path for form factor experiment. {README['EXPERIMENT']['FORMFACTOR']} ")
-                    logger.warning("Exception: {}".format(e))
-                    dump(README)
-                    if not args.force:
-                        raise e
+            ## get apldata from the API 
+            apl_data = None 
+            ## calculate a reasonable block size for the ApL calculation based on the trajectory length, 
+            #with a default of 1000 frames if the trajectory length is not available or is zero 
+            block_size = README["TRJLENGTH"] // 1000 if README["TRJLENGTH"] else 1000 
 
+            try: 
+                apl_data = get_ApL_data(system, block_size) 
+
+            except ValueError as ve:
+                # possibly, there are not enough frames to calculate ApL data with the calculated block size. Try again with all points.
+                try: 
+                    apl_data = get_ApL_data(system)
+                except Exception as e: 
+                    logger.warning("Could not get area per lipid data.")
+                    logger.warning("Exception: {}".format(e))
+                    has_issues = True
+                    raise e
+                    if args.strict_systems:
+                        raise e
+                    apl_data = None
+            
+            apl_data = apl_data.tolist()  # Convert numpy array to Python list
+            
+            if not apl_data and args.strict_systems:
+                raise RuntimeError("empty ApL data")
+            # apl_data = list(map(lambda x: [rnan(x[0]), rnan(x[1])] if x and len(x) == 2 else None, apl_data))   # Ensure no NaN values in the data, as they cannot be serialized to JSON
             # Collect the LipidInformation of the analysis of the trajectory
+            apl_json = None
+            try:
+                apl_json = json.dumps(apl_data, allow_nan=False) if apl_data else None  # Serialize to JSON, ensuring no NaN values
+            except Exception as e:
+                apl_data = list(map(lambda x: [rnan(x[0]), rnan(x[1])] if x and len(x) == 2 else None, apl_data))   # Ensure no NaN values in the data, as they cannot be serialized to JSON
+                # try json dump again, if it still doesn't work yield the error
+                try:
+                    apl_jason = json.dumps(apl_data, allow_nan=False) if apl_data else None 
+                except Exception as e2:
+                    logger.warning("Could not serialize area per lipid data to JSON. Check the ApL data for this system.")  
+                    logger.warning("System: " + README["path"] + " block size: " + str(block_size) + "\n")
+                    has_issues = True
+                    if args.strict_systems:
+                        raise e2
+                    apl_json = None
+
+            ff_data = None
+            try:
+                ff_data = get_FF(system).tolist() # Convert numpy array to Python list
+            except Exception as e:
+                logger.warning("Could not get form factor data.")
+                logger.warning("Exception: {}".format(e))
+                has_issues = True
+                if args.strict_systems:
+                    raise e
+                ff_data = None
+            try:               
+                ff_json = json.dumps(ff_data, allow_nan=False) if ff_data else None
+            except Exception as e:
+                logger.warning("Could not serialize form factor data to JSON. Check the form factor data for this system.")  
+                logger.warning("System: " + README["path"] + "\n")
+                has_issues = True
+                if args.strict_systems:
+                    raise e
+                logger.exception(e)
+                ff_json = None
+                
             trajectories_analysis_data = {
                 "trajectory_id":          Trj_ID,
                 "bilayer_thickness":      rnan(BLT) if not isinstance(BLT, list) else [rnan(x) for x in BLT],
                 "area_per_lipid":         rnan(APL),
                 "area_per_lipid_file":    genRpath(
                     osp.join(FMDL_SIMU_PATH, README["path"], 'apl.json')),
+                "area_per_lipid_data": apl_json,
                 "form_factor_file":       genRpath(
                     osp.join(FMDL_SIMU_PATH, README["path"], 'FormFactor.json')),
+                "form_factor_data": ff_json,
                 "op_quality_total":          rnan(get_quality(system, part = 'total', lipid = None, experiment = 'OP')),
                 "op_quality_headgroups":     rnan(get_quality(system, part = 'headgroup', lipid = None, experiment = 'OP')),
                 "op_quality_tails":          rnan(get_quality(system, part = 'tails', lipid = None, experiment = 'OP')),
@@ -1227,7 +1276,12 @@ if __name__ == '__main__':
 
       
     # ------------------
-    # -- TABLE `trajectories_experiments_OP` and `trajectories_experiments_FF`        
+    # -- TABLE `trajectories_experiments_OP` and `trajectories_experiments_FF`
+    # Link the trajectory with the experiments of type OP and FF associated 
+    # to the system in the README file. The association is made through the path of the experiment, 
+    # which should be unique. 
+    # The experiment must be already in the DB, otherwise it will be 
+    # skipped and a warning will be printed.       
     # ------------------            
    
             if "EXPERIMENT" in README and "ORDERPARAMETER" in README.get("EXPERIMENT", {}) and README["EXPERIMENT"]["ORDERPARAMETER"]:
@@ -1256,12 +1310,12 @@ if __name__ == '__main__':
                                 has_issues = True
                                 continue
 
-                            LipidInfo = {
+                            trajExpLipInfo = {
                                 "trajectory_id": Trj_ID,
                                 "lipid_id": Lipids_ID[mol],
                                 "experiment_id": exp_id,
                             }        
-                            _ =  UPSERT(database, 'trajectories_experiments_OP', LipidInfo)
+                            _ =  UPSERT(database, 'trajectories_experiments_OP', trajExpLipInfo)
                             if args.debug:
                                 logger.debug("Linked trajectory {} with experiment {} for lipid {}".format(
                                     Trj_ID, path, mol))
@@ -1271,62 +1325,67 @@ if __name__ == '__main__':
                 logger.debug("No related order parameter experiments recorded for system: {}".format(system))  
                     
     # -- TABLE `trajectories_experiments_FF`
-                if "FORMFACTOR" in README.get("EXPERIMENT", {}):
-                    # The Form Factor experiments associated to the simulation
-                    ExpFF = README["EXPERIMENT"]["FORMFACTOR"]
+            if "EXPERIMENT" in README and \
+            "FORMFACTOR" in README["EXPERIMENT"] and \
+            README["EXPERIMENT"]["FORMFACTOR"]: 
+                ExpFF = README["EXPERIMENT"]["FORMFACTOR"]
+                if type(ExpFF) is str:
+                    ExpFF = [ExpFF]
+                elif type(ExpFF) is dict:
+                    ExpFF = list(ExpFF.values())
+                for path in ExpFF:
+                    logger.debug("Linking trajectory {} with FF experiment {}".format(
+                        Trj_ID, path))
+                    exp_id = CheckEntry(
+                                    'experiments_FF', {
+                                        #"article_doi": path,
+                                    "path": path
+                                    })
+                    # If the experiment is not found in the DB, skip it and print a warning
+                    if not exp_id:
+                        if args.strict_systems:
+                            raise ValueError("Referenced experiment not found in DB: " +
+                                path + " referenced by system: " +
+                                system)  
+                                # If strict mode is enabled, stop processing the system
+                        logger.warning("Referenced FF experiment not found in DB: " +
+                                path + " referenced by system: " + system)  
+                        has_issues = True        
+                        continue # Skip this experiment if it is not found in the DB
+                    
+                    trajExpInfo = {
+                        "trajectory_id": Trj_ID,
+                        "experiment_id": exp_id,
+                        }
 
-                    if ExpFF:
-                        if type(ExpFF) is str:
-                            ExpFF = [ExpFF]
-                            for path in ExpFF:
-                                logger.debug("Linking trajectory {} with experiment {}".format(
-                                    Trj_ID, path))
-                                for file in os.listdir(osp.join(
-                                        PATH_EXPERIMENTS_FF, path)):
-                                    exp_id = CheckEntry(
-                                                    'experiments_FF', {
-                                                      #"article_doi": path,
-                                                    "path": genRpath(osp.join(
-                                                             PATH_EXPERIMENTS_FF,
-                                                             path, file))
-                                                    })
-                                    if not exp_id:
-                                        if args.strict_systems:
-                                            raise ValueError("Referenced experiment not found in DB: " +
-                                                path + " referenced in system: " +
-                                                system)  
-                                               # If strict mode is enabled, stop processing the system
-                                        logger.warning("Referenced experiment not found in DB: " +
-                                                path + " referenced in system: " +
-                                                system)  
-                                        has_issues = True        
-                                        continue
-
-                                    if file.endswith(".json"):
-                                        LipidInfo = {
-                                            "trajectory_id": Trj_ID,
-                                            "experiment_id": exp_id,
-                                                     }
-
-                                        _ = UPSERT(database, 'trajectories_experiments_FF',
-                                                    LipidInfo)
-                                        logger.debug("Linking trajectory {} with experiment {}".format(
-                                                Trj_ID, file)) 
-                                        Linked_Experiments_FF.append(README["path"] +" ID:" + str(Trj_ID))
-                    else:
-                        logger.debug("No related form factor experiments recorded for system: {}".format(system))
+                    _ = UPSERT(database, 'trajectories_experiments_FF',
+                                trajExpInfo)
+                    logger.debug("Linking trajectory {} with FF experiment {}".format(
+                            Trj_ID, path)) 
+                    Linked_Experiments_FF.append(README["path"] +" ID:" + str(Trj_ID))
+            else:
+                logger.debug("No related form factor experiments recorded for system: {}".format(system))
+        
+        
+        
+        
             if has_issues:
                 systems_with_issues_counts += 1
             systems_counts += 1
+        
+        # force mode: catch all exceptions, print them, and continue with the next system,
+        # while keeping track of the failed systems
         except Exception as err:
             logger.error("Exception loading system: " + README["path"])
             logger.error("Exception loading system:" + README["path"] + "\n" + str(err))
-            logger.traceback(err)
-            if not args.force:
+            if args.force:
+                logger.exception(err)
+            else:
                 raise err
             FAILS.append(README["path"])
     
-    database.close()    
+    database.close() 
+
 ####################
 
     logger.success("loaded {} lipids, metadata, and cross-references.".format(lipids_counts))

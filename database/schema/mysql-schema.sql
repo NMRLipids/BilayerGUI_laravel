@@ -49,7 +49,7 @@ CREATE TABLE `experiments` (
   `section` bigint DEFAULT 1 NOT NULL,
   `path` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL,
   `type` enum('FF','OP') CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL DEFAULT 'FF',
-  `data` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL, 
+  `data` JSON DEFAULT NULL, 
   -- JSON data with experiment details, e.g. FF parameters or OP details
   PRIMARY KEY (`id`),
   UNIQUE KEY `experiments_path_unique` (`path`, `type`),
@@ -421,7 +421,9 @@ CREATE TABLE `trajectories_analysis` (
   `bilayer_thickness` double DEFAULT NULL,
   `area_per_lipid` double DEFAULT NULL,
   `area_per_lipid_file` varchar(255) NOT NULL,
+  `area_per_lipid_data` JSON DEFAULT NULL,
   `form_factor_file` varchar(255) NOT NULL,
+  `form_factor_data` JSON DEFAULT NULL,
   `op_quality_total` double DEFAULT NULL,
   `op_quality_headgroups` double DEFAULT NULL,
   `op_quality_tails` double DEFAULT NULL,
@@ -635,7 +637,7 @@ CREATE VIEW `experiments_FF` AS
     `experiments`.`data_doi` AS `data_doi`,
     `experiments`.`path` AS `path`,
     `experiments`.`section` AS `section`,
-    `experiments`.`data` AS `FF_data`
+    `experiments`.`data` AS `data`
    FROM `experiments`
   WHERE (`experiments`.`type` = 'FF');
 

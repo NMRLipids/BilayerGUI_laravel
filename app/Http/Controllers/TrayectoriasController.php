@@ -19,127 +19,63 @@ class TrayectoriasController extends Controller
 
     const GitHubURL =    'https://raw.githubusercontent.com/NMRLipids/BilayerData/refs/heads/main/';
     const GitHubURLEXP = 'https://raw.githubusercontent.com/NMRLipids/BilayerData/main/';
-    static $DataStr = '';
-    static $DataValue = '';
-    static $DataError = '';
-
-    static $DataExpStr = array();
-    static $DataExpValue = array();
-    static $DataExpError = array();
-
-    static $DataExpStrArray =array();
-    static $DataExpValueArray =array();
-    static $DataExpErrorArray =array();
-
-    static $maxValue = -INF;
-    static $minValue = INF;
-
-    static $sub_ns = ['5', '50', '100', '200'];
-
-    static $metadatos_head = '';
-
-    // Creamos el array de lipidos para las graficas e tarta
-    static $l1lipid = array();
-    static $l2lipid = array();
-    static $l1lipidNum = array();
-    static $l2lipidNum = array();
-
-    static $l1lipidStr = '';
-    static $l2lipidStr = '';
-    static $l1lipidNumStr = '';
-    static $l2lipidNumStr = '';
-
-    static $RealNameAsoc = ''; // una lista para
-
-    // Lista de lipidos de las dos cada para colorear
-    // --------------------
-    static $lip1Array = [];
-    static $lip2Array = [];
-    static $lipArray = [];
-
-    private $plotData = [];
-
-public static function urlFileExist($file)
-    {
-        $file_headers = @get_headers($file);
-        if (!$file_headers || str_contains($file_headers[0], '400') || str_contains($file_headers[0], '404')) {
-            $exists = false;
-        } else {
-            $exists = true;
-        }
-
-        return $exists;
-    }
-
-public static function urlFileExist2($file)
-    {
-        $file_headers = @get_headers($file);
-        if ($file_headers && strpos($file_headers[0], '200')) {
-            $exists = true;
-        } else {
-            $exists = false;
-        }
-
-        return $exists;
-    }
-
-public static function filtraValor($val)
-
-    {
-        //if ($val == 0 || $val == 4242) {
-        if ($val == 4242) {
-            return 'N/A';
-        } else {
-            return round($val, 2);
-        }
-    }
-
-    public static function IgualaDecimales($n1, $n2)
-    {
-        $ent1 = $dec1 = $ent2 = $dec2 = '0';
-        $a = explode('.', $n1);
-        $b = explode('.', $n2);
-        if (count($a) > 1) {
-            $dec1 = $a[1];
-        }
-        if (count($b) > 1) {
-            $dec2 = $b[1];
-        }
-
-        $maxdec = max(strlen($dec1), strlen($dec2));
-        $dec1 = str_pad($dec1, $maxdec, '0', STR_PAD_RIGHT);
-        $dec2 = str_pad($dec2, $maxdec, '0', STR_PAD_RIGHT);
-        $ent1 = $a[0];
-        $ent2 = $b[0];
-
-        return $ent1 . '.' . $dec1 . ' &plusmn; ' . $ent2 . '.' . $dec2;
-    }
     
+    private $OPData = []; // This will hold the OP data structured for the view
+    private $OPLegend = []; // This will hold the legend labels for the OP data
+    private $ApLdata = ""; // This will hold the AP data structured for the view
+    private $FFData = []; // This will hold the FF data structured for the view
+    private $FFLegend = []; // This will hold the legend labels for the FF data 
 
-    public static function urlFileExist_new($url)
-    {
-        return curl_init($url) !== false;
+    // This function is responsible for fetching the Area per Lipid (ApL) data for a given trajectory. 
+    // It checks if the trajectory has an associated analysis, and if so, it calls the area_per_lipid_data() method on the analysis to retrieve the ApL data. 
+    // The retrieved ApL data is then stored in the controller instance for later use in the view.
+    private function fetchApLData($trayectoria): void {
+        $ApLData = [];
+        $analysis = $trayectoria->analisis;
+        if (isset($analysis)) {
+            $this->ApLdata =$analysis->area_per_lipid_data; // this is already a JSON string, so we can pass it directly to the view without encoding it again
+        }
+    }
+   
+    // This function is responsible for fetching the Form Factor (FF) data for a given trajectory.
+    private function fetchFFData($trayectoria): void {
+        $this->FFLegend = [$trayectoria->article_doi ? $trayectoria->article_doi : 'Simulation Data'];
+        if (isset($trayectoria->analisis)) {
+             $this->FFData[] = json_decode($trayectoria->analisis->form_factor_data, true); 
+             // this is already a JSON string, so we decode it to a PHP array for easier manipulation in the view, 
+             // and then we can re-encode it as JSON in the view when passing it to JavaScript for rendering the charts.
+        }
     }
 
-    public static function CleanLabel($label)
-    {
-        $label = str_replace('_M M_', '_', $label);
-        $label = str_replace('_M', '', $label);
-        $label = str_replace('M_', '', $label);
-        $labelExpl = explode('_', $label);
-        return $labelExpl[1];
+    private function augmentFFDataWithExperiments($trayectoria): void {
+        if (isset($trayectoria->experimentsFF)) {
+            foreach ($trayectoria->experimentsFF as $key => $experiment) {
+                error_log("Processing FF experiment: " . ($experiment->path ?? $experiment->article_doi ?? 'Unknown Experiment') . " for trajectory id " . $trayectoria->id);
+                $experimentName = $experiment->path ?? $experiment->article_doi ?? 'Unknown Experiment';               
+                // Each FF experiment stores its FF data in the data attribute of its base table, so we can access it directly from the experiment model
+                error_log(var_export($experiment->doi, true)); // Log the raw data for debugging
+                if (isset($experiment->data) && !empty($experiment->data)) { 
+                    error_log("Data found: FF data with experiment " . $experimentName);
+                    $this->FFLegend[] = $experimentName; // Add the experiment name to the legend for chart labeling
+                    $decodedFFData = json_decode($experiment->data, true);
+                    if (json_last_error() === JSON_ERROR_NONE) {
+                        error_log("Augmenting FF data with experiment " . $experimentName);
+                        $this->FFData[] = $decodedFFData; // Append to existing FF data
+                    } else {
+                        error_log("Error decoding FF data for experiment " . $experimentName . ": " . json_last_error_msg());
+                    }   
+                } else {
+                    error_log("No FF data found for ". $experiment->type. " experiment " . $experimentName);
+                }
+
+                error_log("Finished processing experiment " . $experimentName);
+            }
+        }
+        else {
+            error_log("No FF experiments found for trajectory id " . $trayectoria->id);
+        }
     }
 
-    static $ColMemAssoc = [];
-    static $MemNameAssoc = [];
-    # $ColMemAssoc['CHOL'] = '#ffff00';
-
-   # foreach ($trayectoria->lipidos as $key => $value) {
-   #     $ColMemAssoc[$value['name']] = $value['color'];
-   #     $MemNameAssoc[$value['molecule']] = $value['name'];
-   #     $RealNameAsoc = $RealNameAsoc . "'" . $value['molecule'] . "':'" . $value['name'] . "',";
-    #}
-    
     private function makeOPData($trayectoria): void {
         $OPData = [];
         $legend = [$trayectoria->article_doi ? $trayectoria->article_doi : 'Simulation Data'];
@@ -153,7 +89,7 @@ public static function filtraValor($val)
                     continue; // Skip this lipid if there's an error decoding the plot data
                 }
                 if (empty($decodedPlotData)) {
-                    die("Decoded OP plot data for lipid " . $lipidName . " is empty or not an array");
+                    error_log("Decoded OP plot data for lipid " . $lipidName . " is empty or not an array");
                 }
                 foreach ($decodedPlotData as $group => $plot_data) {
                     $OPData[$lipidName][$group] = [$plot_data];
@@ -199,7 +135,7 @@ public static function filtraValor($val)
                         // If we don't have existing data for this lipid and group, we don't plot it. 
                         // We choose to skip it to ensure we only include experiments that have corresponding simulation data.
                         if (isset($this->OPData[$lipidName][$group])) {
-                            error_log("Augmenting OP data for lipid " . $lipidName . " group " . $group . " with experiment " . $experimentName);
+                            #error_log("Augmenting OP data for lipid " . $lipidName . " group " . $group . " with experiment " . $experimentName);
                             $this->OPData[$lipidName][$group][] = $plot_data; // Push to existing data for this lipid and group
                         }  
                   
@@ -210,14 +146,22 @@ public static function filtraValor($val)
     }
 
     function show($trayectoria_id) {
-           $trayectoria = Trayectoria::findOrFail($trayectoria_id);
-           $this->makeOPData($trayectoria);
-           $this->augmentOPDataWithExperiments($trayectoria);
+        $trayectoria = Trayectoria::findOrFail($trayectoria_id);
+        $this->makeOPData($trayectoria);
+        $this->augmentOPDataWithExperiments($trayectoria);
+
+        $this->fetchApLData($trayectoria);
+
+        $this->fetchFFData($trayectoria);
+        $this->augmentFFDataWithExperiments($trayectoria);
 
         return view('trayectorias.show', [
             'trayectoria' => $trayectoria,
             'OPData' => $this->OPData,
-            'OPLegend' => $this->OPLegend, 
+            'OPLegend' => $this->OPLegend,
+            'ApLData' => $this->ApLdata,
+            'FFData' => $this->FFData,
+            'FFLegend' => $this->FFLegend
         ]);
     }
 }

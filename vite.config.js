@@ -3,7 +3,12 @@ import laravel from 'laravel-vite-plugin';
 export default defineConfig({
     plugins: [
         laravel({
-            input: ['resources/js/app.js', 'resources/js/plotopcharts.js'],
+            input: [
+                    'resources/js/app.js', 
+                    'resources/js/plotopcharts.js', 
+                    'resources/js/plotApLchart.js',
+                    'resources/js/plotFFcharts.js'
+                ],
             refresh: true,
         }),
     ],
