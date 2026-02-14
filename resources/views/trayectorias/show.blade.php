@@ -295,18 +295,43 @@
                                                 </div>
                                             @endforeach
                                         @endif
-
-                                        <div class="row" style="padding-bottom:50px!important;">
-                                            <div class="col-sm-6 col-md-6 chart-container-half">
+                                        @if (isset($ApLData))
+                                        <div class="row" style="">
+                                            <div class="col-sm-12 col-md-12 chart-container" style=" background-color:
+                                                     #0d0d0e;border-right-width:1px;border-right-style: none; padding: 4px; border-radius: 0px;" >
                                                 <h3>Area per lipid</h3>
-                                                <canvas id="myChartAreaxLip"> </canvas>
-                                            </div>
+                                                <canvas id="myChartAreaxLip"
+                                                    data-apldata="{{  json_encode($ApLData) }}"
+                                                    data-apltitle="Area per lipid">
+                                                 </canvas> 
+                                        </div>
+                                        @else
+                                        <div>
+                                            <h2>No Area per Lipid Data Available</h2>
+                                        </div>
+                                        @endif
 
-                                            <div class="col-sm-6 col-md-6 chart-container-half">
+                                        @if (isset($FFData))
+                                        <div class="row" style="">
+                                            <div class="col-sm-12 col-md-12 chart-container" style=" background-color:
+                                                     #0d0d0e;border-left-width: 1px;border-left-style: none; padding: 4px; border-radius: 0px;">
                                                 <h3>Form Factor</h3>
-                                                <canvas id="myChartFormFact"> </canvas>
+                                                <label style="display: inline-flex; align-items: center; gap: 6px; color: #ffffff; font-weight: 600; margin-bottom: 8px;">
+                                                    <input type="checkbox" data-ffnormalize-target="myChartFormFact" checked>
+                                                    Normalize (0-1)
+                                                </label>
+                                                <canvas id="myChartFormFact"
+                                                    data-ffdata="{{ json_encode($FFData) }}"
+                                                    data-fftitle="Form Factor"
+                                                    data-fflegend="{{ json_encode($FFLegend) }}"
+                                                > </canvas>
                                             </div>
                                         </div>
+                                        @else
+                                        <div>
+                                            <h2>No Form Factor Data Available</h2>
+                                        </div>
+                                        @endif
                                         <div class="row p-2">
                                             <div class="col-sm-12 col-md-12">
                                                 <h3> Experimental and Molecular Dynamics based descriptors<h3>
@@ -358,70 +383,7 @@
                             </div>
 
 
-                            <!-- Experiment Tab -->
-                            <div role="tabpanel" class="tab-pane bg-solapa card-datos" id="homeExperiment">
-
-                                <div class="card-body">
-                                    @if (isset($trayectoria->TrayectoriaAnalisisLipidos)) 
-                                        @foreach ($trayectoria->TrayectoriaAnalisisLipidos as $key => $value)
-                                            @if (isset($value->order_parameters_experiment) && !is_null($value->order_parameters_experiment))
-                                                @php
-                                                    $lipidName = $value->getLipid->molecule;
-                                                    $lipid_id = $value->lipid_id;
-                                                @endphp
-                                                <div class="row p-2">
-                                                    <div class="col-sm-12 col-md-12">
-                                                        <h3>Order Parameters: {{ $lipidName }}</h3>
-                                                        <a
-                                                            href="{{ TC::GitHubURLEXP . $value->order_parameters_experiment }}">Download
-                                                            JSON</a>
-                                                        <br />
-                                                    </div>
-                                                    <div class="row p-2">
-                                                        <div class="col-sm-12 col-md-12 chart-container-half">
-                                                            <canvas id="myChartOrderParamLipidsEXPg1{{ $lipid_id }}">
-                                                            </canvas>
-                                                        </div>
-                                                    </div>
-
-                                                    <div class="row p-2">
-                                                        <div class="col-sm-12 col-md-12 chart-container-half">
-                                                            <canvas id="myChartOrderParamLipidsEXPg2{{ $lipid_id }}">
-                                                            </canvas>
-                                                        </div>
-                                                    </div>
-
-                                                    <div class="row p-2">
-                                                        <div class="col-sm-12 col-md-12 chart-container-half">
-                                                            <canvas id="myChartOrderParamLipidsEXPg3{{ $lipid_id }}">
-                                                            </canvas>
-                                                        </div>
-                                                    </div>
-
-                                                    @if (isset($trayectoria->experimentsFF))
-                                                        <div class="row p-2">
-                                                            <div class="col-sm-12 col-md-12 chart-container-half">
-                                                                <h3>Form Factor</h3>
-                                                                <canvas id="myChartFormFactEXP"> </canvas>
-                                                            </div>
-                                                        </div>
-                                                    @else
-                                                        <div>
-                                                            <h2>No Form Factor Data Available</h2>
-                                                        </div>
-                                                    @endif
-                                                </div>
-
-                                            @endif
-                                        @endforeach
-                                    @else
-                                        <div>
-                                            <h2>No Lipid Data Available</h2>
-                                        </div>
-                                    @endif    
-                                </div>
-
-                            </div> <!--  END Experiment Tab -->
+                            
                         </div>
                     </div>
                 </div>
@@ -431,10 +393,10 @@
     </div>
 
 
-@vite(['resources/js/plotopcharts.js'])
+@vite(['resources/js/plotopcharts.js', 'resources/js/plotApLchart.js', 'resources/js/plotFFcharts.js'])
 
 @endsection
 
 @section('meta-tags')
-    {!! TC::$metadatos_head !!}
+    
 @endsection

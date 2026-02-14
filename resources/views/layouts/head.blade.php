@@ -7,9 +7,9 @@
     <meta name="csrf-token" content="{{ csrf_token() }}" />
 
     <meta property="og:type" content="website">
-    <meta property="og:site_name" content="NMRlipids Databank">
-    <meta property="og:title" content="NMRlipids Databank">
-    <meta property="og:description" content="NMRlipids Databank">
+    <meta property="og:site_name" content="FAIRMD Lipids Databank">
+    <meta property="og:title" content="FAIRMD Lipids Databank">
+    <meta property="og:description" content="FAIRMD Lipids Databank">
     <meta property="og:url" content="{{ url()->current() }}">
     <meta property="og:locale" content="en_US">
     <meta property="og:image" content="{{ url('storage/images/nmr_w_letras.png') }}">

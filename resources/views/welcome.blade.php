@@ -53,7 +53,7 @@ use App\Http\Controllers\StatisticsController;
                     Quick links to new functionality:
                     <ul>
                         
-                        <li><a href="/trajectories/803" style="color: green;">Simulation with experimental data and quality annotation</a></li>
+                        <li><a href="/trajectories/805" style="color: green;">Simulation with multiple experimental data and quality annotation</a></li>
                         <li><a href="/trajectories/768" style="color: green;">Simulation with diverse lipid set</a></li>
                         <li><a href="/experiments?page=1" style="color: green;">Experiments list</a></li>
                         <li><a href="/experiment/FF/10.1016/j.bbamem.2012.05.007/1" style="color: green;">Form factor experiment with plot</a></li>

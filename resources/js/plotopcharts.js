@@ -10,7 +10,7 @@
 
 // Function to build x-axis labels from data
 import Chart from 'chart.js/auto';
-const $colorList = [
+const colorList = [
         '#fcfcfc',
         '#ef1e1e',
         '#6e8bff',       
@@ -56,7 +56,7 @@ function enrichDataWithIndices(data) {
             x: labels.indexOf(makeLabel(point)),
             y: point.OP
         }));
-        dataset.backgroundColor = $colorList[index % $colorList.length];
+        dataset.backgroundColor = colorList[index % colorList.length];
         dataset.borderColor = dataset.backgroundColor.replace('0.2', '1');
     });
     return data;
@@ -252,16 +252,16 @@ function drawOneChart(canvas, dataset, legend, title) {
             },
             scales: {
                 x: {
-                type: 'category',
-                ticks: {
-                    color: '#ffffff'
+                    type: 'category',
+                    ticks: {
+                        color: '#ffffff'
+                    },
+                    grid: {
+                        color: '#676666',
+                        drawBorder: false,
+                        borderColor: '#fbfbfb'
+                    }
                 },
-                grid: {
-                    color: '#676666',
-                    drawBorder: false,
-                    borderColor: '#fbfbfb'
-                }
-            },
                 
                 y: {
                     beginAtZero: true,
