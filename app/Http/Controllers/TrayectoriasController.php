@@ -121,7 +121,7 @@ class TrayectoriasController extends Controller
                 foreach ($experiment->membraneComposition as $membraneComponent) {
                     $lipid = $membraneComponent->lipid; // Get the lipid associated with this membrane component
                     $lipidName = $lipid->molecule ?? throw new Exception("Unknown Lipid in Membrane Composition for experiment $experimentName");
-                    if (!isset($this->OPData[$lipidName])) next; // Skip if we don't have Simulation OP data for this lipid
+                    if (!isset($this->OPData[$lipidName])) continue; // Skip if we don't have Simulation OP data for this lipid
                     $decodedPlotData = json_decode($membraneComponent->data, true);
                     if (json_last_error() !== JSON_ERROR_NONE or !is_array($decodedPlotData)) {
                         error_log("Error decoding OP plot data for lipid " . $lipidName . ": ". " experiment " . $experiment->path . " " . json_last_error_msg());
