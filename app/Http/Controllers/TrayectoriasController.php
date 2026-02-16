@@ -19,12 +19,15 @@ class TrayectoriasController extends Controller
 
     const GitHubURL =    'https://raw.githubusercontent.com/NMRLipids/BilayerData/refs/heads/main/';
     const GitHubURLEXP = 'https://raw.githubusercontent.com/NMRLipids/BilayerData/main/';
+    const GitHubDataRepoSimulations = "https://github.com/NMRLipids/BilayerData/tree/main/Simulations/";
     
     private $OPData = []; // This will hold the OP data structured for the view
     private $OPLegend = []; // This will hold the legend labels for the OP data
     private $ApLdata = ""; // This will hold the AP data structured for the view
     private $FFData = []; // This will hold the FF data structured for the view
     private $FFLegend = []; // This will hold the legend labels for the FF data 
+    private $comp_ul = [];
+    private $comp_ll = [];
 
     // This function is responsible for fetching the Area per Lipid (ApL) data for a given trajectory. 
     // It checks if the trajectory has an associated analysis, and if so, it calls the area_per_lipid_data() method on the analysis to retrieve the ApL data. 
@@ -145,6 +148,16 @@ class TrayectoriasController extends Controller
         }
     }
 
+    function buildCompostion ($trayectoria): void {
+        
+        foreach ($trayectoria->trajectoriesLipids as $lipidComponent) {
+            $lipidName = $lipidComponent->lipid->molecule ?? throw new Exception("Unknown Lipid in Trajectory Analysis for trajectory id " . $trayectoria->id);
+            $this->comp_ul[$lipidName] = $lipidComponent->leaflet_1;
+            $this->comp_ll[$lipidName] = $lipidComponent->leaflet_2;
+        }
+
+    }
+
     function show($trayectoria_id) {
         $trayectoria = Trayectoria::findOrFail($trayectoria_id);
         $this->makeOPData($trayectoria);
@@ -154,6 +167,7 @@ class TrayectoriasController extends Controller
 
         $this->fetchFFData($trayectoria);
         $this->augmentFFDataWithExperiments($trayectoria);
+        $this->buildCompostion($trayectoria);
 
         return view('trayectorias.show', [
             'trayectoria' => $trayectoria,
@@ -161,7 +175,9 @@ class TrayectoriasController extends Controller
             'OPLegend' => $this->OPLegend,
             'ApLData' => $this->ApLdata,
             'FFData' => $this->FFData,
-            'FFLegend' => $this->FFLegend
+            'FFLegend' => $this->FFLegend,
+            'compul' => $this->comp_ul,
+            'compll' => $this->comp_ll
         ]);
     }
 }

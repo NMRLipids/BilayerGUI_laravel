@@ -9,7 +9,7 @@
 	"customizations": {
 		"vscode": {
 			"extensions": [
-				"10nates.ollama-autocoder"
+		
 			],
 			"settings": {}
 		}

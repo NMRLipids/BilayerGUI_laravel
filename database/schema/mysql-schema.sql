@@ -322,7 +322,8 @@ CREATE TABLE `cross_references` (
 
 --
 -- Table structure for table `membranes`
---
+-- This table is mainly used to count the number of unique membranes in the database
+-- 
 
 DROP TABLE IF EXISTS `membranes`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
@@ -335,12 +336,11 @@ CREATE TABLE `membranes` (
   `lipid_number_l1` varchar(255) DEFAULT NULL,
   `lipid_number_l2` varchar(255) DEFAULT NULL,
   `geometry` varchar(255) DEFAULT NULL,
-  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
+  UNIQUE KEY `membranes_unique` (`forcefield_id`,`lipid_names_l1`, `lipid_number_l1`,`lipid_names_l2`,`lipid_number_l2`,`geometry`), 
   KEY `forcefield_id` (`forcefield_id`),
   CONSTRAINT `membranes_ibfk_1` FOREIGN KEY (`forcefield_id`) REFERENCES `forcefields` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb3;
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -561,11 +561,8 @@ CREATE TABLE `trajectories_lipids` (
   `id` bigint unsigned NOT NULL AUTO_INCREMENT,
   `trajectory_id` bigint unsigned NOT NULL,
   `lipid_id` bigint unsigned NOT NULL,
-  `lipid_name` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_unicode_ci NOT NULL,
   `leaflet_1` int NOT NULL,
   `leaflet_2` int NOT NULL,
-  `created_at` timestamp NULL DEFAULT NULL,
-  `updated_at` timestamp NULL DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `analysis_trajectory_id_foreign` (`trajectory_id`),
   KEY `Lipid_ID` (`lipid_id`),

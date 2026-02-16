@@ -43,13 +43,11 @@
 
                         </h3>
                     </div>
-
-
                     <div role="tabpanel" class="pt-4">
                         <ul class="nav nav-pills justify-content-start" id="trajectoryTab" role="tablist">
 
                             <li role="presentation" class="nav-item ">
-                                <a href="#homePeptide" class="nav-link active  " aria-controls="homePeptide" role="tab"
+                                <a href="#homeSimulationOverview" class="nav-link active  " aria-controls="homeSimulationOverview" role="tab"
                                     data-toggle="tab">Methodology</a>
                             </li>
 
@@ -63,11 +61,9 @@
                                     data-toggle="tab">Analysis/Experiment</a>
                             </li>
                         </ul>
-
-
                         <div class="tab-content">
-                            <!-- Peptide Tab -->
-                            <div role="tabpanel" class="tab-pane active bg-solapa card-datos" id="homePeptide">
+                            <!-- Simulation Tab -->
+                            <div role="tabpanel" class="tab-pane active bg-solapa card-datos" id="homeSimulationOverview">
 
                                 <div class="card-body">
                                     <div class="row p-2">
@@ -139,13 +135,12 @@
                                                     </div>
 
 
-
+                                                    
                                                     <span class="txt-dato">
                                                         <a
-                                                            href="{{ 'https://github.com/NMRLipids/BilayerData/tree/main/Simulations/' . $trayectoria->git_path }}">
+                                                            href="{{ TC::GitHubDataRepoSimulations . $trayectoria->git_path }}">
                                                             <br/>
-                                                            <span>See the system in : </span><img style="width: 120px;"
-                                                                src="{{ asset('storage/images/github.png') }}">
+                                                            <span>See the system on GitHub</span>
                                                         </a>
                                                     </span><br>
                                                 </div>
@@ -166,21 +161,24 @@
                                             <div class="row">
 
                                                 <div class="text-center">
-                                                    Click on any component to highlight it from the plot.
+                                                    Hover over a component to view composition data.
                                                 </div>
                                             </div>
                                             <div class="row">
 
-                                                <div class=" col-xs-12 col-sm-6 chart-container-half text-center">
+                                            <!-- A plot depicting the composition of the membrane leaflets as a ring plot  -->
+                                                <div class=" col-xs-12 col-sm-6 chart-container-half text-center" style="height: 30vh;">
 
                                                     Upper leaflet
-                                                    <canvas id="myChart1" width="50" height="50"> </canvas>
+                                                    <canvas id="UpperLeafletChart" width="50" height="50"
+                                                    data-composition-ul="{{ json_encode($compul) }}"> </canvas>
 
                                                 </div>
 
-                                                <div class="col-xs-12 col-sm-6 chart-container-half text-center">
+                                                <div class="col-xs-12 col-sm-6 chart-container-half text-center" style="height: 30vh;">
                                                     Lower leaflet
-                                                    <canvas id="myChart2" width="50" height="50"> </canvas>
+                                                    <canvas id="LowerLeafletChart" width="50" height="50"
+                                                    data-composition-ll="{{ json_encode($compll) }}"> </canvas>
                                                 </div>
                                             </div>
                                         </div>
@@ -393,7 +391,7 @@
     </div>
 
 
-@vite(['resources/js/plotopcharts.js', 'resources/js/plotApLchart.js', 'resources/js/plotFFcharts.js'])
+@vite(['resources/js/plotopcharts.js', 'resources/js/plotApLchart.js', 'resources/js/plotFFcharts.js', 'resources/js/plotMembrane.js'])
 
 @endsection
 

@@ -944,9 +944,33 @@ if __name__ == '__main__':
                     Names[1].append(lipid)
                     Number[1].append(str(Lipids[lipid][1]))
 
+                # now try to find the lipid in the DB, if it does not exist, add it with the information we have (at least the name)
+                if not CheckEntry('lipids', {"molecule": lipid}):
+                    if args.strict_systems:
+                        raise ValueError("Lipid {} not found in the DB. Please add it to the DB before processing this system.".format(lipid))
+                    logger.warning("Lipid {} not found in the DB. Adding it.".format(lipid))  
+                    # If it does not exist, create it
+                    LipidInfo = {
+                        "molecule":      lipid,
+                        "name":          lipid,
+                        "mapping":       None
+                        }
+                    Lip_ID = UPSERT(database, 'lipids', LipidInfo)
+                    logger.debug(f"Inserted lipid {lipid} with ID {Lip_ID}")
+                    count_lipids += 1
+                    has_issues = True
+
+                    # Enteer an entry in the trajectories_lipids table for this lipid and trajectory
+                    # This is needed to link the trajectory with the lipids in the composition, and to be able to search for trajectories with specific lipids in the future
+                    # The entry will be created later, after creating the trajectory entry in the trajectories table, when we have the trajectory ID (Trj_ID)
+                   
+
             Names = [':'.join(Names[0]), ':'.join(Names[1])]
             Number = [':'.join(Number[0]), ':'.join(Number[1])]
 
+
+
+            # This is kept for backward compatibility with the old README files
             # Collect the LipidInformation about the membrane
             LipidInfo = {
                 "forcefield_id":   FF_ID,
@@ -1013,8 +1037,7 @@ if __name__ == '__main__':
                 LipidInfo = {
                     "trajectory_id": Trj_ID,
                     "lipid_id":      Lipids_ID[lipid],
-                    "lipid_name":    lipid,
-                    "leaflet_1":     Lipids[lipid][0],
+                    "leaflet_1":     Lipids[lipid][0], 
                     "leaflet_2":     Lipids[lipid][1]
                     }
 
@@ -1308,7 +1331,7 @@ if __name__ == '__main__':
                                         path + ", referenced in system: " +
                                         system + " for lipid: " + mol)
                                 has_issues = True
-                                continue
+                                continue # Skip this experiment if it is not found in the DB
 
                             trajExpLipInfo = {
                                 "trajectory_id": Trj_ID,

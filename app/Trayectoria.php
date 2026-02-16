@@ -49,6 +49,9 @@ class Trayectoria extends AppModel
       return $this->hasOne(TrayectoriaAnalisisLipidos::class, 'trajectory_id', 'id')->where('lipid_id', $lipid_id)->first();
     }
 
+    function trajectoriesLipids() {
+      return $this->hasMany(TrayectoriasLipidos::class, 'trajectory_id', 'id');
+    }
 
     function lipidos() {
       //  DB::enableQueryLog();
