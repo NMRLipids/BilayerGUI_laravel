@@ -1,6 +1,7 @@
-<!doctype html>
-<html class="welcome" lang="{{ str_replace('_', '-', app()->getLocale()) }}"> 
-@include('layouts.head')
+@extends('layouts.app')
+
+@section('content')
+
 <style>
 /* Custom pagination styling for dark theme */
 
@@ -49,56 +50,9 @@
     border-color: var(--bs-pagination-disabled-border-color);
 }
 </style>
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <script>
     
-// Load chart.js from CDN
-// ICICIC make proper use of local copy of chart.js instead of CDN to avoid issues with CORS and ensure compatibility with our code
-function OPPlot(canvasId, dataValues, labels, legendText) {
-    var ctx = document.getElementById(canvasId).getContext('2d');
-    var myChart = new Chart(ctx, {
-        type: 'line',
-        data: {
-            labels: labels,
-            datasets: [{
-                label: legendText,
-                data: dataValues,
-                borderColor: 'rgba(75, 192, 192, 1)',
-                backgroundColor: 'rgba(75, 192, 192, 0.2)',
-                fill: false,
-                tension: 0.1
-            }]
-        },
-        options: {
-            responsive: true,
-            plugins: {
-                legend: {
-                    labels: {
-                        color: '#ffffff' 
-                    }
-                }
-            },
-            scales: {
-                x: {
-                    ticks: {
-                        color: '#ffffff' 
-                    }
-                },
-                y: {
-                    ticks: {
-                        color: '#ffffff' 
-                }
-            }
-        }
-     }
-    });
-
-    var size = '90%';
-    if (myChart.canvas) {
-        myChart.canvas.parentNode.style.width = size;
-    }
-}
 
 
 
@@ -271,32 +225,7 @@ function DrawPlot(canvasId, data, labelsArray , step, chartType, title, labelX, 
 </script>
 
 
-<body id="page-top">
-    <!-- Navigation-->
-     <main>
-     <header class="masthead">
-        <div class="container px-4 px-lg-5 h-100">
-            <div class="row gx-4 gx-lg-5 h-100 align-items-center justify-content-center text-center">
-                <div class="col-lg-10 align-self-end">
-                    <h1 class="text-white   font-weight-bold">NMRlipids Databank</h1>
-                     <nav class="navbar navbar-expand-lg navbar-light fixed-top py-3" id="mainNav">
-                         <div class="container px-4 px-lg-5">
-                            <a class="navbar-brand" href="/#page-top">NMRlipids Databank</a>
-                            <button class="navbar-toggler navbar-toggler-right" type="button" data-bs-toggle="collapse"
-                               data-bs-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false"
-                                  aria-label="Toggle navigation">
-                                <span class="navbar-toggler-icon"></span>
-                             </button>
-                                <div class="collapse navbar-collapse" id="navbarResponsive">
-                                    <ul class="navbar-nav ms-auto my-2 my-lg-0">
-                                        <li class="nav-item"><a class="nav-link" href="/#about">About</a></li>
-                                    </ul>
-                                </div>
-                        </div>
-                    </nav>
-                </div>
-            </div>
-        </div>
+
     <!-- Main page -->
         <div class="container px-4 px-lg-5">
             <div class="row gx-4 gx-lg-5 justify-content-center">
@@ -650,36 +579,15 @@ function DrawPlot(canvasId, data, labelsArray , step, chartType, title, labelX, 
                                     @endif   
                                 @endforeach
                                                           
-                            @elseif  ($entity['type'] === 'FF' && ! empty( $entity['data'] ) )
+                            @elseif  ($entity['type'] === 'FF' && ! empty($FFData) )
                             <div class="row p-2">
                                 <div class="col-sm-12 col-md-12 chart-container-half">
-                                    <canvas id="myChartFormFactEXP"> </canvas>
-                                    <?php
-                                        $dataFF = $entity['data'];
-                                        echo "<script>\n";
-                                        echo "var dataFF = [" . $dataFF . "];\r\n";
-                                        echo "var label = [\"". $entity['doi'] . "\"];\r\n";
-                                        echo 'DrawPlot(
-                                                "myChartFormFactEXP",
-                                                
-                                                dataFF,
-                                                
-                                                label,
-                                                0.01,
-                                                "line",
-                                                "Form factor",
-                                                "Qz (\u{212B}\u{207B}\u{00B9})",
-                                                "  |F(Qz)|  ",
-                                                1,
-                                                0,
-                                                true,
-                                                true,
-                                                true,
-                                                true,
-                                                "linear"
-                                                );' . "\r\n";
-                                        echo "</script>\r\n";
-                                    ?>
+                                    <input type="checkbox" data-ffnormalize-target="myChartFormFactEXP">Normalize (0-1)
+                                    <canvas id="myChartFormFactEXP"
+                                    data-ffdata="{{ json_encode($FFData) }}"
+                                    data-fflegend='["Form Factor"]'
+                                    data-fftitle="Form Factor - {{ $entity['doi'] }}"> </canvas>
+                                    
                                 </div>
                             </div>
 
@@ -693,12 +601,11 @@ function DrawPlot(canvasId, data, labelsArray , step, chartType, title, labelX, 
         </div>
     </header>
     </main>
-    @include('layouts.foot')
+@endsection
 
 
-    @vite(['resources/js/plotopcharts.js'])
+@vite(['resources/js/plotopcharts.js', 'resources/js/plotFFcharts.js'])
 
     <!-- Bootstrap core JS--><script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
     <!-- Core theme JS-->
    
-</body>

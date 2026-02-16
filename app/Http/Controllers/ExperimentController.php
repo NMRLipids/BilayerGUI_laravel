@@ -205,23 +205,20 @@ class ExperimentController extends Controller
             }
         }            
 
-        
-        $datFF =  ($experiment->type === 'FF' && !empty($experiment->data)) ? $this->formatFFData($experiment->data) : null;
+        $dataFF[] =  ($experiment->type === 'FF' && !empty($experiment->data)) ? json_decode($experiment->data, true) : null;
 
         return View::make('experiment', [
                 'entity' => ['doi' => $experiment->article_doi,
-                             'data_doi' => $experiment->data_doi,
+                            'data_doi' => $experiment->data_doi,
                             'section' => $experiment->section, 
                             'path' => $experiment->path,
                             'type' => ($experiment->type),
-                            'data' => $datFF['data'] ?? null,
-                            'data_min' => $datFF['min'] ?? null,
-                            'data_max' => $datFF['max'] ?? null,
                             'membrane_composition' => $membraneComposition,
                             'solution_composition' => $solutionComposition,
                             ],
                 'properties' => $assocProps,
                 'OPData' => $OPData,
-        ]);
+                'FFData' => $dataFF,
+            ]);
     }
 }

@@ -55,13 +55,12 @@ use App\Http\Controllers\StatisticsController;
                         <li>Improved mobile responsive design.</li>
                     </ul>
                     Quick links to new functionality:
-                    <ul>
-                        
+                    <ul>                        
                         <li><a href="/trajectories/5" style="color: green;">Simulation with multiple experimental data and quality annotation</a></li>
-                        <li><a href="/trajectories/768" style="color: green;">Simulation with diverse lipid set (check Membrane tab)</a></li>
+                        <li><a href="/trajectories/768" style="color: green;">Simulation with diverse lipid set (check Membrane and Analysis tab)</a></li>
                         <li><a href="/experiments?page=1" style="color: green;">Experiments list</a></li>
                         <li><a href="/experiment/FF/10.1016/j.bbamem.2012.05.007/1" style="color: green;">Form factor experiment with plot</a></li>
-                        <li><a href="/experiment/OP/10.1021/acs.jpcb.4c04719/4" style="color: green;">Order parameter experiment (plot currently defunct)</a></li>
+                        <li><a href="/experiment/OP/10.1021/acs.jpcb.4c04719/4" style="color: green;">Order parameter experiment with plot</a></li>
 
                     </ul>
                     </div>

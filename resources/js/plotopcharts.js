@@ -62,61 +62,6 @@ function enrichDataWithIndices(data) {
     return data;
 }
 
-const toydata = {datasets: [
-            {
-                    label: 'ToyData 1',
-                    showLine: false,
-                    data: [
-                        {C: 'C1', H: 'H11', OP: -0.18, STD: 0.01},
-                        {C: 'C1', H: 'H12', OP: -0.17, STD: 0.02},
-                        {C: 'C2', H: 'H2X', OP: -0.05, STD: 0.02},
-                        {C: 'C2', H: 'H25', OP: -0.12, STD: 0.015},
-                        {C: 'C3', H: 'H31', OP: -0.22, STD: 0.025},
-                        {C: 'C3', H: 'H32', OP: -0.19, STD: 0.018}
-                    ],
-                    borderWidth: 2
-            },
-            {   // This dataset has some missing labels (e.g. C1H11, C1H12) to 
-                // demonstrate how the code handles missing data points
-                label: 'ToyData 2',
-                showLine: false,
-                data: [
-                    
-                    {C: 'C2', H: 'H25', OP: -0.11, STD: 0.012},
-                    {C: 'C3', H: 'H31', OP: -0.20, STD: 0.028},
-                    {C: 'C3', H: 'H32', OP: -0.18, STD: 0.020}
-                ],
-                borderWidth: 2
-            },
-            {
-                label: 'ToyData 3',
-                showLine: false,
-                data: [
-                    {C: 'C1', H: 'H11', OP: -0.10, STD: 0.010},
-                    {C: 'C1', H: 'H12', OP: -0.12, STD: 0.015},
-                    {C: 'C2', H: 'H2X', OP: -0.02, STD: 0.010},
-                    {C: 'C2', H: 'H25', OP: -0.05, STD: 0.008},
-                    {C: 'C3', H: 'H31', OP: -0.15, STD: 0.015},
-                    {C: 'C3', H: 'H32', OP: -0.14, STD: 0.012}
-                ],
-                borderWidth: 2
-            },
-            {
-                label: 'ToyData 4',
-                showLine: false,
-                data: [
-                    {C: 'C1', H: 'H11', OP: -0.25, STD: 0.025},
-                    {C: 'C1', H: 'H12', OP: -0.24, STD: 0.030},
-                    {C: 'C2', H: 'H2X', OP: -0.15, STD: 0.020},
-                    {C: 'C2', H: 'H25', OP: -0.20, STD: 0.025},
-                    {C: 'C3', H: 'H31', OP: -0.28, STD: 0.035},
-                    {C: 'C3', H: 'H32', OP: -0.26, STD: 0.028}
-                ],
-                borderWidth: 2
-            }
-        ]};
-
-
 // Function to normalize datasets by inserting null values for missing x-labels
 function normalizeDatasets(data) {
     if (!data.datasets || data.datasets.length === 0) return;

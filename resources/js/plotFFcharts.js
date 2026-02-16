@@ -14,8 +14,41 @@ const colorList = [
         '#996c83'
     ];
 
+function getComputedTextColor(el) {
+    if (!el) return undefined;
+    const own = getComputedStyle(el).color;
+    if (own && own !== 'rgba(0, 0, 0, 0)') return own;
+    if (el.parentElement) {
+        const parent = getComputedStyle(el.parentElement).color;
+        if (parent && parent !== 'rgba(0, 0, 0, 0)') return parent;
+    }
+    return undefined;
+}
+
+function withAlpha(color, alpha) {
+    if (!color) return undefined;
+    const rgb = color.match(/^rgb\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*\)$/i);
+    if (rgb) {
+        const r = Number(rgb[1]);
+        const g = Number(rgb[2]);
+        const b = Number(rgb[3]);
+        return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+    }
+    const rgba = color.match(/^rgba\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*,\s*([\d.]+)\s*\)$/i);
+    if (rgba) {
+        const r = Number(rgba[1]);
+        const g = Number(rgba[2]);
+        const b = Number(rgba[3]);
+        return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+    }
+    return color;
+}
+
 
     function drawOneChart(canvas, dataset, title) {
+        const textColor = getComputedTextColor(canvas);
+        const gridColor = withAlpha(textColor, 0.18);
+
         let myChart = new Chart(canvas, {
             type: 'line',
             data: dataset,
@@ -24,25 +57,50 @@ const colorList = [
                 plugins: {
                     legend: {
                         display: true,
+                        labels: {
+                            color: textColor,
+                        }
                     },
                     title: {
                         display: true,
                         text: title,
+                        color: textColor,
                     },
                 },
                 scales: {
                     x: {
                         type: 'linear',
                         position: 'bottom',
+                        startAtZero: false,
+                        ticks: {
+                            color: textColor,
+                        },
+                        grid: {
+                            color: gridColor,
+                        },
+                        border: {
+                            color: gridColor,
+                        },
                         title: {
                             display: true,
                             text: 'Q (Å⁻¹)',
+                            color: textColor,
                         },
                     },
                     y: {
+                        ticks: {
+                            color: textColor,
+                        },
+                        grid: {
+                            color: gridColor,
+                        },
+                        border: {
+                            color: gridColor,
+                        },
                         title: {
                             display: true,
                             text: 'Form Factor (Å⁻¹)',
+                            color: textColor,
                         },
                     },
                 },
