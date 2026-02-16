@@ -525,150 +525,132 @@ function DrawPlot(canvasId, data, labelsArray , step, chartType, title, labelX, 
                           
                         @if (count($properties) > 0)
                         
-                        <div class="tab-pane fade" id="properties" role="tabpanel" aria-labelledby="properties-tab">
-                            <br/>
-                            <table class="table table-bordered table-striped table-sm table-dark">
-                                <thead>
-                                    <tr>
-                                        <th scope="col">Name</th>
-                                        <!-- th scope="col">Description</th -->
-                                        <th scope="col">Value</th>
-                                        
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @foreach ($properties as $prop)
-                                    <tr>
-                                        <td>{{ $prop->name }}</td>
-                                        <!--td>{{ $prop->description }}</td-->
-                                        <td>
-                                         @if( preg_match('/^(array|dict)$/', $prop->type) )
-                                          <!-- Format arrays and dictionaries nicely using html in nested tables -->
-                                            @php
-                                                $decoded_value = $prop->value;
-                                            @endphp
-                                            @if (is_array($decoded_value))
-                                                @if (array_keys($decoded_value) === range(0, count($decoded_value) - 1))
-                                                    <!-- It's an array -->
-                                                    <table class="table table-striped table-sm table-dark">
-                                                        <thead>
-                                                            <tr>
-                                                                <th scope="col">Index</th>
-                                                                <th scope="col">Value</th>
-                                                            </tr>
-                                                        </thead>
-                                                        <tbody>
-                                                            @foreach ($decoded_value as $index => $item)
-                                                            <tr>
-                                                                <td>{{ $index }}</td>
-                                                                <td>{{ is_array($item) ? json_encode($item) : $item }}</td>
-                                                            </tr>
-                                                            @endforeach
-                                                        </tbody>
-                                                    </table>
+                            <div class="tab-pane fade" id="properties" role="tabpanel" aria-labelledby="properties-tab">
+                                <br/>
+                                <table class="table table-bordered table-striped table-sm table-dark">
+                                    <thead>
+                                        <tr>
+                                            <th scope="col">Name</th>
+                                            <!-- th scope="col">Description</th -->
+                                            <th scope="col">Value</th>
+                                            
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach ($properties as $prop)
+                                        <tr>
+                                            <td>{{ $prop->name }}</td>
+                                            <!--td>{{ $prop->description }}</td-->
+                                            <td>
+                                            @if( preg_match('/^(array|dict)$/', $prop->type) )
+                                            <!-- Format arrays and dictionaries nicely using html in nested tables -->
+                                                @php
+                                                    $decoded_value = $prop->value;
+                                                @endphp
+                                                @if (is_array($decoded_value))
+                                                    @if (array_keys($decoded_value) === range(0, count($decoded_value) - 1))
+                                                        <!-- It's an array -->
+                                                        <table class="table table-striped table-sm table-dark">
+                                                            <thead>
+                                                                <tr>
+                                                                    <th scope="col">Index</th>
+                                                                    <th scope="col">Value</th>
+                                                                </tr>
+                                                            </thead>
+                                                            <tbody>
+                                                                @foreach ($decoded_value as $index => $item)
+                                                                <tr>
+                                                                    <td>{{ $index }}</td>
+                                                                    <td>{{ is_array($item) ? json_encode($item) : $item }}</td>
+                                                                </tr>
+                                                                @endforeach
+                                                            </tbody>
+                                                        </table>
+                                                    @else
+                                                        <!-- It's a dictionary -->
+                                                        <table class="table table-striped table-sm table-dark">
+                                                            <thead>
+                                                                <tr>
+                                                                    <th scope="col">Key</th>
+                                                                    <th scope="col">Value</th>
+                                                                </tr>
+                                                            </thead>
+                                                            <tbody>
+                                                                @foreach ($decoded_value as $key => $value)
+                                                                <tr>
+                                                                    <td>{{ $key }}</td>
+                                                                    <td>{{ is_array($value) ? json_encode($value) : $value }}</td>
+                                                                </tr>
+                                                                @endforeach
+                                                            </tbody>
+                                                        </table>
+                                                    @endif
                                                 @else
-                                                    <!-- It's a dictionary -->
-                                                    <table class="table table-striped table-sm table-dark">
-                                                        <thead>
-                                                            <tr>
-                                                                <th scope="col">Key</th>
-                                                                <th scope="col">Value</th>
-                                                            </tr>
-                                                        </thead>
-                                                        <tbody>
-                                                            @foreach ($decoded_value as $key => $value)
-                                                            <tr>
-                                                                <td>{{ $key }}</td>
-                                                                <td>{{ is_array($value) ? json_encode($value) : $value }}</td>
-                                                            </tr>
-                                                            @endforeach
-                                                        </tbody>
-                                                    </table>
+                                                    <!-- Not a valid array or dictionary -->
+                                                    {{ $prop->value }}
                                                 @endif
-                                            @else
-                                                <!-- Not a valid array or dictionary -->
+                                                <!-- pre style="white-space: pre-wrap; color: white">{{ print_r($prop->value, true) }}</pre -->
+                                                @else
                                                 {{ $prop->value }}
-                                            @endif
-                                            <!-- pre style="white-space: pre-wrap; color: white">{{ print_r($prop->value, true) }}</pre -->
-                                            @else
-                                            {{ $prop->value }}
-                                            @endif
-                                        </td>
-                                      
-                                    </tr>
-                                    @endforeach
-                                </tbody>
-                            </table>
-                        </div>
+                                                @endif
+                                            </td>
+                                        
+                                        </tr>
+                                        @endforeach
+                                    </tbody>
+                                </table>
+                            </div>
+
                         @else
                             <!-- Hide the properties tab if there are no properties to show -->
-                        @php
-                            echo "<style>\n";
-                            echo "#properties-tab { display: none; }\n";
-                            echo "</style>\n";
-                        @endphp
+                            
+                            <style>
+                            #properties-tab { display: none; }
+                            </style>
+                            
                         @endif
+
                         <!-- Analysis Tab -->
                         <div class="tab-pane fade" id="analysis" role="tabpanel" aria-labelledby="analysis-tab">
                             
-                            @if ($entity['type'] === 'OP')
-                            <table class="table table-bordered table-striped table-sm table-dark">
-                                <thead>
-                                    <tr>
-                                        <th scope="col">Lipid</th>
-                                        <th scope="col">OP data</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-
-                                @foreach ( $entity['membrane_composition'] as $component )
-                                    <tr>
-                                        <td><a href="/lipid/{{ $component->id }}"> {{ $component->molecule }}</a></td>
-                                        <td>
-                                            @if ( isset( $component->data ) )
-                                                <table class="table table-striped table-sm table-dark">
-                                                    
-                                                    <tbody>
-                                                        @foreach ( $component->data as $key => $data )
-                                                        @if ( empty( $data ) )
-                                                        <tr> <td colspan="2">
-                                                        <p> No OP {{ $key }} data available for this lipid. </p> 
-                                                         @php continue; @endphp
-                                                        </td></tr> 
-                                                        @endif
-                                                        <tr>
-                                                            <td>
-                                                                <div class="chart-container-half">
-                                                                    <canvas id="myChartOP{{ $component->id }}{{ $key }}"> </canvas>
-                                                                </div>
-                                                                <?php
-                                                                    $data_values = json_encode($data);
-                                                                    echo "<script>\n";
-                                                                    echo "var dataOP = " . $data_values . ";\r\n";
-                                                                    echo "var labels = " . json_encode(array_keys($data)) . ";\r\n";
-                                                                    echo "var label = [\"". $entity['doi'] . " - " . $component->molecule . "\"];\r\n";
-                                                                    echo 'OPPlot("myChartOP' . $component->id . $key . '", dataOP, labels, label);' . "\r\n";
-                                                                    echo "</script>\r\n";
-                                                                    //echo '<textarea rows="10" cols="100" id="dataOP' . $component->id . $key . '" value="' . $data_values . '">    ' . $data_values . '</textarea>';
-                                                            ?>
-                                                            </td>
-                                                                                                                  
-                                                        </tr>
-                                                        @endforeach
-                                                    </tbody>
-                                                </table>  
-                                            @else
-                                                No OP data available for this lipid.
-                                            @endif
-                                        </td>  
-                                      
-                                    </tr>
+                            @if ($entity['type'] === 'OP')                         
+                                @foreach ( $entity['membrane_composition'] as $lipid )
+                                    @php
+                                        $lipidName = $lipid->molecule;
+                                        $lipid_id = $lipid->id;
+                                    @endphp
+                                    @if (isset($OPData[$lipidName]))
+                                        @foreach ($OPData[$lipidName] as $group => $plot_data)   
+                                        <!-- OP plot for each group of the lipid  {{$lipidName}}
+                                                Data attributes 'data-opplot' and 'data-oplegend' are 
+                                                used to pass the plot data and legend to the JavaScript 
+                                                code that will render the chart -->
+                                            <div class="chart-container" style="max-height: 500px; max-width: 80vh; background-color: #3b3944; position: relative;
+                                            margin-top: 20px; padding: 20px; border: 1px solid #695e5e; border-radius: 8px;">
+                                                <!-- h4>Group {{ $group }}</h4 -->
+                                                <canvas
+                                                    id="op_{{ $group }}_{{ $lipid_id }}"
+                                                    data-opplot='@json($plot_data)'
+                                                    data-oplegend='["{{ $lipidName }} - {{ $group }}"]'
+                                                    data-optitle="Order Parameters - {{ $lipidName }} - {{ $group }}"
+                                                    >
+                                                </canvas>
+                                                </div>                                                                        
+                                                    <p style="cursor: pointer;" data-toggle="collapse" data-target="#dataCollapse_{{ $group }}_{{ $lipid_id }}">
+                                                        <span class="bi bi-chevron-down"></span> Data
+                                                    </p>
+                                                    <div id="dataCollapse_{{ $group }}_{{ $lipid_id }}" class="collapse" style="background-color: #1a1a1a; padding: 10px; border-radius: 5px;">
+                                                        <pre style="color: #fff; overflow-x: auto;">{{ json_encode($plot_data, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES) }}</pre>
+                                                    </div>
+                                        @endforeach
+                                    @else
+                                        <div>
+                                            <h2>No OP Data Available for {{ $lipidName }}</h2>
+                                        </div>    
+                                    @endif   
                                 @endforeach
-
-                                </tbody>
-                            </table>
-                           
-                            @elseif  ($entity['type'] == 'FF' && ! empty( $entity['data'] ) )
+                                                          
+                            @elseif  ($entity['type'] === 'FF' && ! empty( $entity['data'] ) )
                             <div class="row p-2">
                                 <div class="col-sm-12 col-md-12 chart-container-half">
                                     <canvas id="myChartFormFactEXP"> </canvas>
@@ -714,7 +696,7 @@ function DrawPlot(canvasId, data, labelsArray , step, chartType, title, labelX, 
     @include('layouts.foot')
 
 
-
+    @vite(['resources/js/plotopcharts.js'])
 
     <!-- Bootstrap core JS--><script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
     <!-- Core theme JS-->
