@@ -391,7 +391,11 @@
     </div>
 
 
+<<<<<<< HEAD
 @vite(['resources/js/plotopcharts.js', 'resources/js/plotApLchart.js', 'resources/js/plotFFcharts.js', 'resources/js/plotMembrane.js'])
+=======
+@vite(['resources/js/plotopcharts.js', 'resources/js/plotApLchart.js', 'resources/js/plotFFcharts.js'])
+>>>>>>> ab9b3b151d874e53c3eaeeac2642d6e8fac44eee
 
 @endsection
 
