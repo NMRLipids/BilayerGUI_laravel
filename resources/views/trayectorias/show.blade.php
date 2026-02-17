@@ -249,8 +249,8 @@
                                 <div class="card-body">
 
                                     @if (isset($trayectoria->analisis))
-                                        @if (isset($trayectoria->TrayectoriaAnalisisLipidos))
-                                            @foreach ($trayectoria->TrayectoriaAnalisisLipidos as $key => $analisis_lipid)
+                                        @if (isset($trayectoria->getTrayectoriaAnalisisLipidos))
+                                            @foreach ($trayectoria->getTrayectoriaAnalisisLipidos as $key => $analisis_lipid)
                                                 @php
                                                     $lipidName = $analisis_lipid->getLipid->molecule;
                                                     $lipid_id = $analisis_lipid->lipid_id;

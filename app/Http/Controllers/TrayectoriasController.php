@@ -82,8 +82,8 @@ class TrayectoriasController extends Controller
     private function makeOPData($trayectoria): void {
         $OPData = [];
         $legend = [$trayectoria->article_doi ? $trayectoria->article_doi : 'Simulation Data'];
-        if (isset($trayectoria->analisis) && isset($trayectoria->TrayectoriaAnalisisLipidos)) {
-            foreach ($trayectoria->TrayectoriaAnalisisLipidos as $key => $lipid) {
+        if (isset($trayectoria->analisis) && isset($trayectoria->getTrayectoriaAnalisisLipidos)) {
+            foreach ($trayectoria->getTrayectoriaAnalisisLipidos as $key => $lipid) {
 
                 $lipidName = $lipid->getLipid->molecule ?? throw new Exception("Unknown Lipid $lipid"); // Use molecule name or fallback to 'Unknown Lipid'
                 $decodedPlotData = json_decode($lipid->op_plot_data, true);

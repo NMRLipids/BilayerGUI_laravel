@@ -41,7 +41,7 @@ class Trayectoria extends AppModel
       return $this->hasMany(TrayectoriaAnalisisLipidos::class, 'trajectory_id', 'id');
     }
 
-    function TrayectoriaAnalisisLipidos() {
+    function getTrayectoriaAnalisisLipidos() {
       return $this->hasMany(TrayectoriaAnalisisLipidos::class, 'trajectory_id', 'id')->where('lipid_id', '!=', null);
     }
 
