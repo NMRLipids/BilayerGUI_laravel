@@ -1,0 +1,15 @@
+{
+    "database": {
+        "host": "localhost",
+        "user": "your_username",
+        "password": "your_password",
+        "database": "your_database"
+    },
+    "logging": {
+        "level": "DEBUG",
+        "file": "apl_debug.log"
+    },
+    "apl": {
+        "default_block_size": 1000
+    }
+}
