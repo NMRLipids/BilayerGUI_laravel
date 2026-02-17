@@ -99,7 +99,7 @@ p {
 }
 
 /* Extra small devices (phones) */
-@media (max-width: 577px) {
+@media (max-width: 576px) {
     .masthead {
         padding: 24rem 0.1rem 20rem !important;
         min-height: auto !important;
