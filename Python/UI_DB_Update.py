@@ -698,6 +698,32 @@ if __name__ == '__main__':
     propper_op_count = 0
     systems_with_issues_counts = 0
 
+    # Define the expected fields in the README for systems. 
+    # These are used to check the completeness of the README and
+    # raise warnings or errors if fields are missing.
+    # The STRICT_SYSTEM_FIELDS list includes 'ID' as a required field, while SYSTEM_FIELDS does not.
+    # The STRICT_SYSTEM_FIELDS list does not include WARNINGS, while SYSTEM_FIELDS does. 
+    # In strict mode, the absence of any of these fields will raise an error. 
+    # In non-strict mode, it will only log a warning.  
+    
+    SYSTEM_FIELDS = [
+        'AUTHORS_CONTACT', 'COMPOSITION', 'CPT', 'DATEOFRUNNING', 
+        'DOI', 'FF', 'FF_DATE', 'FF_SOURCE', 'GRO', 'LOG',
+        'NUMBER_OF_ATOMS', 'PREEQTIME', 'PUBLICATION', 'SOFTWARE',
+        'SOFTWARE_VERSION', 'SYSTEM', 'TEMPERATURE', 'TIMELEFTOUT', 'TOP',
+        'TPR', 'TRAJECTORY_SIZE', 'TRJ', 'TRJLENGTH', 'TYPEOFSYSTEM',
+        'WARNINGS'
+    ]
+
+    STRICT_SYSTEM_FIELDS = [
+        'AUTHORS_CONTACT', 'COMPOSITION', 'CPT', 'DATEOFRUNNING', 
+        'DOI', 'FF', 'FF_DATE', 'FF_SOURCE', 'GRO', 'LOG',
+        'NUMBER_OF_ATOMS', 'PREEQTIME', 'PUBLICATION', 'SOFTWARE',
+        'SOFTWARE_VERSION', 'SYSTEM', 'TEMPERATURE', 'TIMELEFTOUT', 'TOP',
+        'TPR', 'TRAJECTORY_SIZE', 'TRJ', 'TRJLENGTH', 'TYPEOFSYSTEM', 'ID'
+    ]
+
+
     # Load the configuration of the connection
     config = json.load(open(args.config, "r"))
     database = pymysql.connect(**config)
@@ -799,23 +825,12 @@ if __name__ == '__main__':
             if not args.strict_systems:
                 # In force mode, ignore missing fields in the README
                 # ID field is already checked above and must exist
-                for field in [
-                    'AUTHORS_CONTACT', 'COMPOSITION', 'CPT', 'DATEOFRUNNING', 
-                    'DOI', 'FF', 'FF_DATE', 'FF_SOURCE', 'GRO', 'LOG',
-                    'NUMBER_OF_ATOMS', 'PREEQTIME', 'PUBLICATION', 'SOFTWARE',
-                    'SOFTWARE_VERSION', 'SYSTEM', 'TEMPERATURE', 'TIMELEFTOUT', 'TOP',
-                    'TPR', 'TRAJECTORY_SIZE', 'TRJ', 'TRJLENGTH', 'TYPEOFSYSTEM',
-                    'WARNINGS']:
+                for field in SYSTEM_FIELDS:
                     if field not in README:
                         README[field] = None
             else:   
                 # In normal mode, raise errors for missing fields in the README 
-                for field in [
-                    'AUTHORS_CONTACT', 'COMPOSITION', 'CPT', 'DATEOFRUNNING', 
-                    'DOI', 'FF', 'FF_DATE', 'FF_SOURCE', 'GRO', 'LOG',
-                    'NUMBER_OF_ATOMS', 'PREEQTIME', 'PUBLICATION', 'SOFTWARE',
-                    'SOFTWARE_VERSION', 'SYSTEM', 'TEMPERATURE', 'TIMELEFTOUT', 'TOP',
-                    'TPR', 'TRAJECTORY_SIZE', 'TRJ', 'TRJLENGTH', 'TYPEOFSYSTEM', 'ID']:
+                for field in STRICT_SYSTEM_FIELDS:
                     assert field in README, \
                     "ERROR: Field '" + field + "' is missing in the README file. " + \
                     "Check the README file in system: " + README["path"] + "\n"

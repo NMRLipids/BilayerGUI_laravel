@@ -3788,8 +3788,8 @@ input[type=button].btn-block {
 .input-group > .custom-file {
   position: relative;
   flex: 1 1 auto;
-  width: 10vw;
-  min-width: 22rem;
+  width: 60%;
+  min-width: 0;
   margin-bottom: 0;
 }
 

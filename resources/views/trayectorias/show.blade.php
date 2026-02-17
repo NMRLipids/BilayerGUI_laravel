@@ -117,6 +117,9 @@
                                                             </span><br>
                                                             <p>
                                                                 @php
+                                                                    // ICICIC:
+                                                                    // Generate the path to the simulation files 
+                                                                    // without using echo
                                                                     $cadPath = asset(
                                                                         'storage/simulations/' . $trayectoria->git_path,
                                                                     );

@@ -137,6 +137,14 @@ p {
         width: 100%;
     }
     
+    .input-group > .form-control,
+    .input-group > .form-control-plaintext,
+    .input-group > .custom-select,
+    .input-group > .custom-file {
+    width: 100% !important;
+    }
+
+
     .input-group-append {
         width: 100%;
     }
