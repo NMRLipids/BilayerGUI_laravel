@@ -881,7 +881,7 @@ if __name__ == '__main__':
                         # If it does not exist, create it
                         Lip_ID = UPSERT(database, 'lipids', LipidInfo)
                         logger.debug(f"Inserted lipid {key} with ID {Lip_ID}")
-                        count_lipids += 1
+                        lipids_counts += 1
                         has_issues = True
                     
                     # Link the lipid with the forcefield
