@@ -123,6 +123,53 @@ function normalizeDatasets(data) {
 
 const whiskerPlugin = {
             id: 'whiskerPlugin',
+            afterDataLimits(chart, _args, pluginOptions) {
+                if (!pluginOptions || !pluginOptions.enabled) return;
+                const yScale = chart?.scales?.y;
+                if (!yScale) return;
+
+                // Recompute y-axis data limits including the whisker extents (OP ± STD),
+                // so the error bars never get clipped by the chart area.
+                let min = Number.POSITIVE_INFINITY;
+                let max = Number.NEGATIVE_INFINITY;
+
+                chart.data.datasets.forEach((dataset, datasetIndex) => {
+                    const meta = chart.getDatasetMeta(datasetIndex);
+                    if (!meta || meta.hidden) return;
+
+                    (dataset.data || []).forEach(point => {
+                        if (!point || point.OP == null) return;
+                        const op = Number(point.OP);
+                        if (!Number.isFinite(op)) return;
+                        const stdRaw = Number(point.STD);
+                        // If STD is missing/invalid, treat error as 0 (no whisker extension).
+                        const err = Number.isFinite(stdRaw) ? Math.abs(stdRaw) : 0;
+                        min = Math.min(min, op - err);
+                        max = Math.max(max, op + err);
+                    });
+                });
+
+                if (!Number.isFinite(min) || !Number.isFinite(max)) return;
+
+                const range = max - min;
+                const paddingRatio = Number.isFinite(pluginOptions.paddingRatio)
+                    ? pluginOptions.paddingRatio
+                    : 0.05;
+                const minPadding = Number.isFinite(pluginOptions.minPadding)
+                    ? pluginOptions.minPadding
+                    : 0.02;
+
+                // Add a small pad so caps don't sit exactly on the border.
+                // Uses ratio of the data range, but also enforces a minimal absolute padding.
+                const pad = Math.max((range === 0 ? 1 : range) * paddingRatio, minPadding);
+                const paddedMin = min - pad;
+                const paddedMax = max + pad;
+
+                // Expand (never shrink) the computed scale limits for this update.
+                // This avoids fighting with user-defined limits / other scale logic.
+                yScale.min = Number.isFinite(yScale.min) ? Math.min(yScale.min, paddedMin) : paddedMin;
+                yScale.max = Number.isFinite(yScale.max) ? Math.max(yScale.max, paddedMax) : paddedMax;
+            },
             afterDatasetsDraw(chart, args, pluginOptions) {
                 if (!pluginOptions || !pluginOptions.enabled) return;
                 const { ctx, scales } = chart;
@@ -208,7 +255,9 @@ function drawOneChart(canvas, dataset, legend, title) {
                 whiskerPlugin: {
                     enabled: true,
                     capWidth: 8,
-                    lineWidth: 2
+                    lineWidth: 2,
+                    paddingRatio: 0.05,
+                    minPadding: 0.02
                 },
                 tooltip: {
                     callbacks: {
