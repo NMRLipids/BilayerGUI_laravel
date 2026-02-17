@@ -1147,7 +1147,7 @@ if __name__ == '__main__':
                 apl_data = list(map(lambda x: [rnan(x[0]), rnan(x[1])] if x and len(x) == 2 else None, apl_data))   # Ensure no NaN values in the data, as they cannot be serialized to JSON
                 # try json dump again, if it still doesn't work yield the error
                 try:
-                    apl_jason = json.dumps(apl_data, allow_nan=False) if apl_data else None 
+                    apl_json = json.dumps(apl_data, allow_nan=False) if apl_data else None 
                 except Exception as e2:
                     logger.warning("Could not serialize area per lipid data to JSON. Check the ApL data for this system.")  
                     logger.warning("System: " + README["path"] + " block size: " + str(block_size) + "\n")
