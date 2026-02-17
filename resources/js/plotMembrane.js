@@ -1,4 +1,40 @@
+/**
+ * Render membrane composition doughnut charts (upper + lower leaflet) using Chart.js.
+ *
+ * Expected DOM:
+ * - A canvas with id="UpperLeafletChart" and `data-composition-ul` containing JSON.
+ * - A canvas with id="LowerLeafletChart" and `data-composition-ll` containing JSON.
+ *
+ * Data format:
+ * The `data-composition-*` values should decode to an object mapping component name -> value,
+ * e.g. `{ "POPC": 120, "CHOL": 40 }`.
+ *
+ * Behavior:
+ * - Colors are assigned deterministically by label position (index in the labels array).
+ * - Clicking a slice highlights that component in both charts (if present).
+ * - Legend / tooltip text color inherits the surrounding computed text color for dark themes.
+ *
+ * Example canvases:
+ * ```html
+ * <div class="row">
+ *   <div class="col">
+ *     <canvas
+ *       id="UpperLeafletChart"
+ *       data-composition-ul='{"POPC": 120, "CHOL": 40, "POPE": 20}'>
+ *     </canvas>
+ *   </div>
+ *   <div class="col">
+ *     <canvas
+ *       id="LowerLeafletChart"
+ *       data-composition-ll='{"POPC": 110, "CHOL": 50, "POPE": 20}'>
+ *     </canvas>
+ *   </div>
+ * </div>
+ * ```
+ */
+
 import Chart from 'chart.js/auto';
+
 
 const colorList = [
 	'#0026ff',
@@ -32,18 +68,8 @@ function parseJsonData(value) {
 	}
 }
 
-function hashStringToInt(input) {
-	let hash = 199281; // prime number seed
-	for (let i = 0; i < input.length; i++) {
-		hash = (hash * 0.61803398875 + input.charCodeAt(i)) >>> 0; // golden ratio conjugate
-	}
-	return hash;
-}
 
-function colorForLabel(label) {
-	const idx = hashStringToInt(String(label)) % colorList.length;
-	return colorList[idx];
-}
+
 
 function colorForIndex(index) {
 	const safeIndex = Number.isFinite(index) ? index : 0;

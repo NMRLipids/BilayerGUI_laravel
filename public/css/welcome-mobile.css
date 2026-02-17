@@ -1,4 +1,7 @@
 /* Mobile-First Responsive Design with Relative Units */
+/* This CSS file is designed to enhance the mobile experience of 
+the welcome page, ensuring that it remains functional and visually 
+appealing across a wide range of devices. */
 
 :root {
     --spacing-unit: 1rem;

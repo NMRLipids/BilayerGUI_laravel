@@ -1,14 +1,42 @@
 /**
- * Chart utility functions for displaying data visualizations
- * Used in trajectory analysis views
+ * Order-Parameter (OP) chart renderer for trajectory analysis views.
+ *
+ * Renders Chart.js scatter charts from JSON embedded in canvas `data-*` attributes.
+ *
+ * Expected DOM:
+ * - One or more `<canvas data-opplot ...>` elements.
+ * - Each canvas should provide:
+ *   - `data-opplot`: JSON string of an array of series, where each series is an array of points.
+ *     Each point is an object with at least: `{ C: string, H: string, OP: number, STD?: number }`.
+ *   - `data-oplegend`: JSON string array of legend labels (one per series).
+ *   - `data-optitle`: (optional) chart title.
+ *
+ * Notes:
+ * - X-axis labels are derived from unique `(C, H)` pairs as `C[H]`.
+ * - Data points are enriched with `x` (index into derived labels) and `y` (= OP).
+ * - Missing `(C,H)` points in a series are normalized to null values so all series share the same x-axis.
+ * - A custom whisker plugin draws error bars when `STD` is present.
+ *
+ * Example canvas:
+ * ```html
+ * <canvas
+ *   id="OPChart_DPPC_G1"
+ *   data-opplot='[
+ *     [
+ *       {"C":"C1","H":"H11","OP":-0.18,"STD":0.01},
+ *       {"C":"C1","H":"H12","OP":-0.17,"STD":0.02}
+ *     ],
+ *     [
+ *       {"C":"C1","H":"H11","OP":-0.10,"STD":0.01},
+ *       {"C":"C1","H":"H12","OP":-0.12,"STD":0.02}
+ *     ]
+ *   ]'
+ *   data-oplegend='["Simulation","Experiment"]'
+ *   data-optitle="DPPC OP (G1)">
+ * </canvas>
+ * ```
  */
 
-/** 
- * This file contains utility functions for processing data and building charts using Chart.js.
- * It includes functions to build x-axis labels from the dataset and to enrich the dataset with indices for plotting.
- */
-
-// Function to build x-axis labels from data
 import Chart from 'chart.js/auto';
 const colorList = [
         '#fcfcfc',

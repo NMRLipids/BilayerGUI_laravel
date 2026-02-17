@@ -1,3 +1,41 @@
+/**
+ * Form Factor (FF) chart renderer.
+ *
+ * Renders Chart.js line charts from JSON embedded in canvas `data-*` attributes.
+ *
+ * Expected DOM:
+ * - One or more `<canvas data-ffdata ...>` elements.
+ * - Each canvas should provide:
+ *   - `data-ffdata`: JSON string of an array of series.
+ *     Each series is an array of points in one of these forms:
+ *       - `[x, y]` tuples, e.g. `[[0.1, 12.3], [0.2, 11.9]]`, OR
+ *       - `{x: number, y: number}` objects.
+ *   - `data-fflegend`: JSON string array of legend labels (one per series).
+ *   - `data-fftitle`: (optional) chart title.
+ * - Optional normalization toggle:
+ *   - an `<input type="checkbox">` with `data-ffnormalize-target="<canvasId>"`.
+ *
+ * Notes:
+ * - When normalization is enabled, each series is min-max scaled to [0, 1].
+ * - Axis ticks/titles and legend/title text colors inherit from computed DOM text color
+ *   so charts remain readable on dark backgrounds.
+ *
+ * Example canvas:
+ * ```html
+ * <input type="checkbox" id="FormFactorChart_1_normalize"
+ *  checked data-ffnormalize-target="FormFactorChart_1" />
+ * <canvas
+ *   id="FormFactorChart_1"
+ *   data-fftitle="Normalized Form Factor"
+ *   data-fflegend='["Simulation","Experiment"]'
+ *   data-ffdata='[
+ *     [[0.10, 12.3], [0.20, 11.9], [0.30, 11.2]],
+ *     [[0.10, 10.1], [0.20, 10.4], [0.30, 10.0]]
+ *   ]'>
+ * </canvas>
+ * ```
+ */
+
 import Chart from 'chart.js/auto';
 const colorList = [
         '#fcfcfc',

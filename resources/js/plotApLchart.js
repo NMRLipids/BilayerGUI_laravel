@@ -1,3 +1,35 @@
+/**
+ * Area-per-Lipid (ApL) chart renderer.
+ *
+ * Renders a Chart.js line chart from JSON embedded in canvas `data-*` attributes.
+ *
+ * Expected DOM:
+ * - One or more `<canvas data-apldata ...>` elements.
+ * - Each canvas should provide:
+ *   - `data-apldata`: JSON string representing a series of points.
+ *     Supported point formats:
+ *       - `{x: number, y: number}` objects, OR
+ *       - `[x, y]` tuples.
+ *   - `data-aptitle`: (optional) chart title.
+ *
+ * Axes:
+ * - X: Time (ps)
+ * - Y: Area per lipid (Å²)
+ *
+ * Example canvas:
+ * ```html
+ * <canvas
+ *   id="ApLChart_1"
+ *   data-aptitle="Area per lipid"
+ *   data-apldata='[
+ *     {"x": 0, "y": 62.1},
+ *     {"x": 1000, "y": 61.8},
+ *     {"x": 2000, "y": 62.5}
+ *   ]'>
+ * </canvas>
+ * ```
+ */
+
 import Chart from 'chart.js/auto';
 
 function drawApLChart(canvas, dataset, title) {
