@@ -44,16 +44,14 @@ DROP TABLE IF EXISTS `experiments`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `experiments` (
   `id` bigint unsigned NOT NULL AUTO_INCREMENT,
-  `article_doi` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL,
-  `data_doi` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL,
-  `section` bigint DEFAULT 1 NOT NULL,
+  `article_doi` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci DEFAULT NULL,
+  `data_doi` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci DEFAULT NULL,
   `path` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL,
   `type` enum('FF','OP') CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL DEFAULT 'FF',
   `data` JSON DEFAULT NULL, 
   -- JSON data with experiment details, e.g. FF parameters or OP details
   PRIMARY KEY (`id`),
-  UNIQUE KEY `experiments_path_unique` (`path`, `type`),
-  UNIQUE KEY `experiments_doi_section_type_path_unique` (`article_doi`,`section`,`type`)
+  UNIQUE KEY `experiments_path_unique` (`path`, `type`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -633,7 +631,6 @@ CREATE VIEW `experiments_FF` AS
     `experiments`.`article_doi` AS `doi`,
     `experiments`.`data_doi` AS `data_doi`,
     `experiments`.`path` AS `path`,
-    `experiments`.`section` AS `section`,
     `experiments`.`data` AS `data`
    FROM `experiments`
   WHERE (`experiments`.`type` = 'FF');
@@ -649,8 +646,7 @@ CREATE VIEW `experiments_OP` AS
  SELECT `experiments`.`id` AS `id`,
 `experiments`.`article_doi` AS `article_doi`,
   `experiments`.`article_doi` AS `doi`,
-    `experiments`.`path` AS `path`,
-    `experiments`.`section` AS `section`
+    `experiments`.`path` AS `path`
    FROM `experiments`
   WHERE (`experiments`.`type` = 'OP');
 

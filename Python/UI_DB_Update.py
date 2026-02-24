@@ -532,7 +532,7 @@ def check_exp(expobj) -> bool:
     Check if an experiment is valid to be inserted into the DB.
     Parameters
     ----------    
-    :param exp: Experiment path
+    :param exp: Experiment path (exp_id)
     :param README: README metadata
     
     Returns
@@ -545,24 +545,10 @@ def check_exp(expobj) -> bool:
     README = expobj.metadata or {}
     logger.debug(f"Processing experiment at path: {exp}")
     if (not README):
-        logger.warning(f"WARNING: Empty metadata for path '{exp}' is. Skipping experiment.")
+        logger.warning(f"WARNING: Empty metadata for path '{exp}'. Skipping experiment.")
         return False
-    section_from_path = os.path.basename(os.path.normpath(exp))
-    section_from_readme = README.get("SECTION")
-    if section_from_readme:
-        if str(section_from_readme) != str(section_from_path):
-            logger.warning(f"WARNING: Section in README ('{section_from_readme}') does not match section from path ('{section_from_path}') in experiment path '{exp}'. Skipping experiment.")
-            return False
-    # check if experiment path follows expected structure doi1/doi2/section
-    if exp.count('/') != 2:
-        logger.warning(f"WARNING: Experiment path '{exp}' does not follow expected structure (doi1/doi2/section). Skipping experiment.")
-        return False
-    # check if section is numeric, skip if not
-    if not section_from_path.isdigit():
-        logger.warning(f"Section '{section_from_path}' in experiment path '{exp}' is not numeric. Skipping experiment.")
-        return False
-    if not README.get("ARTICLE_DOI") and not README.get("DOI"):
-        logger.warning(f"ARTICLE_DOI is missing in README.yaml in experiment path '{exp}'. Skipping experiment.")
+    if not exp:
+        logger.warning(f"WARNING: Experiment has no path (exp_id). Skipping experiment.")
         return False
     return True
 
@@ -747,15 +733,13 @@ if __name__ == '__main__':
             for exp in ExperimentCollection.load_from_data(exp_type):
                 # get metadata
                 metadata = exp.metadata or {}
-                section_from_path = os.path.basename(exp.exp_id)  
                 if not check_exp(exp): continue
             # Load form factor data file (assuming only one .json file per experiment)
                 form_factor_data = exp.data if exp_type == 'FFExperiment' else None
 
                 expInfo = {
-                            "article_doi": metadata.get("ARTICLE_DOI", metadata.get("DOI", ""))  ,
-                            "data_doi": metadata.get("DATA_DOI", ""),
-                            "section" : metadata.get("SECTION", section_from_path),
+                            "article_doi": metadata.get("ARTICLE_DOI", metadata.get("DOI")) or None,
+                            "data_doi": metadata.get("DATA_DOI") or None,
                             "type" : exp_type[:2],  # 'FF' or 'OP'
                             "data": json.dumps(form_factor_data) if form_factor_data else None,
                             "path": exp.exp_id

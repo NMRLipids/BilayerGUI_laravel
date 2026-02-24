@@ -199,7 +199,7 @@ function DrawPlot(canvasId, data, labelsArray , step, chartType, title, labelX, 
                                     <th scope="col">Article DOI</th>
                                     <th scope="col">Data DOI</th>
                                     <th scope="col">Type</th>
-                                    <th scope="col">Section</th>
+                                    <th scope="col">Path</th>
                                     <th scope="col"># types of lipids</th>
                                     <th scope="col">Actions</th>
                                 </tr>
@@ -212,9 +212,9 @@ function DrawPlot(canvasId, data, labelsArray , step, chartType, title, labelX, 
                                     <td>{{ $experiment->data_doi }}</td>
                                     <td>{{ $experiment->type }}</td>
                                     
-                                    <td>{{ $experiment->section }}</td>
+                                    <td>{{ $experiment->path }}</td>
                                     <td>{{ $experiment->lipid_count }}</td>
-                                    <td><a href="{{ route('experiments.show', ['type' => $experiment->type, 'doi' => $experiment->article_doi, 'section' => $experiment->section]) }}" class="btn btn-primary btn-sm">View</a></td>
+                                    <td><a href="{{ route('experiments.show', ['type' => $experiment->type, 'path' => $experiment->path]) }}" class="btn btn-primary btn-sm">View</a></td>
                                 </tr>
                                 @endforeach
                             </tbody>

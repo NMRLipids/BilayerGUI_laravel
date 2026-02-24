@@ -90,8 +90,8 @@ Route::get('/lipid/{lipid_id}', [LipidController::class, 'show']
 Route::get('/lipids', [LipidController::class, 'list'])
     ->name('lipids.list');
 
-Route::get('/experiment/{type}/{doi}/{section}', [ExperimentController::class, 'show'])
-    ->where(['doi' => '.+', 'section' => '[0-9]+', 'type' => 'FF|OP'])
+Route::get('/experiment/{type}/{path}', [ExperimentController::class, 'show'])
+    ->where(['type' => 'FF|OP', 'path' => '.+'])
     ->name('experiments.show');
 
 Route::get('/experiments', [ExperimentController::class, 'list'])

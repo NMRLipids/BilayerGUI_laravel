@@ -112,12 +112,11 @@ class ExperimentController extends Controller
     {
         // Fetch all experiments
         $experiments = DB::table('experiments as e')
-            ->select('e.id', 'e.article_doi', 'e.data_doi', 'e.section', 'e.type', 'e.path')
+            ->select('e.id', 'e.article_doi', 'e.data_doi', 'e.type', 'e.path')
             ->leftJoin('experiments_membrane_composition as emc', 'e.id', '=', 'emc.experiment_id')
             ->groupBy('e.id')
             ->orderBy('type', 'asc')
-            ->orderBy('article_doi', 'asc')
-            ->orderBy('section', 'asc')
+            ->orderBy('path', 'asc')
             
             ->selectRaw('COUNT(emc.lipid_id) as lipid_count')
             ->paginate(10);
@@ -128,15 +127,14 @@ class ExperimentController extends Controller
     }
 
 
-    public function show($type, $doi, $section): \Illuminate\View\View
+    public function show($type, $path): \Illuminate\View\View
     {
 
         $OPData = null;
 
-        // Fetch experiment by DOI, section, and type
+        // Fetch experiment by path and type
         $experiment = DB::table('experiments')
-            ->where('article_doi', $doi)
-            ->where('section', $section)
+            ->where('path', $path)
             ->where('type', $type)
             ->first();
 
@@ -210,7 +208,6 @@ class ExperimentController extends Controller
         return View::make('experiment', [
                 'entity' => ['doi' => $experiment->article_doi,
                             'data_doi' => $experiment->data_doi,
-                            'section' => $experiment->section, 
                             'path' => $experiment->path,
                             'type' => ($experiment->type),
                             'membrane_composition' => $membraneComposition,
