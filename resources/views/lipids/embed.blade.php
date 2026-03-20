@@ -2,7 +2,7 @@
 
 @section('content')
     <!-- Main page -->
-        <div class="container">
+        <div class="">
             <table class="table table-bordered table-striped table-sm">
                 <thead>
                     <tr>

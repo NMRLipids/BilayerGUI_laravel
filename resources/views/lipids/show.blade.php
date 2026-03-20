@@ -6,14 +6,13 @@
         <div class="container px-4 px-lg-5">
             <div class="row gx-4 gx-lg-5 justify-content-center">
                 <div class="col-lg-10">
-                    <hr class="divider divider-light" />
-                    <h3 class="text-white text-center mt-0">{{ $entity['name'] }}</h3>
-                    <?php 
+                    <h3 class="text-white text-center mt-0">Lipid {{ $entity['name'] }}</h3>
+                    @php
                         $e2ntity = $entity ?? [];
                         $properties = $entity['properties'] ?? []; 
                         $cross_refs = $entity['cross_references'] ?? [];
-
-                    ?>
+                        $synonyms = $entity['synonyms'] ?? [];
+                    @endphp
 
                     <!-- Bootstrap Tabs -->
                     <ul class="nav nav-pills justify-content-start" id="lipidTab" role="tablist">
@@ -26,6 +25,11 @@
                         @if(!empty($cross_refs))
                         <li class="nav-item" role="presentation">
                             <button class="nav-link" id="crossrefs-tab" data-bs-toggle="tab" data-bs-target="#crossrefs" type="button" role="tab">Cross References</button>
+                        </li>
+                        @endif
+                        @if(!empty($synonyms))
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="synonyms-tab" data-bs-toggle="tab" data-bs-target="#synonyms" type="button" role="tab">Synonyms</button>
                         </li>
                         @endif
                     </ul>
@@ -43,6 +47,7 @@
                                             $key === 'id' ||
                                             $key === 'properties' ||
                                             $key === 'cross_references' ||
+                                            $key === 'synonyms' ||
                                             $key === 'properties_flat')
                                              @continue @endif
                                             <tr>
@@ -50,6 +55,18 @@
                                                 <td>{{ $value }}</td>
                                             </tr>
                                         @endforeach
+                                        @if(!empty($entity['properties_flat']['image']))
+                                            <tr>
+                                                <th scope="row">Image</th>
+                                                <td style="max-width: 200px; overflow: scroll; background-color: #ffffff;">
+                                                    <img src="{{ $entity['properties_flat']['image'] }}" alt="Lipid Image" class="img-fluid" style="background-color: #ffffff; max-width: 200px;">
+                                                </td>
+                                            </tr>
+                                        @endif
+                                        <tr>
+                                            <th scope="row">Used in: </th>
+                                            <td><a href=" {{ route('search.results', ['text' => '"' . $entity['molecule'] . '"']) }} " class="text-white-75">Search Experiments/Simulations</a></td>
+                                        </tr>
                                     </tbody>
                                 </table>
                             </div>
@@ -62,9 +79,8 @@
                                     <table class="table table-bordered table-striped table-sm table-dark">
                                         <thead>
                                             <tr>
-                                                <th scope="col">Name</th>
+                                                <th scope="col">Property</th>
                                                 <th scope="col">Value</th>
-                                                <th scope="col">Unit</th>
                                             </tr>
                                         </thead>
                                         <tbody>
@@ -72,7 +88,6 @@
                                                 <tr>
                                                     <td>{{ $x->name }}</td>
                                                     <td>{{ $x->value }}</td>
-                                                    <td>{{ $x->unit }}</td>
                                                 </tr>
                                             @endforeach
                                         </tbody>
@@ -112,7 +127,16 @@
                             </div>
                         </div>
                         @endif
-
+                        <!-- Synonyms -->
+                        @if(!empty($synonyms))
+                        <div class="tab-pane fade" id="synonyms" role="tabpanel">
+                                <ul>     
+                                        @foreach ($synonyms as $syn)
+                                            <li>{!! $syn !!}</li>
+                                        @endforeach
+                                </ul>
+                        </div>
+                        @endif
                     </div>
                     <div style="margin-top:1rem; flex:1 0 auto;">
                         @include('bioschemas.json_pre', ['entity' => $entity]) 
