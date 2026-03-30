@@ -88,6 +88,11 @@ class Trayectoria extends AppModel
             ->sortBy('type');
     }   
 
+    public function hasExperiments() {
+        return $this->experimentsOP()->exists() || $this->experimentsFF()->exists();
+    }
+
+
     function countExperiments() {
 
         // Prefer counts loaded via withCount() to avoid N+1 queries,
@@ -127,15 +132,27 @@ class Trayectoria extends AppModel
     function displayName()
     {
      $membrana = $this->membrana;  
-     $l1 = $membrana->lipid_names_l1 . ':' .$membrana->lipid_number_l1 ?? 'N/A';
-     $l2 = $membrana->lipid_names_l2 . ':' .$membrana->lipid_number_l2 ?? 'N/A';
-     return  $l1 . ($l1 != $l2 ? ', ' . $l2 : '') . ' - ' . $this->campo_de_fuerza?->name . ' at ' . 
-        $this->temperature . 'K';    
+     $l1 = $membrana->lipid_names_l1;
+     $l2 = $membrana->lipid_names_l2;
+     $forceFieldName = $this->campo_de_fuerza?->name ?? '';
+     $shortForceFieldName = strlen($forceFieldName) > 15
+         ? substr($forceFieldName, 0, 15) . '...'
+         : $forceFieldName;
+     return  $l1 . ($l1 != $l2 ? ', ' . $l2 : '') . ' - ' . $shortForceFieldName;    
     
     }   
+
+    function longName(){
+        $membrana = $this->membrana;  
+        $l1 = $membrana->lipid_names_l1 . ':' .$membrana->lipid_number_l1 ?? 'N/A';
+        $l2 = $membrana->lipid_names_l2 . ':' .$membrana->lipid_number_l2 ?? 'N/A';
+        return  $l1 . ($l1 != $l2 ? ', ' . $l2 : '') . ' - ' . $this->campo_de_fuerza?->name . ' at ' . 
+           $this->temperature . 'K, ' . $this->trj_length . ' ns';
+    }
+
     function displayTitle()
     {
-        return "Trajectory: " . $this->displayName() . ($this->doi ? " DOI: " . $this->doi  : '') .' (ID: ' . $this->id . ')';
+        return "Trajectory: " . $this->longName();
     }
 
 }

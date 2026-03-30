@@ -75,13 +75,13 @@ class Lipido extends AppModel
 
     public function displayName()
     {
-        return ($this->molecule ?? $this->short_name ?? $this->name ?? 'Unknown Lipid '. $this->id. ' (ID)') . 
-        ($this->getShortestSynonym() ? ' (' . $this->getShortestSynonym() . ')' : ' ('.$this->name.')');
+        return ($this->molecule ?? $this->short_name ?? $this->name ?? 'Unknown Lipid '. $this->id. ' (ID)');
     }
 
     public function displayTitle()
     {
-        return "Lipid: " . $this->name;
+        return "Lipid: " . $this->name .
+        ($this->getShortestSynonym() ? ' (' . $this->getShortestSynonym() . ')' : ' ('.$this->name.')');
 
     }
 }

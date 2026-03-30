@@ -55,6 +55,12 @@
                                                 <td>{{ $value }}</td>
                                             </tr>
                                         @endforeach
+                                        <tr>
+                                            <th scope="row">Used in: </th>
+                                            <td><a href="{{ route('search.results', ['text' => '"' . $entity['molecule'] . '"']) }}" class="btn btn-success btn-sm">Browse Experiments/Simulations</a>
+                                             <a href="{{ route('new_advanced_search.results', ['lipidos[1]' => '"' . $entity['molecule'] . '"', 'sort' => 'op_quality_total', 'direction' => 'desc']) }}" class="btn btn-primary btn-sm">Browse Simulations with Quality</a></td>
+
+                                        </tr>
                                         @if(!empty($entity['properties_flat']['image']))
                                             <tr>
                                                 <th scope="row">Image</th>
@@ -63,10 +69,7 @@
                                                 </td>
                                             </tr>
                                         @endif
-                                        <tr>
-                                            <th scope="row">Used in: </th>
-                                            <td><a href=" {{ route('search.results', ['text' => '"' . $entity['molecule'] . '"']) }} " class="text-white-75">Search Experiments/Simulations</a></td>
-                                        </tr>
+                                       
                                     </tbody>
                                 </table>
                             </div>

@@ -136,8 +136,12 @@
 
                                      <div class="col-12 col-md-6 col-lg-4 p-1 limit-item">
                                         <div class="num{{ $numLipids }}">
-
-                                            <span class="badge badge-secondary">Simulation</span>
+                                            @if ($trayectoria->hasExperiments())
+                                                    <span class="badge badge-secondary" style="background-color: #168258;">@lang('Simulation + experiments')</span>
+                                            @else
+                                                    <span class="badge badge-secondary">@lang('Simulation')</span>
+                                            @endif
+                                            
                                             <span>
                                                 <a href="{{ route('trayectorias.show', $trayectoria->id) }}"
                                                     class="" title="{{ $trayectoria->displayTitle() }}"> {{ $trayectoria->displayName() }}
