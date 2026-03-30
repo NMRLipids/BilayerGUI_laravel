@@ -89,9 +89,10 @@ use App\Http\Controllers\StatisticsController;
                             href="https://github.com/NMRLipids/Databank">Databank-API</a>. For more details refer to the <a
                             href="https://www.nature.com/articles/s41467-024-45189-z"> FAIRMD Lipids databank publication</a>.
                     <div class="row">
-                        <div class="col-9 p-xs-1 p-sm-2">
+                        <div class="row p-xs-1 p-sm-2">
                             <form action="{{ route('search.results') }}" method="get">
                                 <div class="input-group mb-3 ui-widget">
+
                                     <input id="BasicSearch" type="text" name="text" class="form-control"
                                         placeholder="@lang('Buscar')..." aria-label="Search field"
                                         aria-describedby="button-addon2">
@@ -104,7 +105,8 @@ use App\Http\Controllers\StatisticsController;
 
                         </div>
 
-                        <div class="col-3 p-xs-1 p-sm-2">
+                        <div class="">
+                            <a href="{{ route('search.results') }}" class="btn btn-outline-secondary">Browse</a>
 
                             <a href="{{ route('new_advanced_search.form') }}"
                                 class="btn btn-outline-secondary"><span>@lang('Búsqueda avanzada')</span></a>
