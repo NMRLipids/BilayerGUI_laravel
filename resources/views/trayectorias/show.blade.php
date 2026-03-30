@@ -55,7 +55,7 @@
                         <li role="presentation" class="nav-item">
                             <button class="nav-link" id="homeMembrane-tab"
                                 data-bs-toggle="tab" data-bs-target="#homeMembrane" 
-                                type="button" role="tab">Membrane</button>
+                                type="button" role="tab">Lipid composition</button>
 
                         </li>
 
@@ -217,7 +217,7 @@
                                         <div class="col-xs-12 col-lg-6 d-flex flex-wrap cardlipids">
                                             <div class=" m-2 w-100" style="width: 18rem;">
                                                 <div class="card-header text-left bg-card-header">
-                                                    <h5 class=" ">{{ $lipido->molecule }}</h5>
+                                                    <h5 class=" "><a href="{{ route('lipid.show', $lipido->id) }}">{{ $lipido->molecule }}</a></h5>
                                                     <ul>
                                                         <li>
                                                             Quality total:
@@ -266,16 +266,19 @@
                                                 <th>Article DOI</th>
                                                 <th>Internal ID</th>
                                                 <th>Type</th>
+                                                <th>Temperature</th>
                                                 <th>Actions</th>
                                             </tr>
                                         </thead>
                                         <tbody>
                                             @foreach ($related_experiments as $experiment)
                                                 <tr>
-                                                    <td>{{ $experiment->article_doi}}</td>
+                                                    <td>{!! renderDOI($experiment->article_doi) !!}</td>
                                                     <td>{{ $experiment->path }}</td>
                                                     <td>{{ $experiment->type }}</td>
+                                                    <td>{{ $experiment->getTemperature()?->value ?? 'N/A' }} {{ $experiment->getTemperature()?->unit ?? '' }}</td>
                                                     <td>
+
                                                         <a href="{{ route('experiments.show', ['type' => $experiment->type, 'path' => $experiment->path]) }}"
                                                             class="btn btn-sm btn-primary">View</a>
                                                     </td>

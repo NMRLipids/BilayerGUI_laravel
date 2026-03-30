@@ -15,6 +15,25 @@ function resaltar_texto($texto, $texto_para_resaltar) {
 }
 
 /**
+ * Render a DOI as a clickable link. Article title is fetched asynchronously
+ * via JavaScript and shown as a tooltip on hover.
+ */
+function renderDOI($doi)
+{
+    if (empty($doi)) {
+        return 'N/A';
+    }
+
+    $doi = trim($doi);
+    $url = 'https://doi.org/' . rawurlencode($doi);
+    $escapedDoi = e($doi);
+
+    return '<a href="' . $url . '" target="_blank" rel="noopener" '
+        . 'class="doi-link" data-doi="' . $escapedDoi . '">'
+        . $escapedDoi . '</a>';
+}
+
+/**
  * Traduccion de las columnas de base de datos a texto
  */
 function c($clave) {

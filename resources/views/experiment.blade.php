@@ -73,11 +73,11 @@
                                     <tbody>
                                         <tr>
                                             <th scope="row">Article DOI</th>
-                                            <td>{{ $entity['doi'] }}</td>
+                                            <td>{!! renderDOI($entity['doi']) !!}</td>
                                         </tr>
                                         <tr>
                                             <th scope="row">Data DOI</th>
-                                            <td>{{ $entity['data_doi'] }}</td>
+                                            <td>{!! renderDOI($entity['data_doi']) !!}</td>
                                         </tr>
                                        
                                         <tr>
@@ -378,9 +378,10 @@
                                 <table class="table table-bordered table-striped table-sm table-dark">
                                     <thead>
                                         <tr>
-                                            <th scope="col">ID</th>
+                                            
                                             <th scope="col">DOI</th>
                                             <th scope="col">Software</th>
+                                            <th scope="col">Force field</th>
                                             <th scope="col">Trajectory length</th>
                                             <th scope="col">Temperature (K)</th>
                                             <th scope="col">Actions</th>
@@ -390,9 +391,9 @@
                                         @foreach ($related_simulations as $simulation)
                                         
                                         <tr>
-                                            <td>{{ $simulation->id }}</td>
-                                            <td>{{ $simulation->doi }}</td>
+                                            <td>{!! renderDOI($simulation->doi) !!}</td>
                                             <td>{{ $simulation->software}}</td>
+                                            <td>{{ $simulation->campo_de_fuerza?->name}}</td>
                                             <td>{{ $simulation->trj_length }}</td>
                                             <td>{{ $simulation->temperature }}</td>
                                             <td><a href="{{ route('trayectorias.show', ['trayectoria_id' => $simulation->id]) }}" class="btn btn-primary btn-sm">View</a></td>
