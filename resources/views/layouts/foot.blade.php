@@ -16,9 +16,16 @@
     <!-- Grid container -->
 
 </footer>
-<!-- Bootstrap core JS
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.1/dist/js/bootstrap.bundle.min.js"></script>
--->
+<!-- Bootstrap core JS (fallback if Vite dev server is unavailable) -->
+<script>
+if (typeof bootstrap === 'undefined') {
+    var s = document.createElement('script');
+    s.src = 'https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js';
+    s.integrity = 'sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz';
+    s.crossOrigin = 'anonymous';
+    document.head.appendChild(s);
+}
+</script>
 <!-- SimpleLightbox plugin JS-->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/SimpleLightbox/2.1.0/simpleLightbox.min.js"></script>
 <!-- Core theme JS

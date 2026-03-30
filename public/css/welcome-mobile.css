@@ -41,7 +41,7 @@ p {
 }
 
 /* Navigation adjustments for mobile */
-@media (max-width: 1089px) {
+@media (max-width: 991px) {
     .masthead {
         padding: 5rem 1rem 10rem !important;
     }

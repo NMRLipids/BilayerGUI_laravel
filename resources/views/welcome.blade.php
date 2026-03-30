@@ -20,7 +20,11 @@ use App\Http\Controllers\StatisticsController;
             </button>
             <div class="collapse navbar-collapse" id="navbarResponsive">
                 <ul class="navbar-nav ms-auto my-2 my-lg-0">
-                    <li class="nav-item"><a class="nav-link" href="#about">About</a></li>                    
+                    <li class="nav-item"><a class="nav-link" href="{{ route('search.results') }}">Search</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{{ route('new_advanced_search.form') }}">Advanced Search</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{{ route('experiments.list') }}">Browse Experiments</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{{ route('search.results') }}">Browse Simulations</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#about">About</a></li>
                 </ul>
             </div>
         </div>

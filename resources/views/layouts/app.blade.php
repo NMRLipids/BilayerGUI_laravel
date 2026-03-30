@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 @include('layouts.head')
-<?php
+@php
 $allSession = Session::all();
 $numSelected = 0;
 foreach ($allSession as $key => $value) {
@@ -9,17 +9,16 @@ foreach ($allSession as $key => $value) {
         $numSelected = $numSelected + 1;
     }
 }
-?>
+@endphp
 
 <body>
     <div id="app" class="bg-datos" style="height:auto;overflow-x:hidden; ">
         <nav id="mainNav" class="navbar navbar-expand-md navbar-light ">
             <div class="container">
                 <a class="navbar-brand" href="{{ url('/') }}">
-                    <img class="img-fluid" style="width:225px" alt="FAIRMD Lipids Databank"
+                    <img class="img-fluid" style="max-height: 40px;" alt="FAIRMD Lipids Databank"
                         src="{{ asset('storage/images/fairmd_w_letras.png') }}">
-                    <?php //{{ config('app.name') }}
-                    ?>
+                   
                     <div class="d-none">
                         <span>Versión: {{ config('app.version') }}</span>
                         <span>Entorno: {{ config('app.env') }}</span>
@@ -38,45 +37,10 @@ foreach ($allSession as $key => $value) {
 
                     <!-- Right Side Of Navbar -->
                     <ul class="navbar-nav ml-auto">
-                        <!-- Authentication Links -->
-                        @guest
-                            @if ($numSelected > 0)
-                                <!--<li class="nav-item">
-                                <a class="nav-link" href="{{ route('new_advanced_search.compare') }}">{{ __('Compare') }}</a>
-                            </li>-->
-                            @endif
-                            <li class="nav-item">
-                                <a class="nav-link"
-                                    href="{{ route('new_advanced_search.form') }}">{{ __('Advanced Search') }}</a>
-                            </li>
-                            <!--  <li class="nav-item" -->
-                                <!--/li>-->
-                            @if (Route::has('register'))
-                                <li class="nav-item">
-                                    <a class="nav-link" href="{{ route('register') }}">{{ __('Register') }}</a>
-                                </li>
-                            @endif
-                        @else
-                            <li class="nav-item dropdown">
-                                <a id="navbarDropdown" class="nav-link dropdown-toggle" href="#" role="button"
-                                    data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false" v-pre>
-                                    {{ Auth::user()->name }} <span class="caret"></span>
-                                </a>
-
-                                <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdown">
-                                    <a class="dropdown-item" href="{{ route('logout') }}"
-                                        onclick="event.preventDefault();
-                                                     document.getElementById('logout-form').submit();">
-                                        {{ __('Logout') }}
-                                    </a>
-
-                                    <form id="logout-form" action="{{ route('logout') }}" method="POST"
-                                        style="display: none;">
-                                        @csrf
-                                    </form>
-                                </div>
-                            </li>
-                        @endguest
+                        <li class="nav-item"><a class="nav-link" href="{{ route('search.results') }}">Search</a></li>
+                        <li class="nav-item"><a class="nav-link" href="{{ route('new_advanced_search.form') }}">Advanced Search</a></li>
+                        <li class="nav-item"><a class="nav-link" href="{{ route('experiments.list') }}">Browse Experiments</a></li>
+                        <li class="nav-item"><a class="nav-link" href="{{ route('search.results') }}">Browse Simulations</a></li>
                     </ul>
                 </div>
             </div>
