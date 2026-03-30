@@ -482,7 +482,13 @@ a:hover {
 }
 
 .form-control::-webkit-input-placeholder {
-  color: white;
+  color: #6c757d;
+}
+.form-control::-moz-placeholder {
+  color: #6c757d;
+}
+.form-control::placeholder {
+  color: #6c757d;
 }
 
 

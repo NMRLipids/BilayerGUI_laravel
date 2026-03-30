@@ -37,7 +37,12 @@ foreach ($allSession as $key => $value) {
 
                     <!-- Right Side Of Navbar -->
                     <ul class="navbar-nav ml-auto">
-                        <li class="nav-item"><a class="nav-link" href="{{ route('search.results') }}">Search</a></li>
+                        <li class="nav-item">
+                            <form action="{{ route('search.results') }}" method="get" class="d-flex align-items-center my-1 my-md-0">
+                                <input type="text" name="text" class="form-control form-control-sm" placeholder="Search..." aria-label="Search" style="width: 150px;">
+                                <button class="btn btn-sm btn-outline-dark ms-1" type="submit">Go</button>
+                            </form>
+                        </li>
                         <li class="nav-item"><a class="nav-link" href="{{ route('new_advanced_search.form') }}">Advanced Search</a></li>
                         <li class="nav-item"><a class="nav-link" href="{{ route('experiments.list') }}">Browse Experiments</a></li>
                         <li class="nav-item"><a class="nav-link" href="{{ route('search.results') }}">Browse Simulations</a></li>
