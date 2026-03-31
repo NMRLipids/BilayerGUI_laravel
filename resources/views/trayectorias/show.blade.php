@@ -375,7 +375,7 @@
                                         <div class="col-sm-12 col-md-12 chart-container" style=" background-color:
                                                     #0d0d0e;border-left-width: 1px;border-left-style: none; padding: 4px; border-radius: 0px;">
                                             <h4 class="chart-label">Form Factor</h4>
-                                            <label style="display: inline-flex; align-items: center; gap: 6px; color: #ffffff; font-weight: 600; margin-bottom: 8px;">
+                                            <label class="chart-label" style="display: inline-flex; align-items: center; gap: 6px; color: #ffffff; font-weight: 600; margin-bottom: 8px;">
                                                 <input type="checkbox" data-ffnormalize-target="myChartFormFact" checked>
                                                 Normalize (by max of first series)
                                             </label>
