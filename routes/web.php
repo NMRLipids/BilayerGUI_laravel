@@ -55,7 +55,7 @@ Route::get('/simulations/{trayectoria_id}', 'App\Http\Controllers\TrayectoriasCo
 ->where('trayectoria_id', '[0-9]+')
 ->name('simulations.show');
 
-Route::get('/trayectories', 'App\Http\Controllers\TrayectoriasController@list')->name('trayectorias.list');
+Route::get('/trajectories', 'App\Http\Controllers\TrayectoriasController@list')->name('trayectorias.list');
 Route::get('/simulations', 'App\Http\Controllers\TrayectoriasController@list')->name('simulations.list');
 
 

@@ -156,9 +156,9 @@ use App\Http\Controllers\StatisticsController;
                         <div class="row g-3">
                             <div class="col-md-4">
                                 <div class="component-pill">
-                                    <strong>Databank-GUI</strong>
+                                    <strong>Databank-UI</strong>
                                     <span>This website — browse, search and compare simulations.
-                                        <a href="https://github.com/NMRLipids/BilayerGUI_laravel">Source</a></span>
+                                        <a href="https://github.com/NMRLipids/BilayerUI_laravel">GitHub</a></span>
                                 </div>
                             </div>
                             <div class="col-md-4">
