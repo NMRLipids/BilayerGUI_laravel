@@ -158,6 +158,75 @@ class TrayectoriasController extends Controller
 
     }
 
+    function list()
+    {
+        $request = request();
+        $sort = $request->input('sort', 'id');
+        $direction = $request->input('direction', 'asc');
+        $perPage = $request->input('per_page', 10);
+
+        $direction = in_array($direction, ['asc', 'desc']) ? $direction : 'asc';
+        $allowedSorts = ['id', 'temperature', 'trj_length', 'op_quality_total', 'ff_quality', 'best'];
+        $sort = in_array($sort, $allowedSorts) ? $sort : 'id';
+
+        $query = Trayectoria::with(['campo_de_fuerza', 'membrana', 'lipidos', 'analisis'])
+            ->withCount(['experimentsOP', 'experimentsFF']);
+
+        // Filter by lipid
+        $lipidFilter = $request->input('lipid', '');
+        if ($lipidFilter !== '') {
+            $query->whereHas('lipidos', function ($q) use ($lipidFilter) {
+                $q->where('molecule', $lipidFilter);
+            });
+        }
+
+        // Join trajectories_analysis for sorting by quality columns
+        if (in_array($sort, ['op_quality_total', 'ff_quality', 'best'])) {
+            $query->leftJoin('trajectories_analysis as ta_sort', 'trajectories.id', '=', 'ta_sort.trajectory_id')
+                  ->select('trajectories.*');
+            if ($sort === 'best') {
+                // Rank product: rank(OP) * rank(FF), lower = better.
+                // NULLs get worst rank (N+1) per dimension, so they always sort below
+                // any simulation with actual data for both metrics.
+                $rpDir = $direction === 'desc' ? 'ASC' : 'DESC';
+                $query->orderByRaw("
+                    (CASE WHEN ta_sort.op_quality_total IS NULL
+                          THEN (SELECT COUNT(*) FROM trajectories_analysis) + 1
+                          ELSE (SELECT COUNT(*) FROM trajectories_analysis ta2
+                                WHERE ta2.op_quality_total IS NOT NULL
+                                  AND ta2.op_quality_total > ta_sort.op_quality_total) + 1
+                    END)
+                    *
+                    (CASE WHEN ta_sort.ff_quality IS NULL
+                          THEN (SELECT COUNT(*) FROM trajectories_analysis) + 1
+                          ELSE (SELECT COUNT(*) FROM trajectories_analysis ta3
+                                WHERE ta3.ff_quality IS NOT NULL
+                                  AND ta3.ff_quality > ta_sort.ff_quality) + 1
+                    END)
+                    $rpDir
+                ");
+            } else {
+                $query->orderByRaw("ta_sort.$sort IS NULL, ta_sort.$sort $direction");
+            }
+        } else {
+            $query->orderBy($sort, $direction);
+        }
+
+        if ($perPage === 'all') {
+            $trayectorias = $query->paginate($query->count() ?: 1);
+        } else {
+            $perPage = in_array((int)$perPage, [10, 20, 50]) ? (int)$perPage : 20;
+            $trayectorias = $query->paginate($perPage);
+        }
+
+        return view('trayectorias.list', [
+            'trayectorias' => $trayectorias,
+            'sort' => $sort,
+            'direction' => $direction,
+            'per_page' => $request->input('per_page', 10),
+        ]);
+    }
+
     function show($trayectoria_id) {
         $trayectoria = Trayectoria::findOrFail($trayectoria_id);
         $this->makeOPData($trayectoria);

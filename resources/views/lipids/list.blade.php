@@ -6,8 +6,9 @@
             <div class="row gx-4 gx-lg-5 justify-content-center">
                 <div class="col-lg-10">
                     <h3 class="text-white text-center mt-0">Lipids</h3>
+                        
                         <div class="text-white text-center mt-0">
-                        <table class="table table-bordered table-striped table-sm table-dark">
+                        <table class="table table-bordered table-striped table-sm table-glass table-hover">
                             <thead>
                                 <tr>
                                     <th>Accession</th>
@@ -25,7 +26,7 @@
                                         
                                         <td>
                                             <a href="{{ route('lipid.show', $lipid->id) }}" 
-                                            class="btn btn-sm btn-primary">View</a>
+                                            class="btn btn-sm btn-primary" title="{{ $lipid->displayTitle() }}">View</a>
                                         </td>
                                     </tr>
                                 @endforeach

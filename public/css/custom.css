@@ -67,7 +67,7 @@ main {
 
 body{
     /*background: linear-gradient(to bottom, rgba(92, 77, 66, 1.0) 0%, rgba(92, 77, 66, 0.8) 100%), url(/storage/image/bg_03.jpg);*/
-    background: linear-gradient(to bottom, rgb(255, 0, 217) 0%, rgba(5, 83, 90, 0.603) 100%);
+  background: linear-gradient(165deg, #0f4d59 0%, #1b6a73 52%, #3f8f8f 100%);
     background-attachment: fixed;
     background-position: center;
     background-repeat: no-repeat;
@@ -187,12 +187,20 @@ i.fas {
   height: 70vh;
 
 }
+.chart-container canvas {
+  max-height: 90% !important;
+}
 .chart-container-half {
   position: relative;
   margin: auto;
   width: 80vw;
   height: 50vh;
 
+}
+
+/* Labels inside dark chart containers — always white */
+.chart-label {
+  color: #fff !important;
 }
 
 #accordion .title{
@@ -238,15 +246,8 @@ i.fas {
 
 .bg-datos{
   height: auto;
-  /* Set a specific height */
-
   min-height: 100vh;
-  /*background: linear-gradient(to bottom, #4e4e4e 0%, #000000 100%);*/
-/*background: linear-gradient(to bottom, rgba(81, 214, 256, 0.8) 0%, rgba(0, 122, 133, 0.8) 100%), url(/storage/images/bg_03.jpg);*/
-background: linear-gradient(to bottom, rgba(81, 214, 256, 0.8) 0%, rgba(0, 122, 133, 0.8) 100%);
-
-
-  /* Create the parallax scrolling effect */
+  background: linear-gradient(135deg, #0a3d48 0%, #12535f 40%, #1a7a6d 100%);
   background-attachment: fixed;
   background-position: center;
   background-repeat: no-repeat;
@@ -256,6 +257,74 @@ background: linear-gradient(to bottom, rgba(81, 214, 256, 0.8) 0%, rgba(0, 122, 
 .txt-white{
   color: white;
 }
+
+/* Semi-transparent frosted glass table style */
+.table-glass {
+  --bs-table-bg: rgba(255, 255, 255, 0.15);
+  --bs-table-color: #fff;
+  --bs-table-border-color: rgba(255, 255, 255, 0.25);
+  --bs-table-striped-bg: rgba(255, 255, 255, 0.08);
+  --bs-table-striped-color: #fff;
+  --bs-table-hover-bg: rgba(255, 255, 255, 0.2);
+  --bs-table-hover-color: #fff;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border-radius: 0.375rem;
+  overflow: hidden;
+}
+.table-glass thead th {
+  background: rgba(0, 0, 0, 0.3);
+  border-bottom: 2px solid rgba(255, 255, 255, 0.3);
+}
+.table-glass a:not(.btn) {
+  color: #b7ff5a;
+}
+.table-glass a:not(.btn):hover {
+  color: #dcff9e;
+}
+.table-glass .btn-primary {
+  background-color: rgba(13, 110, 253, 0.8);
+  border-color: rgba(13, 110, 253, 0.6);
+}
+
+/* Light translucent frosted glass table style */
+.table-frost {
+  --bs-table-bg: rgba(255, 255, 255, 0.18);
+  --bs-table-color: #1a1a1a;
+  --bs-table-border-color: rgba(255, 255, 255, 0.25);
+  --bs-table-striped-bg: rgba(255, 255, 255, 0.1);
+  --bs-table-striped-color: #1a1a1a;
+  --bs-table-hover-bg: rgba(255, 255, 255, 0.25);
+  --bs-table-hover-color: #000;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border-radius: 0.375rem;
+  overflow: hidden;
+}
+.table-frost thead th {
+  background: rgba(255, 255, 255, 0.3);
+  border-bottom: 2px solid rgba(255, 255, 255, 0.35);
+  color: #000;
+  font-weight: 600;
+}
+.table-frost a {
+  color: #4f8f18;
+}
+.table-frost a:hover {
+  color: #6caf2b;
+}
+.table-frost .btn-primary {
+  background-color: rgba(13, 110, 253, 0.85);
+  border-color: rgba(13, 110, 253, 0.7);
+  color: #fff;
+}
+.table-frost .text-white {
+  color: #1a1a1a !important;
+}
+.table-frost .text-white.text-decoration-none {
+  color: #1a1a1a !important;
+}
+
 table{
 color: white!important;
 
@@ -460,7 +529,31 @@ a:hover {
 }
 
 .table-responsive {
-     background-color: rgb(226 226 226 / 38%);
+     background-color: transparent;
+}
+
+.pagination .page-link {
+  background-color: rgba(255, 255, 255, 0.92);
+  color: #0b3d5c;
+  border: 1px solid rgba(11, 61, 92, 0.35);
+}
+.pagination .page-link:hover,
+.pagination .page-link:focus {
+  background-color: #ffffff;
+  color: #07283d;
+  border-color: rgba(11, 61, 92, 0.55);
+  box-shadow: none;
+}
+.pagination .page-item.active .page-link {
+  background-color: #ffffff;
+  color: #07283d;
+  border-color: rgba(11, 61, 92, 0.75);
+  font-weight: 600;
+}
+.pagination .page-item.disabled .page-link {
+  background-color: rgba(255, 255, 255, 0.6);
+  color: #6c757d;
+  border-color: rgba(108, 117, 125, 0.35);
 }
 
 .form-control{
@@ -470,6 +563,161 @@ a:hover {
 .form-control:hover{
   color: black;
   background-color: white;
+}
+
+/* ── Front-page hero card ────────────────────────────────── */
+.hero-card {
+  background: rgba(255, 255, 255, 0.12);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 1rem;
+  padding: 1.75rem 2rem;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.18);
+}
+.hero-card .input-group-lg .form-control {
+  border-radius: 0.5rem 0 0 0.5rem;
+  border: none;
+  font-size: 1rem;
+}
+.hero-card .input-group-lg .btn {
+  border-radius: 0 0.5rem 0.5rem 0;
+}
+.hero-card .input-group-lg > .form-control,
+.hero-card .input-group-lg > .btn {
+  height: 48px;
+}
+.btn-accent {
+  background: linear-gradient(135deg, #f4623a 0%, #e04e2a 100%);
+  color: #fff;
+  border: none;
+  font-weight: 600;
+  padding: 0.5rem 1.5rem;
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+.btn-accent:hover {
+  background: linear-gradient(135deg, #e04e2a 0%, #c9401f 100%);
+  color: #fff;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(244, 98, 58, 0.4);
+}
+.hero-card .btn-outline-light {
+  border-color: rgba(255, 255, 255, 0.45);
+  color: rgba(255, 255, 255, 0.9);
+  font-weight: 500;
+  font-size: 0.82rem;
+  border-radius: 2rem;
+  padding: 0.3rem 0.9rem;
+  transition: all 0.15s;
+}
+.hero-card .btn-outline-light:hover {
+  background: rgba(255, 255, 255, 0.2);
+  border-color: rgba(255, 255, 255, 0.7);
+  color: #fff;
+}
+.hero-example {
+  color: #ffe0b2 !important;
+  text-decoration: underline;
+  font-weight: 500;
+}
+.hero-example:hover {
+  color: #fff !important;
+}
+.hero-stats {
+  display: inline-block;
+  background: rgba(0, 0, 0, 0.25);
+  border-radius: 0.5rem;
+  padding: 0.5rem 1.25rem;
+  color: rgba(255, 255, 255, 0.85);
+  font-size: 0.85rem;
+  line-height: 1.5;
+}
+
+/* ── About section cards ─────────────────────────────────── */
+.about-card {
+  background: #fff;
+  border: 1px solid #e0e6ea;
+  border-radius: 0.75rem;
+  padding: 1.5rem 1.75rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  text-align: left;
+}
+.about-card h4 {
+  color: #0e4a56;
+  font-weight: 600;
+  margin-bottom: 0.75rem;
+  font-size: 1.1rem;
+}
+.about-card p,
+.about-card li {
+  color: #333;
+  font-size: 0.92rem;
+  line-height: 1.65;
+}
+.about-card a {
+  color: #12535f;
+  text-decoration: underline;
+}
+.about-card a:hover {
+  color: #0a3a44;
+}
+.component-pill {
+  background: #f0f7f8;
+  border: 1px solid #d0e3e6;
+  border-radius: 0.6rem;
+  padding: 1rem;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+.component-pill strong {
+  color: #0e4a56;
+  font-size: 0.95rem;
+}
+.component-pill span {
+  color: #555;
+  font-size: 0.82rem;
+  line-height: 1.45;
+}
+.nav-icon {
+  display: inline-block;
+  margin-right: 0.3rem;
+  font-size: 1.05em;
+  line-height: 1;
+  opacity: 1.0;
+}
+@media (max-width: 991.98px) {
+  .nav-icon {
+    display: none;
+  }
+}
+.divider {
+  border: 0;
+  height: 3px;
+  background: linear-gradient(90deg, transparent, #12535f, transparent);
+  max-width: 200px;
+  margin: 0 auto;
+}
+
+/* ── Masthead override — compact hero, modern gradient ──── */
+header.masthead {
+  min-height: auto !important;
+  height: auto !important;
+  padding-top: 5.5rem;
+  padding-bottom: 2.5rem;
+  background: linear-gradient(135deg, #0a3d48 0%, #12535f 40%, #1a7a6d 100%) !important;
+  justify-content: center;
+}
+@media (min-width: 992px) {
+  header.masthead {
+    padding-top: 6rem;
+    padding-bottom: 3rem;
+  }
+}
+
+.welcome #about {
+  background: linear-gradient(145deg, #355f24 0%, #79b640 52%, #a6d65a 100%);
 }
 
 .bg-primary {
@@ -610,3 +858,616 @@ font-size: 11px;
  /* MANSORY */
 .grid-item { width: 200px; }
 .grid-item--width2 { width: 400px; }
+
+/* ======================================= */
+/* HIGH-CONTRAST ACCESSIBILITY MODE        */
+/* ======================================= */
+
+/* Toggle button styling */
+.contrast-toggle {
+  font-size: 1.15rem;
+  line-height: 1;
+  padding: 0.25rem 0.5rem;
+  border: 1px solid rgba(255,255,255,0.5);
+  border-radius: 0.25rem;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+}
+.contrast-toggle:hover {
+  background: rgba(255,255,255,0.15);
+}
+
+/* Keep toggle visible inside navbars, including collapsed mobile menu */
+.navbar .contrast-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #0b3d5c;
+  background: rgba(255,255,255,0.95);
+  border-color: rgba(11,61,92,0.85);
+}
+.navbar .contrast-toggle:hover {
+  color: #07283d;
+  background: #ffffff;
+  border-color: rgba(7,40,61,0.95);
+}
+
+@media (max-width: 991.98px) {
+  #mainNav .navbar-toggler {
+    position: relative;
+    z-index: 1051;
+  }
+  #mainNav .navbar-collapse {
+    position: relative;
+    z-index: 1050;
+  }
+  .navbar .contrast-toggle {
+    padding: 0.375rem 0.75rem;
+  }
+  .navbar .contrast-toggle::after {
+    content: ' Contrast';
+    font-size: 0.9rem;
+    font-weight: 500;
+    line-height: 1;
+    margin-left: 0.25rem;
+  }
+}
+
+/* --- High-contrast overrides (applied via .high-contrast on <html>) --- */
+.high-contrast,
+.high-contrast body {
+  background: #fff !important;
+  color: #000 !important;
+}
+
+.high-contrast .bg-datos {
+  background: #fff !important;
+}
+
+.high-contrast .welcome body,
+.high-contrast.welcome body,
+html.high-contrast.welcome {
+  background-color: #fff !important;
+  color: #000 !important;
+}
+
+.high-contrast header.masthead {
+  background: #fff !important;
+  background-image: none !important;
+}
+.high-contrast .masthead .fairmd-logo {
+  background-color: #000 !important;
+  border-radius: 0.5rem;
+  padding: 0.35rem 0.75rem !important;
+}
+
+.high-contrast .navbar,
+.high-contrast .bg-primary {
+  background-color: #000 !important;
+  color: #fff !important;
+}
+
+.high-contrast #about {
+  background: #fff !important;
+  color: #000 !important;
+}
+
+.high-contrast #about,
+.high-contrast #about * {
+  color: #000 !important;
+}
+
+.high-contrast #about a {
+  color: #000 !important;
+  text-decoration: underline !important;
+}
+
+.high-contrast #about .divider-light {
+  background-color: #000 !important;
+}
+
+.high-contrast .navbar .nav-link,
+.high-contrast .navbar .btn,
+.high-contrast .navbar a {
+  color: #fff !important;
+}
+
+.high-contrast .navbar .nav-link:hover,
+.high-contrast .navbar a:hover {
+  color: #ff0 !important;
+}
+
+@media (max-width: 991.98px) {
+  .high-contrast .navbar .navbar-collapse {
+    background-color: #000 !important;
+    padding: 0.5rem 0.75rem;
+    border-radius: 0.375rem;
+  }
+  .high-contrast .navbar .nav-link {
+    color: #fff !important;
+  }
+}
+
+.high-contrast .nav-icon {
+  color: #fff !important;
+}
+
+.high-contrast .text-muted {
+  color: #000 !important;
+}
+
+.high-contrast .badge {
+  background-color: #000 !important;
+  color: #fff !important;
+}
+
+.high-contrast .nav-pills .nav-link:not(.active) {
+  color: #222 !important;
+  background-color: #f2f2f2 !important;
+  border: 1px solid #bbb;
+}
+.high-contrast .nav-pills .nav-link:not(.active):hover,
+.high-contrast .nav-pills .nav-link:not(.active):focus {
+  color: #000 !important;
+  background-color: #e6e6e6 !important;
+  border-color: #888;
+  box-shadow: none !important;
+}
+
+.high-contrast .contrast-toggle {
+  border-color: #fff;
+  color: #fff;
+  background: #222 !important;
+}
+.high-contrast .contrast-toggle:hover {
+  background: #444 !important;
+}
+
+.high-contrast .masthead,
+.high-contrast .masthead * {
+  color: #000 !important;
+}
+.high-contrast .masthead .navbar,
+.high-contrast .masthead .navbar * {
+  color: #fff !important;
+}
+
+.high-contrast .chart-label,
+.high-contrast h4.chart-label {
+  color: #fff !important;
+}
+
+.high-contrast h1, .high-contrast h2, .high-contrast h3,
+.high-contrast h4, .high-contrast h5, .high-contrast h6,
+.high-contrast p, .high-contrast span, .high-contrast li,
+.high-contrast label, .high-contrast .title, .high-contrast .titulo,
+.high-contrast .txt-titulo, .high-contrast .txt-dato,
+.high-contrast .txt_desc, .high-contrast .txt_dato,
+.high-contrast .text-white {
+  color: #000 !important;
+}
+
+.high-contrast a {
+  color: #00e !important;
+  text-decoration: underline !important;
+}
+.high-contrast a:hover {
+  color: #000 !important;
+}
+
+.high-contrast table {
+  color: #000 !important;
+}
+
+.high-contrast .table-glass {
+  --bs-table-bg: #fff;
+  --bs-table-color: #000;
+  --bs-table-border-color: #000;
+  --bs-table-striped-bg: #e8e8e8;
+  --bs-table-striped-color: #000;
+  --bs-table-hover-bg: #d0d0d0;
+  --bs-table-hover-color: #000;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  border: 2px solid #000;
+  background-color: #fff !important;
+  color: #000 !important;
+}
+.high-contrast .table-glass td,
+.high-contrast .table-glass th,
+.high-contrast .table-glass tr {
+  background-color: #fff !important;
+  color: #000 !important;
+}
+.high-contrast .table-glass thead th {
+  background: #333 !important;
+  color: #fff !important;
+  border-bottom: 3px solid #000;
+}
+.high-contrast .table-glass thead th * {
+  color: #fff !important;
+}
+.high-contrast .table-glass a {
+  color: #000 !important;
+  text-decoration: underline !important;
+}
+.high-contrast .table-glass a:hover {
+  color: #333 !important;
+}
+.high-contrast .table-glass thead th a {
+  color: #fff !important;
+}
+.high-contrast .table-glass thead th a:hover {
+  color: #ff0 !important;
+}
+.high-contrast .table-glass td,
+.high-contrast .table-glass th {
+  border-color: #000 !important;
+}
+
+.high-contrast .card,
+.high-contrast .card-body,
+.high-contrast .card-header {
+  background-color: #fff !important;
+  color: #000 !important;
+  border: 1px solid #000 !important;
+}
+
+.high-contrast .btn-primary {
+  background-color: #fff !important;
+  border: 2px solid #000 !important;
+  color: #000 !important;
+}
+.high-contrast .btn-primary:hover,
+.high-contrast .btn-primary:focus {
+  background-color: #000 !important;
+  color: #fff !important;
+  border-color: #000 !important;
+  box-shadow: none !important;
+}
+
+.high-contrast .btn-warning {
+  background-color: #ff0 !important;
+  color: #000 !important;
+  border: 2px solid #000 !important;
+}
+
+.high-contrast .btn-outline-dark,
+.high-contrast .btn-outline-secondary,
+.high-contrast .btn-outline-light {
+  color: #000 !important;
+  border-color: #000 !important;
+  background: #fff !important;
+}
+.high-contrast .navbar .btn-outline-dark,
+.high-contrast .navbar .btn-outline-secondary,
+.high-contrast .navbar .btn-outline-light {
+  color: #000 !important;
+}
+.high-contrast .btn-outline-dark:hover,
+.high-contrast .btn-outline-secondary:hover,
+.high-contrast .btn-outline-light:hover {
+  background: #000 !important;
+  color: #fff !important;
+}
+
+.high-contrast .separador {
+  background-color: #ddd !important;
+  color: #000 !important;
+}
+
+.high-contrast .search_result {
+  background-color: #eee !important;
+  color: #000 !important;
+}
+
+.high-contrast .bg-solapa {
+  background-color: #ddd !important;
+  color: #000 !important;
+}
+
+.high-contrast .table-responsive {
+  background-color: transparent !important;
+}
+
+.high-contrast .form-control {
+  background-color: #fff !important;
+  color: #000 !important;
+  border: 2px solid #000 !important;
+}
+
+.high-contrast footer.bg-primary {
+  background-color: #000 !important;
+  color: #fff !important;
+}
+.high-contrast footer.bg-primary * {
+  color: #fff !important;
+}
+
+.high-contrast .pendiente {
+  background-color: #f00 !important;
+  color: #fff !important;
+}
+
+.high-contrast .alert-warning {
+  background-color: #ff0 !important;
+  color: #000 !important;
+  border: 2px solid #000 !important;
+}
+
+.high-contrast .pagination .page-link {
+  background-color: #fff !important;
+  color: #000 !important;
+  border: 2px solid #000 !important;
+}
+.high-contrast .pagination .page-link:hover,
+.high-contrast .pagination .page-link:focus {
+  background-color: #000 !important;
+  color: #fff !important;
+  box-shadow: none !important;
+}
+.high-contrast .pagination .page-item.active .page-link {
+  background-color: #000 !important;
+  color: #fff !important;
+  border-color: #000 !important;
+}
+.high-contrast .pagination .page-item.disabled .page-link {
+  background-color: #ddd !important;
+  color: #666 !important;
+  border-color: #000 !important;
+}
+
+.high-contrast img {
+  filter: contrast(1.2);
+}
+
+/* OS-level prefers-contrast auto-detection (same rules) */
+@media (prefers-contrast: high) {
+  html:not(.no-high-contrast),
+  html:not(.no-high-contrast) body {
+    background: #fff !important;
+    color: #000 !important;
+  }
+  html:not(.no-high-contrast) .bg-datos {
+    background: #fff !important;
+  }
+  html:not(.no-high-contrast).welcome,
+  html:not(.no-high-contrast) .welcome body {
+    background-color: #fff !important;
+    color: #000 !important;
+  }
+  html:not(.no-high-contrast) header.masthead {
+    background: #fff !important;
+    background-image: none !important;
+  }
+  html:not(.no-high-contrast) .masthead .fairmd-logo {
+    background-color: #000 !important;
+    border-radius: 0.5rem;
+    padding: 0.35rem 0.75rem !important;
+  }
+  html:not(.no-high-contrast) .navbar,
+  html:not(.no-high-contrast) .bg-primary {
+    background-color: #000 !important;
+    color: #fff !important;
+  }
+  html:not(.no-high-contrast) #about {
+    background: #fff !important;
+    color: #000 !important;
+  }
+  html:not(.no-high-contrast) #about,
+  html:not(.no-high-contrast) #about * {
+    color: #000 !important;
+  }
+  html:not(.no-high-contrast) #about a {
+    color: #000 !important;
+    text-decoration: underline !important;
+  }
+  html:not(.no-high-contrast) #about .divider-light {
+    background-color: #000 !important;
+  }
+  html:not(.no-high-contrast) .navbar .nav-link,
+  html:not(.no-high-contrast) .navbar .btn,
+  html:not(.no-high-contrast) .navbar a {
+    color: #fff !important;
+  }
+  html:not(.no-high-contrast) .navbar .nav-link:hover,
+  html:not(.no-high-contrast) .navbar a:hover {
+    color: #ff0 !important;
+  }
+  @media (max-width: 991.98px) {
+    html:not(.no-high-contrast) .navbar .navbar-collapse {
+      background-color: #000 !important;
+      padding: 0.5rem 0.75rem;
+      border-radius: 0.375rem;
+    }
+    html:not(.no-high-contrast) .navbar .nav-link {
+      color: #fff !important;
+    }
+  }
+  html:not(.no-high-contrast) .nav-pills .nav-link:not(.active) {
+    color: #222 !important;
+    background-color: #f2f2f2 !important;
+    border: 1px solid #bbb;
+  }
+  html:not(.no-high-contrast) .nav-pills .nav-link:not(.active):hover,
+  html:not(.no-high-contrast) .nav-pills .nav-link:not(.active):focus {
+    color: #000 !important;
+    background-color: #e6e6e6 !important;
+    border-color: #888;
+    box-shadow: none !important;
+  }
+  html:not(.no-high-contrast) .contrast-toggle {
+    background: #222 !important;
+    border-color: #fff;
+    color: #fff;
+  }
+  html:not(.no-high-contrast) .contrast-toggle:hover {
+    background: #444 !important;
+  }
+  html:not(.no-high-contrast) .masthead,
+  html:not(.no-high-contrast) .masthead * {
+    color: #000 !important;
+  }
+  html:not(.no-high-contrast) .masthead .navbar,
+  html:not(.no-high-contrast) .masthead .navbar * {
+    color: #fff !important;
+  }
+  html:not(.no-high-contrast) .chart-label,
+  html:not(.no-high-contrast) h4.chart-label {
+    color: #fff !important;
+  }
+
+  html:not(.no-high-contrast) h1,
+  html:not(.no-high-contrast) h2,
+  html:not(.no-high-contrast) h3,
+  html:not(.no-high-contrast) h4,
+  html:not(.no-high-contrast) h5,
+  html:not(.no-high-contrast) h6,
+  html:not(.no-high-contrast) p,
+  html:not(.no-high-contrast) span,
+  html:not(.no-high-contrast) li,
+  html:not(.no-high-contrast) label,
+  html:not(.no-high-contrast) .title,
+  html:not(.no-high-contrast) .titulo,
+  html:not(.no-high-contrast) .txt-titulo,
+  html:not(.no-high-contrast) .txt-dato,
+  html:not(.no-high-contrast) .text-white {
+    color: #000 !important;
+  }
+  html:not(.no-high-contrast) a {
+    color: #00e !important;
+    text-decoration: underline !important;
+  }
+  html:not(.no-high-contrast) a:hover {
+    color: #000 !important;
+  }
+  html:not(.no-high-contrast) table {
+    color: #000 !important;
+  }
+  html:not(.no-high-contrast) .table-glass {
+    --bs-table-bg: #fff;
+    --bs-table-color: #000;
+    --bs-table-border-color: #000;
+    --bs-table-striped-bg: #e8e8e8;
+    --bs-table-striped-color: #000;
+    --bs-table-hover-bg: #d0d0d0;
+    --bs-table-hover-color: #000;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    border: 2px solid #000;
+  }
+  html:not(.no-high-contrast) .table-glass thead th {
+    background: #333 !important;
+    color: #fff !important;
+    border-bottom: 3px solid #000;
+  }
+  html:not(.no-high-contrast) .table-glass thead th * {
+    color: #fff !important;
+  }
+  html:not(.no-high-contrast) .table-glass a {
+    color: #000 !important;
+    text-decoration: underline !important;
+  }
+  html:not(.no-high-contrast) .table-glass a:hover {
+    color: #333 !important;
+  }
+  html:not(.no-high-contrast) .table-glass thead th a {
+    color: #fff !important;
+  }
+  html:not(.no-high-contrast) .table-glass thead th a:hover {
+    color: #ff0 !important;
+  }
+  html:not(.no-high-contrast) .table-glass td,
+  html:not(.no-high-contrast) .table-glass th {
+    border-color: #000 !important;
+  }
+  html:not(.no-high-contrast) .card,
+  html:not(.no-high-contrast) .card-body,
+  html:not(.no-high-contrast) .card-header {
+    background-color: #fff !important;
+    color: #000 !important;
+    border: 1px solid #000 !important;
+  }
+  html:not(.no-high-contrast) .btn-primary {
+    background-color: #fff !important;
+    border: 2px solid #000 !important;
+    color: #000 !important;
+  }
+  html:not(.no-high-contrast) .btn-primary:hover,
+  html:not(.no-high-contrast) .btn-primary:focus {
+    background-color: #000 !important;
+    color: #fff !important;
+    border-color: #000 !important;
+    box-shadow: none !important;
+  }
+  html:not(.no-high-contrast) .btn-warning {
+    background-color: #ff0 !important;
+    color: #000 !important;
+    border: 2px solid #000 !important;
+  }
+  html:not(.no-high-contrast) .btn-outline-dark,
+  html:not(.no-high-contrast) .btn-outline-secondary,
+  html:not(.no-high-contrast) .btn-outline-light {
+    color: #000 !important;
+    border-color: #000 !important;
+    background: #fff !important;
+  }
+  html:not(.no-high-contrast) .navbar .btn-outline-dark,
+  html:not(.no-high-contrast) .navbar .btn-outline-secondary,
+  html:not(.no-high-contrast) .navbar .btn-outline-light {
+    color: #000 !important;
+  }
+  html:not(.no-high-contrast) .separador {
+    background-color: #ddd !important;
+    color: #000 !important;
+  }
+  html:not(.no-high-contrast) .search_result {
+    background-color: #eee !important;
+    color: #000 !important;
+  }
+  html:not(.no-high-contrast) .table-responsive {
+    background-color: transparent !important;
+  }
+  html:not(.no-high-contrast) .form-control {
+    background-color: #fff !important;
+    color: #000 !important;
+    border: 2px solid #000 !important;
+  }
+  html:not(.no-high-contrast) footer.bg-primary {
+    background-color: #000 !important;
+    color: #fff !important;
+  }
+  html:not(.no-high-contrast) footer.bg-primary * {
+    color: #fff !important;
+  }
+  html:not(.no-high-contrast) .alert-warning {
+    background-color: #ff0 !important;
+    color: #000 !important;
+    border: 2px solid #000 !important;
+  }
+  html:not(.no-high-contrast) .pagination .page-link {
+    background-color: #fff !important;
+    color: #000 !important;
+    border: 2px solid #000 !important;
+  }
+  html:not(.no-high-contrast) .pagination .page-link:hover,
+  html:not(.no-high-contrast) .pagination .page-link:focus {
+    background-color: #000 !important;
+    color: #fff !important;
+    box-shadow: none !important;
+  }
+  html:not(.no-high-contrast) .pagination .page-item.active .page-link {
+    background-color: #000 !important;
+    color: #fff !important;
+    border-color: #000 !important;
+  }
+  html:not(.no-high-contrast) .pagination .page-item.disabled .page-link {
+    background-color: #ddd !important;
+    color: #666 !important;
+    border-color: #000 !important;
+  }
+  html:not(.no-high-contrast) img {
+    filter: contrast(1.2);
+  }
+}

@@ -46,7 +46,18 @@ Route::get('filesff/{id}/{file}', 'App\Http\Controllers\FileController@downloadf
 
 Route::get('/filtro/{codigo}', 'App\Http\Controllers\FiltrosController@html')->name('filtros.html');
 Route::get('/filtro-busqueda-avanzada/{codigo}/{numero}', 'App\Http\Controllers\FiltrosController@htmlBusquedaAvanzada')->name('filtros.html_busqueda_avanzada');
-Route::get('/trajectories/{trayectoria_id}', 'App\Http\Controllers\TrayectoriasController@show')->name('trayectorias.show');
+
+# Routes for trajectories and simulations, both URLs point to the same controller method
+Route::get('/trajectories/{trayectoria_id}', 'App\Http\Controllers\TrayectoriasController@show')
+->where('trayectoria_id', '[0-9]+')
+->name('trayectorias.show');
+Route::get('/simulations/{trayectoria_id}', 'App\Http\Controllers\TrayectoriasController@show')
+->where('trayectoria_id', '[0-9]+')
+->name('simulations.show');
+
+Route::get('/trayectories', 'App\Http\Controllers\TrayectoriasController@list')->name('trayectorias.list');
+Route::get('/simulations', 'App\Http\Controllers\TrayectoriasController@list')->name('simulations.list');
+
 
 Route::get('/filtro-busqueda-avanzada-selects/{codigo}/{numero}', 'App\Http\Controllers\FiltrosController@htmlBusquedaAvanzadaSelects')->name('filtros.html_busqueda_avanzada_selects');
 

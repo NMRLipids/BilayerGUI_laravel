@@ -7,29 +7,39 @@ use App\Http\Controllers\StatisticsController;
 @endphp
 
 
-<body id="page-top">
+<body>
+
+    <div id="page-top"></div>
 
     <!-- Navigation-->
     <nav class="navbar navbar-expand-lg navbar-light fixed-top py-3" id="mainNav">
         <div class="container px-4 px-lg-5">
-            <a class="navbar-brand" href="#page-top">FAIRMD Lipids Databank</a>
-            <button class="navbar-toggler navbar-toggler-right" type="button" data-bs-toggle="collapse"
-                data-bs-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false"
+            <ul class="navbar-nav ms-auto my-2 my-lg-0">
+                <li class="nav-item">
+                <a class="nav-link" href="#page-top"> <span class="nav-icon" style="">&#8962;</span> FAIRMD Lipids</a>
+                </li>
+            </ul>
+                <button class="navbar-toggler navbar-toggler-right" type="button" data-bs-toggle="collapse"
+                data-nav-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false"
                 aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse" id="navbarResponsive">
-                <ul class="navbar-nav ms-auto my-2 my-lg-0">
-                    <li class="nav-item">
+                    <ul class="navbar-nav ms-auto my-2 my-lg-0">
+                    <!-- li class="nav-item">
                         <form action="{{ route('search.results') }}" method="get" class="d-flex align-items-center">
                             <input type="text" name="text" class="form-control form-control-sm" placeholder="Search..." aria-label="Search" style="width: 150px;">
-                            <button class="btn btn-sm btn-outline-dark ms-1" type="submit">Go</button>
+                            <button class="btn btn-sm btn-outline-light ms-1" type="submit">Go</button>
                         </form>
+                    </li --- IGNORE --->
+                    <li class="nav-item"><a class="nav-link" href="{{ route('new_advanced_search.form') }}"><span class="nav-icon" aria-hidden="true" style="font-size: 1.2rem;">⌕ </span>Advanced Search</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{{ route('lipids.list') }}"><span class="nav-icon" aria-hidden="true">◌</span>Lipids</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{{ route('experiments.list') }}"><span class="nav-icon" aria-hidden="true">⚗</span>Experiments</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{{ route('simulations.list') }}"><span class="nav-icon" aria-hidden="true">◈</span>Simulations</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#about"><span class="nav-icon" aria-hidden="true">ⓘ</span>About</a></li>
+                    <li class="nav-item d-flex align-items-center ms-2">
+                        <button class="contrast-toggle" id="contrastToggle" type="button" title="Toggle high-contrast mode" aria-label="Toggle high-contrast mode">&#9684;</button>
                     </li>
-                    <li class="nav-item"><a class="nav-link" href="{{ route('new_advanced_search.form') }}">Advanced Search</a></li>
-                    <li class="nav-item"><a class="nav-link" href="{{ route('experiments.list') }}">Browse Experiments</a></li>
-                    <li class="nav-item"><a class="nav-link" href="{{ route('search.results') }}">Browse Simulations</a></li>
-                    <li class="nav-item"><a class="nav-link" href="#about">About</a></li>
                 </ul>
             </div>
         </div>
@@ -38,131 +48,80 @@ use App\Http\Controllers\StatisticsController;
 <div class="container-fluid p-0" style="display: flex; flex-direction: column; min-height: 50vh;">
     <!-- Masthead-->
     <header class="masthead">
-        <div class="container" style="width: 100; margin-bottom: 1em;">
-            <div class="row gx-4 gx-lg-5  align-items-center justify-content-center text-center">
-                <div class="col-lg-8 align-self-end">
-                        <img class="img-fluid d-block mx-auto" alt="FAIRMD Lipids Databank Logo"
-                            src="{{ asset('storage/images/fairmd_w_letras.png') }}" alt=""
-                            style="max-width: 75%; padding: 0.5rem 1.5rem 0.75rem;">
-                         <h3> (version {{ config('app.version') }})</h3>
+        <div class="container px-4 px-lg-5">
+
+            {{-- Hero area --}}
+            <div class="row justify-content-center text-center" style="padding-top: 2rem;">
+                <div class="col-lg-8">
+                    <img class="img-fluid d-block mx-auto fairmd-logo" alt="FAIRMD Lipids Databank Logo"
+                        src="{{ asset('storage/images/fairmd_w_letras.png') }}"
+                        style="max-width: 420px; width: 100%; padding: 0.5rem 0 1rem;">
+                    <p class="text-white-75" style="font-size: 0.85rem; margin-bottom: 0.25rem;">version {{ config('app.version') }}</p>
+                    <p class="text-white-80 mb-4" style="max-width: 600px; margin: 0 auto; line-height: 1.6;">
+                        Browse, search and compare atomistic MD simulations of lipid membranes from the
+                        <a href="https://github.com/NMRLipids/Databank">FAIRMD Lipids Databank</a>.
+                    </p>
                 </div>
-                @if(config('app.debug'))
-                <div class="col-lg-8 alert alert-warning" style="display: flex; flex-direction: column; padding: 1em;" role="alert">
-                    <h5>⚠️ Development Preview</h5>
+            </div>
 
-                    <div class="text-left">
-                   
-                    <br><small>Latest updates: </small>
-                    <ul>
-                        <li><b>Added cross references tab to trajectory and experiment pages.</b></li>
-                        <li><b>Check out the new Advanced Search functionality!</b></li>
-                        <li>Implemented paginated list of lipids with links to detail pages.</li>
-                        <li>Added an embed mode for the lipids list. <pre>http://localhost/lipids?items_per_page=all&embed=true</pre></li>
-                        
-                    </ul>
-                    <details class="text-muted" style="font-size: 0.8em;">
-                    <summary>Previous updates</summary>
-                    <ul>
-                        <li>Re-implemented the OP data plotting for simulations.</li>
-                        <li>OP plot now supports multiple groups and experiments per lipid, with data properly organized by lipid and group.</li>
-                        <li>Added ApL and FF data plots on the trajectory pages.</li>
-                        <li>All plot data is now stored in the database tables directly.</li>
-                        <li>Added proper handling of quality data</li>
-                        <li>OP data is now visualized as box-and-whisker plots using standard deviation.</li>
-                        <li>Added a checkbox to toggle normalization of FF data between 0 and 1.</li>
-                        <li>Improved mobile responsive design.</li>
-                    </ul>
-                    </details>
-                    Quick links to new functionality:
-                    <ul>
-                        <li><a href="/trajectories/5" style="color: green;">Simulation with multiple experimental data and quality annotation</a></li>
-                        <li><a href="/experiment/OP/10.1021/acs.jpcb.4c04719/4" style="color: green;">Order parameter experiment with multiple groups and experiments</a></li>    
-                        <li><a href="{{ route('lipids.list') }}" style="color: green;">Lipids list with pagination</a></li>
-                        <li><a href="{{ route('lipids.list', ['items_per_page' => 'all', 'embed' => true]) }}" style="color: green;">Lipids list with all entries and embed mode (for iframes)</a></li>
-                        <li><a href="{{ route('lipid.show', 1) }}" style="color: green;">Lipid detail page with properties and cross-references</a></li>
-                        <li><a href="/trajectories/768" style="color: green;">Simulation with diverse lipid set (check Membrane and Analysis tab)</a></li>
-                        <li><a href="/experiments?page=1" style="color: green;">Experiments list</a></li>
-                        <li><a href="/experiment/FF/10.1016/j.bbamem.2012.05.007/1" style="color: green;">Form factor experiment with plot</a></li>
-                        <li><a href="/experiment/OP/10.1021/acs.jpcb.4c04719/4" style="color: green;">Order parameter experiment with plot</a></li>
+            {{-- Search card --}}
+            <div class="row justify-content-center">
+                <div class="col-lg-7 col-xl-6">
+                    <div class="hero-card">
+                        {{-- Main search --}}
+                        <form action="{{ route('search.results') }}" method="get" class="mb-3">
+                            <div class="input-group input-group-lg">
+                                <input id="BasicSearch" type="text" name="text" class="form-control"
+                                    placeholder="Search by name, InChI, SMILES, DOI…"
+                                    aria-label="Search field">
+                                <button class="btn btn-accent" type="submit">Search</button>
+                            </div>
+                        </form>
 
-                    </ul>
-                    </div>
-                </div>
-                @endif
-                <div class="col-lg-8 align-self-baseline" style="display: flex; flex-direction: column; align-items: center; justify-content: center;">
-
-                    <p class="text-white-80 mb-5">The FAIRMD Lipids databank user interface can be used to search data in the <a
-                            href="https://github.com/NMRLipids/Databank">FAIRMD Lipids
-                            Databank</a>.
-                        For programmatic access, see FAIRMD Lipids <a
-                            href="https://github.com/NMRLipids/Databank">Databank-API</a>. For more details refer to the <a
-                            href="https://www.nature.com/articles/s41467-024-45189-z"> FAIRMD Lipids databank publication</a>.
-                    <div class="row">
-                        <div class="row p-xs-1 p-sm-2">
-                            <form action="{{ route('search.results') }}" method="get">
-                                <div class="input-group mb-3 ui-widget">
-
-                                    <input id="BasicSearch" type="text" name="text" class="form-control"
-                                        placeholder="@lang('Buscar')..." aria-label="Search field"
-                                        aria-describedby="button-addon2">
-                                    <div class="input-group-append">
-                                        <button class="btn btn-outline-secondary" type="submit"
-                                            id="button-addon2">@lang('Buscar')</button>
-                                    </div>
-                                </div>
-                            </form>
-
+                        {{-- Quick links --}}
+                        <div class="d-flex flex-wrap gap-2 justify-content-center mb-3">
+                            <a href="{{ route('search.results') }}" class="btn btn-outline-light btn-sm">Browse All</a>
+                            <a href="{{ route('new_advanced_search.form') }}" class="btn btn-outline-light btn-sm">Advanced Search</a>
+                            <a href="{{ route('lipids.list') }}" class="btn btn-outline-light btn-sm">Lipids</a>
+                            <a href="{{ route('experiments.list') }}" class="btn btn-outline-light btn-sm">Experiments</a>
+                            <a href="{{ route('simulations.list') }}" class="btn btn-outline-light btn-sm">Simulations</a>
                         </div>
 
-                        <div class="">
-                            <a href="{{ route('search.results') }}" class="btn btn-outline-secondary">Browse</a>
+                        <hr style="border-color: rgba(255,255,255,0.2); margin: 0.75rem 0;">
 
-                            <a href="{{ route('new_advanced_search.form') }}"
-                                class="btn btn-outline-secondary"><span>@lang('Búsqueda avanzada')</span></a>
-
-                        </div>
+                        {{-- Best simulation finder --}}
+                        <form action="{{ route('simulations.list') }}" method="get" class="d-flex justify-content-center">
+                            <input type="hidden" name="sort" value="best">
+                            <input type="hidden" name="direction" value="desc">
+                            <div class="input-group" style="max-width: 400px;">
+                                <select name="lipid" class="form-select" aria-label="Select lipid">
+                                    <option value="" selected disabled>Best simulation for lipid…</option>
+                                    @foreach (\App\Lipido::orderBy('molecule')->get()->unique('molecule') as $lipid)
+                                        <option value="{{ $lipid->molecule }}">{{ $lipid->molecule }}</option>
+                                    @endforeach
+                                </select>
+                                <button class="btn btn-warning" type="submit">★ Find Best</button>
+                            </div>
+                        </form>
                     </div>
-                    <div class="col-12 mt-4">
-                        <script type="text/javascript">
-                           $(function(){
-                            $('#expopc').click(function(){
-                                $('#BasicSearch').val('POPC');
-                                $('#BasicSearch').focus();
-                            });
+                </div>
+            </div>
 
-                            $('#expopcpope').click(function(){
-                                $('#BasicSearch').val('POPC:POPE');
-                                $('#BasicSearch').focus();
-
-                            });
-                            $('#lipid_name_example').click(function(){
-                                $('#BasicSearch').val('1-octadecanoyl-2-(9Z)-octadecenoyl-sn-glycero-3-phosphocholine');
-                                $('#BasicSearch').focus();
-                            });
-                            });
-                        </script> 
-
-
-
-                        <p class="text-white-75 mb-3">Search based on (partial matching) lipid names, synonyms, or properties (InChI, InChIKey, Smiles), for example by: 
-                            <a href="#" id="expopc">POPC</a>,
-                           <a href="#" id="expopcpope">POPC:POPE</a> or <a href="#" id="lipid_name_example">1-octadecanoyl-2-(9Z)-octadecenoyl-sn-glycero-3-phosphocholine</a>. Please refer to the
-                             <a
-                                href="{{ route('lipids.list') }}">
-                                list of universal molecule names that can be used in searches</a>.
-                            You can search for trajectories by their ID by typing 'ID' followed by their numeric ID, for example,
-                            ID123. More options are available in Advanced search. You can  force search by DOI by typing 'DOI:' followed by the DOI, for example, DOI:10.1021/acs.jpcb.4c04719.
-                        </p>
-                        <p>Current content of the FAIRMD Lipids Databank:</p>
-                        <span class="text-white-75 mb-1" style="font-size: 0.9em;">
+            {{-- Examples & stats --}}
+            <div class="row justify-content-center text-center mt-3">
+                <div class="col-lg-7">
+                    <p class="text-white-75 mb-2" style="font-size: 0.85rem;">
+                        Try:
+                        <a href="#" id="expopc" class="hero-example">POPC</a>,
+                        <a href="#" id="expopcpope" class="hero-example">POPC:POPE</a>, or
+                        <a href="#" id="lipid_name_example" class="hero-example">full lipid names</a>.
+                        Search by trajectory ID (<code style="color: #ffe0b2;">ID123</code>) or
+                        DOI (<code style="color: #ffe0b2;">DOI:10.1021/…</code>).
+                    </p>
+                    <p class="hero-stats">
                         {{ StatisticsController::totals() }}
-                        </span>
-                                                   
-                    </div>
-
-                   
+                    </p>
                 </div>
-                
             </div>
         </div>
         
@@ -173,87 +132,78 @@ use App\Http\Controllers\StatisticsController;
    
 
     <!-- About-->
-    <section class="page-section bg-primary"  id="about" style="display: flex; align-items: center; justify-content: center;">
+    <section class="page-section" id="about" style="padding: 4rem 0;">
         <div class="container px-4 px-lg-5">
-            <div class="row gx-4 gx-lg-5 justify-content-center">
-                <div class="col-lg-8 text-center">
-                    <h2 class="text-white mt-0">About</h2>
-                    <hr class="divider divider-light" />
-                    <h3 class="text-white mt-0">What is FAIRMD Lipids Databank?</h2>
-                    <p class="text-white-75 mb-4 txt_desc text-left">FAIRMD Lipids Databank is a community-driven catalogue containing
-                        atomistic molecular dynamics (MD) simulations of biologically relevant
-                        lipid membranes emerging from the <a href="http://nmrlipids.blogspot.com/"> NMRlipids open
-                            collaboration</a>.
-                        It has been designed to improve the <a href="https://www.go-fair.org/fair-principles/">Findability, Accessibility, Interoperability, and Reuse
-                        (FAIR)</a> of MD simulation data.
-                        FAIRMD Lipids databank is implemented using an overlay databank structure and is described in detail in
-                        the <a href="https://www.nature.com/articles/s41467-024-45189-z"> databank publication</a>. 
-                        Please refer to the <a href="https://nmrlipids.github.io/">online documentation</a> of the system and its components</p>
-                    <h3 class="text-white mt-0">Using FAIRMD Lipids </h2>
-                        <p class="text-white-75 mb-4 txt_desc text-left">
-                            FAIRMD Lipids consists of three main components:
+            <div class="row justify-content-center">
+                <div class="col-lg-9">
 
-                            <ul     class="text-white-75 mb-4 txt_desc text-left">
-                                <li>FAIRMD Lipids Databank-GUI (this website)</li>
-                                <li>FAIRMD Lipids Databank-API</li>
-                                <li>The BilayerData repository</li>
-                            </ul>
-                        </p>
+                    <h2 class="text-center mb-4" style="color: #0e4a56; font-weight: 700;">About FAIRMD Lipids Databank</h2>
+                    <hr class="divider mb-4">
 
-                    <p class="text-white-75 mb-4 txt_desc text-left">
-                        The FAIRMD Lipids Databank-GUI </a> can be used to browse and search the content of the
-                        Databank, to select the best available simulations for specific systems based on ranking lists,
-                        and to perform comparisons between basic properties of membranes. It is implemented as a web
-                        application using the <a href="https://laravel.com/">Laravel framework</a>. The source code is available on <a href="https://github.com/NMRLipids/BilayerGUI_laravel">GitHub</a>.
-                        We have made efforts towards easy local deployment of the application to use, e.g., with private data.
-                    </p>
+                    <div class="about-card mb-4">
+                        <h4>What is FAIRMD Lipids Databank?</h4>
+                        <p>FAIRMD Lipids Databank is a community-driven catalogue containing
+                            atomistic molecular dynamics (MD) simulations of biologically relevant
+                            lipid membranes emerging from the <a href="http://nmrlipids.blogspot.com/">NMRlipids open collaboration</a>.
+                            It improves the <a href="https://www.go-fair.org/fair-principles/">Findability, Accessibility, Interoperability, and Reuse (FAIR)</a>
+                            of MD simulation data using an overlay databank structure described in the
+                            <a href="https://www.nature.com/articles/s41467-024-45189-z">databank publication</a>.
+                            See the <a href="https://nmrlipids.github.io/">online documentation</a> for full details.</p>
+                    </div>
 
-                    <p class="text-white-75 mb-4 txt_desc text-left">
-                        The <a href="http://github.com/NMRlipids/Databank/"> FAIRMD Lipids Databank-API</a> provides
-                        programmatic access to all simulation data in the FAIRMD Lipids Databank. This enables a wide range of
-                        novel data-driven applications —
-                        from construction of machine learning models that predict membrane properties to automatic
-                        analysis of virtually any property across all simulations in the Databank.
-                         </p>
-                    <p class="text-white-75 mb-4 txt_desc text-left">
-                        <a
-                            href="https://github.com/NMRLipids/databank-template/blob/main/scripts/"> Jupyter Notebooks</a>
-                        and other examples for applications of FAIRMD Lipids Databank-API are included on <a
-                            href="https://github.com/NMRlipids/Databank">GitHub</a> and in the <a
-                            href="https://www.nature.com/articles/s41467-024-45189-z"> FAIRMD Lipids databank publication</a>.
-                    </p>
+                    <div class="about-card mb-4">
+                        <h4>Components</h4>
+                        <div class="row g-3">
+                            <div class="col-md-4">
+                                <div class="component-pill">
+                                    <strong>Databank-GUI</strong>
+                                    <span>This website — browse, search and compare simulations.
+                                        <a href="https://github.com/NMRLipids/BilayerGUI_laravel">Source</a></span>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="component-pill">
+                                    <strong>Databank-API</strong>
+                                    <span>Programmatic access for data-driven applications.
+                                        <a href="http://github.com/NMRlipids/Databank/">GitHub</a></span>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="component-pill">
+                                    <strong>BilayerData</strong>
+                                    <span>Metadata repository with trajectories on <a href="https://zenodo.org/">Zenodo</a>.
+                                        <a href="https://github.com/NMRLipids/BilayerData">GitHub</a></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
 
-                    <p class="text-white-75 mb-4 txt_desc text-left">
-                        The <a href="https://github.com/NMRLipids/BilayerData">BilayerData repository</a> is the main data storage of the FAIRMD Lipids
-                        Databank. It contains the actual meta-data on MD simulation data and metadata describing simulations and molecules. The actual
-                        trajectory files are stored in <a href="https://zenodo.org/">Zenodo</a> and linked to the BilayerData repository.
-                        The repository is open for contributions from the community. Instructions for contributing data
-                        are available in the <a href="https://nmrlipids.github.io/dbcontribute.html">online
-                        documentation</a>.
-                    </p>
-                    <h3 class="text-white mt-0">Citing and licensing</h2>
-                    <p class="text-white-75 mb-4 txt_desc text-left">
-                        If you use the FAIRMD Lipids databank in your publications, please cite the FAIRMD Lipids <a
-                            href="https://www.nature.com/articles/s41467-024-45189-z">Databank
-                            publication</a>,
-                        as well as the trajectory entries and related publications whereever appropriate.
-                        The data in the BilayerData repository are provided under a Creative Commons Attribution 4.0
-                        International (CC-BY-4.0) license
-                        (see <a href="https://github.com/NMRLipids/BilayerData/blob/main/LICENSE">LICENSE</a>).
-                        The code for the FAIRMD Lipids Databank-API is provided under the GNU General Public   
-                         license version 3 (GPLv3) (see <a
-                            href="https://github.com/NMRLipids/Databank/blob/main/LICENSE.txt">LICENSE</a>). 
-                        The user interface code is provided under an MIT license (see <a href="https://github.com/NMRLipids/BilayerGUI_laravel/blob/main/LICENSE">LICENSE</a>).  
-                        
-                        All data and code are provided AS-IS. 
-                        There is no warranty of any kind that the data or software are correct
-                        or suitable for any specific purpose.
-                    </p>
-                    <h3 class="text-white mt-0">Feedback and bug reports</h2>
-                    <p class="text-white-75 mb-4 txt_desc text-left">
-                        Please contact us via the GitHub issue tracker of each component for feedback or if you find
-                        any errors or bugs.
-                    </p>
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-6">
+                            <div class="about-card h-100">
+                                <h4>Citing &amp; Licensing</h4>
+                                <p>Please cite the <a href="https://www.nature.com/articles/s41467-024-45189-z">Databank publication</a>
+                                    and relevant trajectory entries.</p>
+                                <ul class="small mb-0">
+                                    <li>Data: <a href="https://github.com/NMRLipids/BilayerData/blob/main/LICENSE">CC-BY-4.0</a></li>
+                                    <li>API code: <a href="https://github.com/NMRLipids/Databank/blob/main/LICENSE.txt">GPLv3</a></li>
+                                    <li>GUI code: <a href="https://github.com/NMRLipids/BilayerGUI_laravel/blob/main/LICENSE">MIT</a></li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="about-card h-100">
+                                <h4>Resources</h4>
+                                <ul class="small mb-2">
+                                    <li><a href="https://github.com/NMRLipids/databank-template/blob/main/scripts/">Jupyter Notebooks</a> and API examples</li>
+                                    <li><a href="https://nmrlipids.github.io/dbcontribute.html">How to contribute data</a></li>
+                                    <li><a href="https://nmrlipids.github.io/">Full documentation</a></li>
+                                </ul>
+                                <p class="small text-dark mb-0">All data and code are provided AS-IS with no warranty. Report issues via each component's GitHub tracker.</p>
+                            </div>
+                        </div>
+                    </div>
+
                 </div>
             </div>
         </div>
@@ -263,7 +213,6 @@ use App\Http\Controllers\StatisticsController;
 
     <script>
         $(function() {
-
             $("#BasicSearch").autocomplete({
                 source: function(request, response) {
                     $.ajax({
@@ -277,7 +226,19 @@ use App\Http\Controllers\StatisticsController;
                         }
                     });
                 }
+            });
 
+            $('#expopc').click(function(e) {
+                e.preventDefault();
+                $('#BasicSearch').val('POPC').focus();
+            });
+            $('#expopcpope').click(function(e) {
+                e.preventDefault();
+                $('#BasicSearch').val('POPC:POPE').focus();
+            });
+            $('#lipid_name_example').click(function(e) {
+                e.preventDefault();
+                $('#BasicSearch').val('1-octadecanoyl-2-(9Z)-octadecenoyl-sn-glycero-3-phosphocholine').focus();
             });
         });
     </script>

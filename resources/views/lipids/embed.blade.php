@@ -22,7 +22,7 @@
                             <td>
                                 <a href="{{ route('lipid.show', $lipid->id) }}" 
                                  target="_blank"
-                                class="btn btn-sm btn-primary">View</a>
+                                class="btn btn-sm btn-primary" title="{{ $lipid->displayTitle() }}">View</a>
                             </td>
                         </tr>
                     @endforeach

@@ -84,14 +84,20 @@ function withAlpha(color, alpha) {
 
 
     function drawOneChart(canvas, dataset, title) {
-        const textColor = getComputedTextColor(canvas);
-        const gridColor = withAlpha(textColor, 0.18);
+        const textColor = '#ffffff';
+        const gridColor = 'rgba(255, 255, 255, 0.25)';
 
         let myChart = new Chart(canvas, {
             type: 'line',
             data: dataset,
             options: {
                 responsive: true,
+                maintainAspectRatio: false,
+                layout: {
+                    padding: {
+                        bottom: 20,
+                    }
+                },
                 plugins: {
                     legend: {
                         display: true,

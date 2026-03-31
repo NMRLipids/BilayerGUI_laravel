@@ -221,6 +221,38 @@ function drawOneChart(canvas, dataset, legend, title) {
     // This will insert null values for any missing x-labels in each dataset, ensuring consistent x-axis across all datasets
     // Configuration for the chart, including the custom whisker plugin for error bars
 
+    const labelCount = Array.isArray(plotData.labels) ? plotData.labels.length : 0;
+    const chartContainer = canvas.closest('.chart-container');
+    const chartItem = canvas.closest('.op-chart-item');
+    const chartGrid = canvas.closest('.op-chart-grid');
+    const isSmallViewport = window.matchMedia('(max-width: 899px)').matches;
+
+    if (chartGrid) {
+        chartGrid.style.display = 'flex';
+        chartGrid.style.flexWrap = 'wrap';
+        chartGrid.style.gap = '1rem';
+        chartGrid.style.alignItems = 'flex-start';
+        chartGrid.style.justifyContent = 'center';
+    }
+
+    if (chartItem) {
+        chartItem.style.overflow = 'hidden';
+        chartItem.style.boxSizing = 'border-box';
+        if (!isSmallViewport && labelCount > 0 && labelCount < 20) {
+            chartItem.style.flex = '0 0 calc(45% - 0.5rem)';
+            chartItem.style.maxWidth = 'calc(45% - 0.5rem)';
+        } else {
+            chartItem.style.flex = '0 0 100%';
+            chartItem.style.maxWidth = '100%';
+        }
+    }
+
+    if (chartContainer) {
+        chartContainer.style.width = '100%';
+        chartContainer.style.boxSizing = 'border-box';
+        chartContainer.style.maxWidth = '100%';
+    }
+
     const config = {
         type: 'scatter',
         data: plotData,

@@ -35,12 +35,12 @@
                     </ul>
 
                     <!-- Tab Contents -->
-                    <div class="tab-content bg-dark text-white p-4 rounded-bottom" id="lipidTabContent">
+                    <div class="tab-content text-white p-4 rounded-bottom" id="lipidTabContent">
                         
                         <!-- Overview -->
                         <div class="tab-pane fade show active" id="overview" role="tabpanel">
                             <div class="table-responsive">
-                                <table class="table table-bordered table-striped table-sm table-dark mb-0">
+                                <table class="table table-bordered table-striped table-sm table-glass table-hover mb-0">
                                     <tbody>
                                         @foreach ($entity as $key => $value)
                                             @if($key === 'jsonLd' ||
@@ -79,7 +79,7 @@
                         <div class="tab-pane fade" id="properties" role="tabpanel">
                             @if(!empty($properties))
                                 <div class="table-responsive">
-                                    <table class="table table-bordered table-striped table-sm table-dark">
+                                    <table class="table table-bordered table-striped table-sm table-glass table-hover">
                                         <thead>
                                             <tr>
                                                 <th scope="col">Property</th>
@@ -105,7 +105,7 @@
                         @if(!empty($cross_refs))
                         <div class="tab-pane fade" id="crossrefs" role="tabpanel">
                             <div class="table-responsive">
-                                <table class="table table-bordered table-striped table-sm table-dark">
+                                <table class="table table-bordered table-striped table-sm table-glass table-hover">
                                     <thead>
                                         <tr>
                                             <th scope="col">Database</th>
@@ -120,7 +120,7 @@
                                                     @if(!empty($xref->url))
                                                         <a href="{{ $xref->url }}" target="_blank" class="text-white-75">{{ $xref->external_id ?? '' }}</a>
                                                     @else
-                                                        <a href="https://identifiers.org/{{ urlencode($xref->database) }}/{{ urlencode($xref->external_id) }}" target="_blank" class="text-white-75">{{ $xref->external_id ?? '' }}</a>
+                                                        <a href="https://identifiers.org/{{ $xref->database }}/{{ $xref->external_id }}" target="_blank" class="text-white-75">{{ $xref->external_id ?? '' }}</a>
                                                     @endif
                                                 </td>
                                             </tr>

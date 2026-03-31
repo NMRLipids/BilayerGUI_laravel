@@ -110,19 +110,43 @@ class ExperimentController extends Controller
 
     public function list(): \Illuminate\View\View
     {
-        // Fetch all experiments
-        $experiments = DB::table('experiments as e')
-            ->select('e.id', 'e.article_doi', 'e.data_doi', 'e.type', 'e.path')
-            ->leftJoin('experiments_membrane_composition as emc', 'e.id', '=', 'emc.experiment_id')
-            ->groupBy('e.id')
-            ->orderBy('type', 'asc')
-            ->orderBy('path', 'asc')
-            
-            ->selectRaw('COUNT(emc.lipid_id) as lipid_count')
-            ->paginate(10);
+        $request = request();
+        $sort = $request->input('sort', 'id');
+        $direction = $request->input('direction', 'asc');
+        $perPage = $request->input('per_page', 10);
 
-        return View::make('experiment', [
+        // Validate inputs
+        $direction = in_array($direction, ['asc', 'desc']) ? $direction : 'asc';
+        $allowedSorts = ['id', 'type', 'temperature'];
+        $sort = in_array($sort, $allowedSorts) ? $sort : 'id';
+
+        $query = \App\Experiments::withCount('membraneComposition');
+
+        if ($sort === 'temperature') {
+            // Join the temperature property for sorting
+            $query->leftJoin('experiments_properties_linker as epl_sort', 'experiments.id', '=', 'epl_sort.experiment_id')
+                  ->leftJoin('experiment_property as ep_sort', function ($join) {
+                      $join->on('epl_sort.property_id', '=', 'ep_sort.id')
+                           ->where('ep_sort.name', '=', 'temperature');
+                  })
+                  ->orderByRaw('CAST(ep_sort.value AS DECIMAL(10,2)) ' . $direction)
+                  ->select('experiments.*');
+        } else {
+            $query->orderBy('experiments.' . $sort, $direction);
+        }
+
+        if ($perPage === 'all') {
+            $experiments = $query->paginate($query->count() ?: 1);
+        } else {
+            $perPage = in_array((int)$perPage, [10, 20, 50]) ? (int)$perPage : 10;
+            $experiments = $query->paginate($perPage);
+        }
+
+        return View::make('experiment.list', [
             'experiments_list' => $experiments,
+            'sort' => $sort,
+            'direction' => $direction,
+            'per_page' => $request->input('per_page', 10),
         ]);
     }
 
@@ -205,7 +229,7 @@ class ExperimentController extends Controller
 
         $dataFF[] =  ($experiment->type === 'FF' && !empty($experiment->data)) ? json_decode($experiment->data, true) : null;
         $exp_object = \App\Experiments::find($experiment->id);
-        return View::make('experiment', [
+        return View::make('experiment.show', [
                 'entity' => ['doi' => $experiment->article_doi,
                             'data_doi' => $experiment->data_doi,
                             'path' => $experiment->path,

@@ -26,8 +26,87 @@ if (typeof bootstrap === 'undefined') {
     document.head.appendChild(s);
 }
 </script>
+
+<!-- Mobile navbar fallback toggle (reliable open/close on repeated taps) -->
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    var togglers = document.querySelectorAll('.navbar-toggler[data-nav-target]');
+    togglers.forEach(function (btn) {
+        var targetSelector = btn.getAttribute('data-nav-target');
+        var target = targetSelector ? document.querySelector(targetSelector) : null;
+        if (!target) return;
+
+        btn.addEventListener('click', function (e) {
+            e.preventDefault();
+            var isOpen = target.classList.contains('show');
+            target.classList.toggle('show', !isOpen);
+            btn.setAttribute('aria-expanded', String(!isOpen));
+        });
+
+        target.querySelectorAll('.nav-link').forEach(function (link) {
+            link.addEventListener('click', function () {
+                if (window.matchMedia('(max-width: 991.98px)').matches) {
+                    target.classList.remove('show');
+                    btn.setAttribute('aria-expanded', 'false');
+                }
+            });
+        });
+    });
+});
+</script>
+
 <!-- SimpleLightbox plugin JS-->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/SimpleLightbox/2.1.0/simpleLightbox.min.js"></script>
+
+<!-- High-contrast toggle + OS preference detection -->
+<script>
+(function () {
+    var root = document.documentElement;
+    var stored = localStorage.getItem('high-contrast');
+
+    function applyContrast(on) {
+        if (on) {
+            root.classList.add('high-contrast');
+            root.classList.remove('no-high-contrast');
+        } else {
+            root.classList.remove('high-contrast');
+            root.classList.add('no-high-contrast');
+        }
+    }
+
+    // Determine initial state: localStorage overrides OS preference
+    if (stored === 'on') {
+        applyContrast(true);
+    } else if (stored === 'off') {
+        applyContrast(false);
+    } else {
+        // No user choice yet — follow OS preference
+        var osHigh = window.matchMedia && window.matchMedia('(prefers-contrast: high)').matches;
+        if (osHigh) {
+            applyContrast(true);
+        }
+        // else: default (no class), media query in CSS handles auto
+    }
+
+    // Listen for OS preference changes (live)
+    if (window.matchMedia) {
+        window.matchMedia('(prefers-contrast: high)').addEventListener('change', function (e) {
+            if (!localStorage.getItem('high-contrast')) {
+                applyContrast(e.matches);
+            }
+        });
+    }
+
+    // Toggle button click
+    document.addEventListener('click', function (e) {
+        var btn = e.target.closest('.contrast-toggle');
+        if (!btn) return;
+        var isOn = root.classList.contains('high-contrast');
+        applyContrast(!isOn);
+        localStorage.setItem('high-contrast', isOn ? 'off' : 'on');
+    });
+})();
+</script>
 
 <!-- Async DOI hover preview card for .doi-link elements -->
 <style>

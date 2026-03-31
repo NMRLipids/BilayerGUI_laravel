@@ -38,7 +38,7 @@
                     <p class="text-white text-center">No results found.</p>
                 @else
                 <div class="text-white text-center table-responsive">
-                    <table class="table table-bordered table-striped table-sm table-dark">
+                    <table class="table table-bordered table-striped table-sm table-glass table-hover">
                         <thead>
                             <tr>
                                 @php
@@ -130,7 +130,7 @@
                                         @endif
                                     </td>
                                     <td>
-                                        <a href="{{ route('trayectorias.show', $trayectoria->id) }}" class="btn btn-sm btn-primary">View</a>
+                                        <a href="{{ route('trayectorias.show', $trayectoria->id) }}" class="btn btn-sm btn-primary" title="{{ $trayectoria->displayTitle() }}">View</a>
                                
                                     </td>
                                 </tr>

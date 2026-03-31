@@ -33,12 +33,20 @@
 import Chart from 'chart.js/auto';
 
 function drawApLChart(canvas, dataset, title) {
+    const textColor = '#ffffff';
+    const gridColor = 'rgba(255, 255, 255, 0.25)';
 
     let myChart = new Chart(canvas, {
         type: 'line',
         data: dataset,
         options: {
             responsive: true,
+            maintainAspectRatio: false,
+            layout: {
+                padding: {
+                    bottom: 20,
+                }
+            },
             plugins: {
                 legend: {
                     display: false,
@@ -46,21 +54,42 @@ function drawApLChart(canvas, dataset, title) {
                 title: {
                     display: true,
                     text: title,
+                    color: textColor,
                 },
             },
             scales: {
                 x: {
                     type: 'linear',
                     position: 'bottom',
+                    ticks: {
+                        color: textColor,
+                    },
+                    grid: {
+                        color: gridColor,
+                    },
+                    border: {
+                        color: gridColor,
+                    },
                     title: {
                         display: true,
                         text: 'Time (ps)',
+                        color: textColor,
                     },
                 },
                 y: {
+                    ticks: {
+                        color: textColor,
+                    },
+                    grid: {
+                        color: gridColor,
+                    },
+                    border: {
+                        color: gridColor,
+                    },
                     title: {
                         display: true,
                         text: 'Area per lipid (Å²)',
+                        color: textColor,
                     },
                 },
             },

@@ -13,10 +13,10 @@ foreach ($allSession as $key => $value) {
 
 <body>
     <div id="app" class="bg-datos" style="height:auto;overflow-x:hidden; ">
-        <nav id="mainNav" class="navbar navbar-expand-md navbar-light ">
-            <div class="container">
+        <nav id="mainNav" class="navbar navbar-expand-lg navbar-light fixed-top py-3">
+            <div class="container px-4 px-lg-5">
                 <a class="navbar-brand" href="{{ url('/') }}">
-                    <img class="img-fluid" style="max-height: 40px;" alt="FAIRMD Lipids Databank"
+                    <img class="img-fluid fairmd-logo" style="max-height: 40px;" alt="FAIRMD Lipids Databank"
                         src="{{ asset('storage/images/fairmd_w_letras.png') }}">
                    
                     <div class="d-none">
@@ -24,34 +24,34 @@ foreach ($allSession as $key => $value) {
                         <span>Entorno: {{ config('app.env') }}</span>
                     </div>
                 </a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
-                    data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false"
-                    aria-label="{{ __('Toggle navigation') }}">
+                <button class="navbar-toggler navbar-toggler-right" type="button" data-bs-toggle="collapse"
+                    data-nav-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false"
+                    aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
                 </button>
 
-                <div class="collapse navbar-collapse" id="navbarSupportedContent">
-                    <!-- Left Side Of Navbar -->
-                    <ul class="navbar-nav mr-auto">
-                    </ul>
-
-                    <!-- Right Side Of Navbar -->
-                    <ul class="navbar-nav ml-auto">
+                <div class="collapse navbar-collapse" id="navbarResponsive">
+                    <ul class="navbar-nav ms-auto my-2 my-lg-0">
                         <li class="nav-item">
-                            <form action="{{ route('search.results') }}" method="get" class="d-flex align-items-center my-1 my-md-0">
+                            <form action="{{ route('search.results') }}" method="get" class="d-flex align-items-center">
                                 <input type="text" name="text" class="form-control form-control-sm" placeholder="Search..." aria-label="Search" style="width: 150px;">
-                                <button class="btn btn-sm btn-outline-dark ms-1" type="submit">Go</button>
+                                <button class="btn btn-sm btn-outline-light ms-1" type="submit">Go</button>
                             </form>
                         </li>
-                        <li class="nav-item"><a class="nav-link" href="{{ route('new_advanced_search.form') }}">Advanced Search</a></li>
-                        <li class="nav-item"><a class="nav-link" href="{{ route('experiments.list') }}">Browse Experiments</a></li>
-                        <li class="nav-item"><a class="nav-link" href="{{ route('search.results') }}">Browse Simulations</a></li>
+                            <li class="nav-item"><a class="nav-link" href="{{ route('new_advanced_search.form') }}"><span class="nav-icon" aria-hidden="true" style="font-size: 1.2rem;">⌕ </span>Advanced Search</a></li>
+                            <li class="nav-item"><a class="nav-link" href="{{ route('lipids.list') }}"><span class="nav-icon" aria-hidden="true" style="font-size: 1.2rem;">◌</span>Lipids</a></li>
+                            <li class="nav-item"><a class="nav-link" href="{{ route('experiments.list') }}"><span class="nav-icon" aria-hidden="true">⚗</span>Experiments</a></li>
+                            <li class="nav-item"><a class="nav-link" href="{{ route('simulations.list') }}"><span class="nav-icon" aria-hidden="true">◈</span>Simulations</a></li>
+                            <li class="nav-item"><a class="nav-link" href="{{ url('/#about') }}"><span class="nav-icon" aria-hidden="true">ⓘ</span>About</a></li>
+                            <li class="nav-item d-flex align-items-center ms-2">
+                            <button class="contrast-toggle" id="contrastToggle" type="button" title="Toggle high-contrast mode" aria-label="Toggle high-contrast mode">&#9684;</button>
+                        </li>
                     </ul>
                 </div>
             </div>
         </nav>
 
-        <main style="padding-bottom: 140px;">
+        <main style="padding-top: 96px; padding-bottom: 140px;">
             @yield('content')
         </main>
 

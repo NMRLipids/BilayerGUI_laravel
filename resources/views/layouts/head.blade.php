@@ -1,6 +1,10 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <script>
+    // Apply high-contrast class early to prevent flash of unstyled content
+    (function(){var s=localStorage.getItem('high-contrast');if(s==='on')document.documentElement.classList.add('high-contrast');else if(s==='off')document.documentElement.classList.add('no-high-contrast');})();
+    </script>
     
     <meta name="description" content="FAIRMD Lipids Databank" />
     <meta name="author" content="NMRLipids Consortium" />
@@ -110,7 +114,7 @@
 
     /* Tab content styling */
     .tab-content {
-        background-color: #212529; /* Bootstrap dark */
+        background-color: transparent;
         border-radius: 0 0 0.5rem 0.5rem;
         margin-top: 1rem;
         padding: 1.5rem;

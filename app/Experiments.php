@@ -17,6 +17,12 @@ class Experiments extends AppModel
     {
         return $this->hasMany(MembraneComposition::class, 'experiment_id', 'id');
     }
+
+    public function getLipids()
+    {
+        return $this->membraneComposition()->with('lipid')->get()->pluck('lipid.molecule');
+    }
+
     public function getMembraneCompositionsByLipid($lipid_id)
     {
         return $this->hasMany(MembraneComposition::class, 'experiment_id', 'id')->where('lipid_id', $lipid_id)->get();

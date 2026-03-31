@@ -5,46 +5,8 @@
             <div class="row gx-4 gx-lg-5 justify-content-center">
                 <div class="col-lg-10">
                     <h3 class="text-white text-center mt-0">
-                    @if (! empty($experiments_list)) Experiments @else {{ $entity['type'] }} Experiment @endif</h3>
-                    @php
-                        $experiments_list = $experiments_list ?? [];
-                        $entity = $entity ?? [];
-                        $properties = $properties ?? []; 
-                    @endphp
-                    @if (!empty($experiments_list))
-                        <div class="text-white text-center mt-0">
-                        <table class="table table-bordered table-striped table-sm table-dark">
-                            <thead>
-                                <tr>
-                                    <th scope="col">ID</th>
-                                    <th scope="col">Article DOI</th>
-                                    <th scope="col">Data DOI</th>
-                                    <th scope="col">Type</th>
-                                    <th scope="col">Path</th>
-                                    <th scope="col"># types of lipids</th>
-                                    <th scope="col">Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @foreach ($experiments_list as $experiment)
-                                <tr>
-                                    <td>{{ $experiment->id }}</td>
-                                    <td>{{ $experiment->article_doi }}</td>
-                                    <td>{{ $experiment->data_doi }}</td>
-                                    <td>{{ $experiment->type }}</td>
-                                    
-                                    <td>{{ $experiment->path }}</td>
-                                    <td>{{ $experiment->lipid_count }}</td>
-                                    <td><a href="{{ route('experiments.show', ['type' => $experiment->type, 'path' => $experiment->path]) }}" class="btn btn-primary btn-sm">View</a></td>
-                                </tr>
-                                @endforeach
-                            </tbody>
-                        </table>
-                        <div class="d-flex justify-content-center">
-                        {{ $experiments_list->links() }}
-                        </div>
-                        </div>
-                    @else
+                        Experiment {{ $entity['type'] }} - {{ $entity['path'] }}
+                    </h3>                  
                         
                     <!-- Bootstrap Tabs -->
                     <ul class="nav nav-pills justify-content-start" id="experimentTab" role="tablist">
@@ -58,7 +20,7 @@
                             <button class="nav-link" id="properties-tab" data-bs-toggle="tab"  data-bs-target="#properties" type="button" role="tab">Properties</button>
                         </li>
                         <!-- Add cross reference links to related simulations if available -->
-                        @if (! empty($related_simulations)) 
+                        @if (count($related_simulations) > 0) 
                         <li class="nav-item" role="presentation">
                             <button class="nav-link" id="related-tab" data-bs-toggle="tab" data-bs-target="#related" type="button" role="tab">Simulations</button>
                         </li>
@@ -69,7 +31,7 @@
                         <!-- Overview Tab -->
                         <div class="tab-pane fade show active" id="overview" role="tabpanel" aria-labelledby="overview-tab">
                               <div class="table-responsive">
-                                <table class="table table-bordered table-striped table-sm table-dark">
+                                <table class="table table-bordered table-striped table-sm table-glass">
                                     <tbody>
                                         <tr>
                                             <th scope="row">Article DOI</th>
@@ -89,12 +51,12 @@
                                             <th scope="row">Membrane composition (molar fraction)</th>
 
                                             <td>
-                                            <table class="table">
+                                            <table class="table table-striped table-sm table-glass">
                                                 
                                                 <tbody>
                                                 @foreach ( $entity['membrane_composition'] as $component )
                                                     <tr>
-                                                        <td><a href="/lipid/{{ $component->id }}"> {{ $component->molecule }}</a></td>
+                                                        <td><a href="/lipid/{{ $component->id }}" title="Lipid: {{ $component->molecule }}"> {{ $component->molecule }}</a></td>
                                                         <td>{{ $component->name  }} </td>
                                                         <td>{{ $component->mol_fraction }}</td>
                                                     </tr>
@@ -112,7 +74,7 @@
                                                     Pure water
 
                                                 @else
-                                                    <table class="table table-striped table-sm ">
+                                                    <table class="table table-striped table-sm table-glass table-hover">
                                                         <thead>
                                                             <tr>
                                                                 <th scope="col">Compound</th>
@@ -151,7 +113,7 @@
                                                 $decoded_value = $properties['REAGENT_SOURCES']->value ?? [];
                                             @endphp
                                             <td>
-                                            <table class="table table-striped table-sm table-dark">
+                                            <table class="table table-striped table-sm table-glass table-hover">
                                                         <tbody>
                                                             @foreach ($decoded_value as $key => $value)
                                                             <tr>
@@ -235,7 +197,7 @@
                         
                             <div class="tab-pane fade" id="properties" role="tabpanel" aria-labelledby="properties-tab">
                                 <br/>
-                                <table class="table table-bordered table-striped table-sm table-dark">
+                                <table class="table table-bordered table-striped table-sm table-glass table-hover">
                                     <thead>
                                         <tr>
                                             <th scope="col">Name</th>
@@ -258,7 +220,7 @@
                                                 @if (is_array($decoded_value))
                                                     @if (array_keys($decoded_value) === range(0, count($decoded_value) - 1))
                                                         <!-- It's an array -->
-                                                        <table class="table table-striped table-sm table-dark">
+                                                        <table class="table table-striped table-sm table-glass table-hover">
                                                             <thead>
                                                                 <tr>
                                                                     <th scope="col">Index</th>
@@ -276,7 +238,7 @@
                                                         </table>
                                                     @else
                                                         <!-- It's a dictionary -->
-                                                        <table class="table table-striped table-sm table-dark">
+                                                        <table class="table table-striped table-sm table-glass table-hover">
                                                             <thead>
                                                                 <tr>
                                                                     <th scope="col">Key</th>
@@ -326,12 +288,14 @@
                                         $lipid_id = $lipid->id;
                                     @endphp
                                     @if (isset($OPData[$lipidName]))
+                                        <div class="op-chart-grid">
                                         @foreach ($OPData[$lipidName] as $group => $plot_data)   
                                         <!-- OP plot for each group of the lipid  {{$lipidName}}
                                                 Data attributes 'data-opplot' and 'data-oplegend' are 
                                                 used to pass the plot data and legend to the JavaScript 
                                                 code that will render the chart -->
-                                            <div class="chart-container" style="max-height: 500px; max-width: 80vh; background-color: #3b3944; position: relative;
+                                            <div class="op-chart-item">
+                                            <div class="chart-container" style="max-height: 500px; min-height: 350px; background-color: #3b3944; position: relative;
                                             margin-top: 20px; padding: 20px; border: 1px solid #695e5e; border-radius: 8px;">
                                                 <!-- h4>Group {{ $group }}</h4 -->
                                                 <canvas
@@ -341,14 +305,11 @@
                                                     data-optitle="Order Parameters - {{ $lipidName }} - {{ $group }}"
                                                     >
                                                 </canvas>
-                                                </div>                                                                        
-                                                    <p style="cursor: pointer;" data-bs-toggle="collapse" data-bs-target="#dataCollapse_{{ $group }}_{{ $lipid_id }}">
-                                                        <span class="bi bi-chevron-down"></span> Data
-                                                    </p>
-                                                    <div id="dataCollapse_{{ $group }}_{{ $lipid_id }}" class="collapse" style="background-color: #1a1a1a; padding: 10px; border-radius: 5px;">
-                                                        <pre style="color: #fff; overflow-x: auto;">{{ json_encode($plot_data, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES) }}</pre>
-                                                    </div>
+                                                </div>
+                                            </div>
+                                                 
                                         @endforeach
+                                        </div>
                                     @else
                                         <div>
                                             <h2>No OP Data Available for {{ $lipidName }}</h2>
@@ -359,23 +320,23 @@
                             @elseif  ($entity['type'] === 'FF' && ! empty($FFData) )
                             <div class="row p-2">
                                 <div class="col-sm-12 col-md-12 chart-container-half">
-                                    <canvas id="myChartFormFactEXP"
-                                    data-ffdata="{{ json_encode($FFData) }}"
-                                    data-fflegend='["Form Factor"]'
-                                    data-fftitle="Form Factor - {{ $entity['doi'] }}"> </canvas>
-                                    
+                                    <div class="chart-container" style="max-height: 500px; max-width: 80vh; background-color: #3b3944; position: relative;
+                                    margin-top: 20px; padding: 20px; border: 1px solid #695e5e; border-radius: 8px;">
+                                        <canvas id="myChartFormFactEXP"
+                                        data-ffdata="{{ json_encode($FFData) }}"
+                                        data-fflegend='["Form Factor"]'
+                                        data-fftitle="Form Factor - {{ $entity['doi'] }}"> </canvas>
+                                    </div>
                                 </div>
                             </div>
-
                             @endif
-
                         </div>
                         <!-- Related Simulations Tab -->
-                        @if (! empty($related_simulations))
+                        @if (count($related_simulations) > 0) 
                         <div class="tab-pane fade" id="related" role="tabpanel" aria-labelledby="related-tab">
                             <p>Related simulations linked to this experiment:</p>
                             <div class="table-responsive">
-                                <table class="table table-bordered table-striped table-sm table-dark">
+                                <table class="table table-bordered table-striped table-sm table-glass table-hover">
                                     <thead>
                                         <tr>
                                             
@@ -396,7 +357,7 @@
                                             <td>{{ $simulation->campo_de_fuerza?->name}}</td>
                                             <td>{{ $simulation->trj_length }}</td>
                                             <td>{{ $simulation->temperature }}</td>
-                                            <td><a href="{{ route('trayectorias.show', ['trayectoria_id' => $simulation->id]) }}" class="btn btn-primary btn-sm">View</a></td>
+                                            <td><a href="{{ route('trayectorias.show', ['trayectoria_id' => $simulation->id]) }}" class="btn btn-primary btn-sm" title="{{ $simulation->displayTitle() }}">View</a></td>
                                         
                                         </tr>
                                         @endforeach
@@ -406,7 +367,6 @@
                         </div>
                         @endif
                     </div>
-                    @endif
                 </div>
             </div>
         </div>

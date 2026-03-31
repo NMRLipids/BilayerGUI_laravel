@@ -78,89 +78,103 @@
                         <div role="tabpanel" class="tab-pane fade show active" id="homeSimulationOverview" aria-labelledby="homeSimulationOverview-tab">
 
                             <div class="card-body">
-                                <div class="row p-2">
-                                    <div class="  col-12 pt-2">
-                                        <div class="container overflow-hidden">
-                                            <div class="row g-5">
-                                                <div class=" col-12"
-                                                    style="background-color: #5fbac4;border-right-width:  19px;border-right-style: solid;border-color: rgb(163 163 163);">
-                                                    <div class="p-3">
-                                                        <span class="txt-titulo">Computational methods </span>
-                                                        <span class="txt-titulo">{{ c('campo_de_fuerza') }}:</span>
-                                                        <span class="txt-dato">
-                                                            {{ $trayectoria->campo_de_fuerza->name }}</span><br>
-                                                        <span class="txt-titulo">{{ c('longitud') }}:</span>
-                                                        <span class="txt-dato">
-                                                            {{ $trayectoria->trj_length }}</span><br>
-                                                        <!--<span class="txt-titulo">{{ c('campo_electrico') }}:</span><span class="txt-dato"> {{ $trayectoria->electric_field }}</span><br>-->
-                                                        <span class="txt-titulo">{{ c('temperatura') }}:</span>
-                                                        <span class="txt-dato">{{ $trayectoria->temperature }}
-                                                        </span><br>
-                                                        <!--<span class="txt-titulo">{{ c('presion') }}:</span><span class="txt-dato">{{ $trayectoria->pressure }} ({{ $trayectoria->pressure_coupling }} {{ $trayectoria->pressure_coupling_type }})</span><br>-->
-                                                        <span class="txt-titulo">{{ c('particulas') }}:</span>
-                                                        <span
-                                                            class="txt-dato">{{ $trayectoria->number_of_atoms }}</span><br>
-                                                        <!--<span class="txt-titulo">{{ c('timestep') }} :</span><span class="txt-dato">{{ $trayectoria->timeleftout }} </span><br>-->
-                                                        <span class="txt-titulo">{{ c('software') }}:</span>
-                                                        <span class="txt-dato">{{ $trayectoria->software }} </span><br>
-                                                        <span class="txt-titulo">@lang('Iones'):</span>
-                                                        <span class="txt-dato">
-
-                                                            {{ $trayectoria->iones_num->map(function ($ion) {return "{$ion->ion_name}({$ion->number})";})->implode(', ') }}
-
-                                                        </span><br>
-
-                                                        <span class="txt-titulo">@lang('Water'):</span>
-                                                        <span class="txt-dato">
-
-                                                            {{ $trayectoria->water_resname }}
-
-                                                        </span><br>
-
-                                                        <span class="txt-titulo">@lang('Lipidos'):</span><br>
-
-                                                        <span class="txt-dato"> L1:
-                                                            {{ $trayectoria->membranas->implode('lipid_names_l1', ', ') }}
-                                                            ({{ $trayectoria->membranas->implode('lipid_number_l1', ', ') }})
-                                                        </span><br>
-                                                        <span class="txt-dato"> L2:
-                                                            {{ $trayectoria->membranas->implode('lipid_names_l2', ', ') }}
-                                                            ({{ $trayectoria->membranas->implode('lipid_number_l2', ', ') }})
-                                                        </span><br>
-                                                        <p>
-                                                            @php
-                                                                // ICICIC:
-                                                                // Generate the path to the simulation files 
-                                                                // without using echo
-                                                                $cadPath = asset(
-                                                                    'storage/simulations/' . $trayectoria->git_path,
-                                                                );
-                                                                echo "<a class=\"bi bi-cloud-download\" href=\"" .
-                                                                    $cadPath .
-                                                                    "/conf.pdb.gz\" class=\"card-link\" >&nbsp;Download PDB File. </a></br>";
-
-                                                                echo '<a class="bi bi-cloud-download card-link" href="https://doi.org/' .
-                                                                    $trayectoria->doi .
-                                                                    '" target="_blank">&nbsp;Link to simulation files</a>';
-                                                            @endphp
-
-                                                        </p>
-                                                    </div>
-
-                                                </div>
-
-
-                                                
-                                                <span class="txt-dato">
-                                                    <a
-                                                        href="{{ TC::GitHubDataRepoSimulations . $trayectoria->git_path }}">
-                                                        <br/>
-                                                        <span>See the system on GitHub</span>
-                                                    </a>
-                                                </span><br>
-                                            </div>
-                                        </div>
-                                    </div>
+                                <div class="table-responsive">
+                                    <table class="table table-bordered table-striped table-sm table-glass table-hover">
+                                        <tbody>
+                                            <tr>
+                                                <th scope="row">Computational methods</th>
+                                                <td>Simulation metadata</td>
+                                            </tr>
+                                            <tr>
+                                                <th scope="row">System</th>
+                                                <td>{{ $trayectoria->system ?? 'N/A' }}</td>
+                                            </tr>
+                                            <tr>
+                                                <th scope="row">Author(s)</th>
+                                                <td>{{ $trayectoria->author ?? 'N/A' }}</td>
+                                            </tr>
+                                            <tr>
+                                                <th scope="row">Date</th>
+                                                <td>{{ $trayectoria->date ?? 'N/A' }}</td>
+                                            </tr>
+                                            <tr>
+                                                <th scope="row">DOI</th>
+                                                <td>{!! renderDOI($trayectoria->doi) !!}</td>
+                                            </tr>
+                                            <tr>
+                                                <th scope="row">Publication</th>
+                                                <td>{{ $trayectoria->publication ?? 'N/A' }}</td>
+                                            </tr>
+                                            <tr>
+                                                <th scope="row">{{ c('campo_de_fuerza') }}</th>
+                                                <td>{{ $trayectoria->campo_de_fuerza->name ?? 'N/A' }}</td>
+                                            </tr>
+                                            
+                                            <tr>
+                                                <th scope="row">{{ c('longitud') }}</th>
+                                                <td>{{ $trayectoria->trj_length ?? 'N/A' }}</td>
+                                            </tr>
+                                            <tr>
+                                                <th scope="row">Trajectory size</th>
+                                                <td>{{ $trayectoria->trj_size ?? 'N/A' }}</td>
+                                            </tr>
+                                            <tr>
+                                                <th scope="row">Pre-equilibration time</th>
+                                                <td>{{ $trayectoria->preeq_time ?? 'N/A' }}</td>
+                                            </tr>
+                                            <tr>
+                                                <th scope="row">Time left out</th>
+                                                <td>{{ $trayectoria->timeleftout ?? 'N/A' }}</td>
+                                            </tr>
+                                            <tr>
+                                                <th scope="row">{{ c('temperatura') }}</th>
+                                                <td>{{ $trayectoria->temperature ?? 'N/A' }}</td>
+                                            </tr>
+                                            <tr>
+                                                <th scope="row">{{ c('particulas') }}</th>
+                                                <td>{{ $trayectoria->number_of_atoms ?? 'N/A' }}</td>
+                                            </tr>
+                                            <tr>
+                                                <th scope="row">{{ c('software') }}</th>
+                                                <td>{{ $trayectoria->software ?? 'N/A' }}</td>
+                                            </tr>
+                                            <tr>
+                                                <th scope="row">@lang('Iones')</th>
+                                                <td>{{ $trayectoria->iones_num->map(function ($ion) { return "{$ion->ion_name}({$ion->number})"; })->implode(', ') ?: 'N/A' }}</td>
+                                            </tr>
+                                            <tr>
+                                                <th scope="row">@lang('Water')</th>
+                                                <td>{{ $trayectoria->water_resname ?? 'N/A' }}</td>
+                                            </tr>
+                                            <tr>
+                                                <th scope="row">@lang('Lipidos') - L1</th>
+                                                <td>
+                                                    {{ $trayectoria->membranas->implode('lipid_names_l1', ', ') ?: 'N/A' }}
+                                                    @if($trayectoria->membranas->implode('lipid_number_l1', ', '))
+                                                        ({{ $trayectoria->membranas->implode('lipid_number_l1', ', ') }})
+                                                    @endif
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <th scope="row">@lang('Lipidos') - L2</th>
+                                                <td>
+                                                    {{ $trayectoria->membranas->implode('lipid_names_l2', ', ') ?: 'N/A' }}
+                                                    @if($trayectoria->membranas->implode('lipid_number_l2', ', '))
+                                                        ({{ $trayectoria->membranas->implode('lipid_number_l2', ', ') }})
+                                                    @endif
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <th scope="row">Files</th>
+                                                <td>
+                                                    @php $cadPath = asset('storage/simulations/' . $trayectoria->git_path) @endphp
+                                                    <a class="bi bi-cloud-download" href="{{ $cadPath }}/conf.pdb.gz">&nbsp;Download PDB File</a><br>
+                                                    <a class="bi bi-cloud-download" href="https://doi.org/{{ $trayectoria->doi }}" target="_blank">&nbsp;Link to simulation files</a><br>
+                                                    <a href="{{ TC::GitHubDataRepoSimulations . $trayectoria->git_path }}" target="_blank">See the system on GitHub</a>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
                                 </div>
                             </div>
                         </div>
@@ -217,7 +231,7 @@
                                         <div class="col-xs-12 col-lg-6 d-flex flex-wrap cardlipids">
                                             <div class=" m-2 w-100" style="width: 18rem;">
                                                 <div class="card-header text-left bg-card-header">
-                                                    <h5 class=" "><a href="{{ route('lipid.show', $lipido->id) }}">{{ $lipido->molecule }}</a></h5>
+                                                    <h5 class=" "><a href="{{ route('lipid.show', $lipido->id) }}" title="{{ $lipido->displayTitle() }}">{{ $lipido->molecule }}</a></h5>
                                                     <ul>
                                                         <li>
                                                             Quality total:
@@ -260,7 +274,7 @@
                             <div class="card-body">
                                 <p>Related experiments:</p>
                                 <div class="table-responsive">
-                                    <table class="table table-bordered table-striped table-sm table-dark">
+                                    <table class="table table-bordered table-striped table-sm table-glass table-hover">
                                         <thead>
                                             <tr>
                                                 <th>Article DOI</th>
@@ -280,7 +294,7 @@
                                                     <td>
 
                                                         <a href="{{ route('experiments.show', ['type' => $experiment->type, 'path' => $experiment->path]) }}"
-                                                            class="btn btn-sm btn-primary">View</a>
+                                                            class="btn btn-sm btn-primary" title="{{ $experiment->displayTitle() }}">View</a>
                                                     </td>
                                                 </tr>
                                             @endforeach
@@ -303,21 +317,22 @@
                                             @endphp
                                             <!-- Order Parameters -->
                                             <div class="row p-2">
-                                                <div class="col-sm-12 col-md-12" style="max-height: 50%; background-color:
-                                                    #0d0d0e;border-right-width:  1px;border-right-style: none; padding: 0px; border-radius: 0px;">
+                                                <div class="col-sm-12 col-md-12" style="max-height: 50%;  padding: 10px;">
 
                                                     <h3>Order Parameters : '{{ $lipidName }}' </h3>
                                                     <a href="{{ TC::GitHubURLEXP }}{{ $analisis_lipid->order_parameters_file }}">Download
                                                         JSON</a>
                                                         @if (isset($OPData[$lipidName]))
+                                                            <div class="op-chart-grid">
                                                             @foreach ($OPData[$lipidName] as $group => $plot_data)   
                                                             <!-- OP plot for each group of the lipid  {{$lipidName}}
                                                                     Data attributes 'data-opplot' and 'data-oplegend' are 
                                                                     used to pass the plot data and legend to the JavaScript 
                                                                     code that will render the chart -->
-                                                                <div class="chart-container" style="max-height: 500px; background-color: #3b3944; position: relative;
+                                                                <div class="op-chart-item">
+                                                                <div class="chart-container" style="max-height: 500px; min-height: 350px; background-color: #3b3944; position: relative;
                                                                 margin-top: 20px; padding: 20px; border: 1px solid #695e5e; border-radius: 8px;">
-                                                                    <h4>Group {{ $group }}</h4>
+                                                                    <h4 class="chart-label">Group {{ $group }}</h4>
                                                                     <canvas
                                                                         id="op_{{ $group }}_{{ $lipid_id }}"
                                                                         data-opplot='@json($plot_data)'
@@ -325,14 +340,11 @@
                                                                         data-optitle="Order Parameters - {{ $lipidName }} - {{ $group }}"
                                                                         >
                                                                     </canvas>
-                                                                    </div>                                                                        
-                                                                        <p style="cursor: pointer;" data-bs-toggle="collapse" data-bs-target="#dataCollapse_{{ $group }}_{{ $lipid_id }}">
-                                                                            <span class="bi bi-chevron-down"></span> Data
-                                                                        </p>
-                                                                        <div id="dataCollapse_{{ $group }}_{{ $lipid_id }}" class="collapse" style="background-color: #1a1a1a; padding: 10px; border-radius: 5px;">
-                                                                            <pre style="color: #fff; overflow-x: auto;">{{ json_encode($plot_data, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES) }}</pre>
-                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                                        
                                                             @endforeach
+                                                            </div>
                                                         @else
                                                             <div>
                                                                 <h2>No OP Data Available for {{ $lipidName }}</h2>
@@ -346,7 +358,7 @@
                                     <div class="row" style="">
                                         <div class="col-sm-12 col-md-12 chart-container" style=" background-color:
                                                     #0d0d0e;border-right-width:1px;border-right-style: none; padding: 4px; border-radius: 0px;" >
-                                            <h3>Area per lipid</h3>
+                                            <h4 class="chart-label">Area per lipid</h4>
                                             <canvas id="myChartAreaxLip"
                                                 data-apldata="{{  json_encode($ApLData) }}"
                                                 data-apltitle="Area per lipid">
@@ -362,7 +374,7 @@
                                     <div class="row" style="">
                                         <div class="col-sm-12 col-md-12 chart-container" style=" background-color:
                                                     #0d0d0e;border-left-width: 1px;border-left-style: none; padding: 4px; border-radius: 0px;">
-                                            <h3>Form Factor</h3>
+                                            <h4 class="chart-label">Form Factor</h4>
                                             <label style="display: inline-flex; align-items: center; gap: 6px; color: #ffffff; font-weight: 600; margin-bottom: 8px;">
                                                 <input type="checkbox" data-ffnormalize-target="myChartFormFact" checked>
                                                 Normalize (by max of first series)
