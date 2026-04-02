@@ -174,9 +174,16 @@
                                                 <th scope="row">X-ray Q-range (Å⁻¹)</th>
                                                 <td>{{ $properties['XRAY']->value['QRANGE'] ?? 'N/A' }}</td>
                                             </tr>
-
-                                       
                                         @endif
+                                        <tr>
+                                            <th scope="row">Show on GitHub</th>
+                                            @php
+                                                $github_url = 'experiments/'. 
+                                                ($entity['type'] == 'OP' ? 'OrderParameters' : 'FormFactors') . '/' . $entity['path'];
+                                            @endphp
+                                            <td>{!! renderGitHubURL($github_url) !!}</td>
+                                        </tr>
+
                                     </tbody>
                                 </table>
                             </div>
@@ -288,14 +295,20 @@
                                         $lipid_id = $lipid->id;
                                     @endphp
                                     @if (isset($OPData[$lipidName]))
+                                    <hr class="my-4" />
+
+                                    <h4 class="text-white">Order Parameters {{ $lipidName }}</h4>
+                                    {!! renderGitHubURL($github_url.'/'.$lipidName . '_OrderParameters.json', text: 'View JSON', raw: true) !!}    
+
                                         <div class="op-chart-grid">
+
                                         @foreach ($OPData[$lipidName] as $group => $plot_data)   
                                         <!-- OP plot for each group of the lipid  {{$lipidName}}
                                                 Data attributes 'data-opplot' and 'data-oplegend' are 
                                                 used to pass the plot data and legend to the JavaScript 
                                                 code that will render the chart -->
                                             <div class="op-chart-item">
-                                            <div class="chart-container" style="max-height: 500px; min-height: 350px; background-color: #3b3944; position: relative;
+                                            <div class="chart-container" style="max-height: 500px; min-height: 350px; background-color: #070220; position: relative;
                                             margin-top: 20px; padding: 20px; border: 1px solid #695e5e; border-radius: 8px;">
                                                 <!-- h4>Group {{ $group }}</h4 -->
                                                 <canvas
@@ -307,7 +320,7 @@
                                                 </canvas>
                                                 </div>
                                             </div>
-                                                 
+                                        <!-- add a separator between different groups of the same lipid -->
                                         @endforeach
                                         </div>
                                     @else
@@ -320,7 +333,7 @@
                             @elseif  ($entity['type'] === 'FF' && ! empty($FFData) )
                             <div class="row p-2">
                                 <div class="col-sm-12 col-md-12 chart-container-half">
-                                    <div class="chart-container" style="max-height: 500px; max-width: 80vh; background-color: #3b3944; position: relative;
+                                    <div class="chart-container" style="max-height: 500px; max-width: 80vh; background-color: #070220; position: relative;
                                     margin-top: 20px; padding: 20px; border: 1px solid #695e5e; border-radius: 8px;">
                                         <canvas id="myChartFormFactEXP"
                                         data-ffdata="{{ json_encode($FFData) }}"

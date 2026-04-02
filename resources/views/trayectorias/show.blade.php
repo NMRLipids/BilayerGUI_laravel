@@ -164,13 +164,16 @@
                                                     @endif
                                                 </td>
                                             </tr>
+                                           
+
                                             <tr>
                                                 <th scope="row">Files</th>
                                                 <td>
+                                                   {!! renderGitHubURL('Simulations/' . $trayectoria->git_path, text: 'View on GitHub') !!}<br>
+
                                                     @php $cadPath = asset('storage/simulations/' . $trayectoria->git_path) @endphp
                                                     <a class="bi bi-cloud-download" href="{{ $cadPath }}/conf.pdb.gz">&nbsp;Download PDB File</a><br>
                                                     <a class="bi bi-cloud-download" href="https://doi.org/{{ $trayectoria->doi }}" target="_blank">&nbsp;Link to simulation files</a><br>
-                                                    <a href="{{ TC::GitHubDataRepoSimulations . $trayectoria->git_path }}" target="_blank">See the system on GitHub</a>
                                                 </td>
                                             </tr>
                                         </tbody>
@@ -250,18 +253,13 @@
                                                 <div class="card-body text-center">
                                                     @php
                                                         $mappingFile = $lipido->getMappingByForcefield($trayectoria->campo_de_fuerza);
-                                                        $pathToScr =
-                                                            TC::GitHubURL .
+                                                        $pathToScr =                              
                                                             'Molecules/membrane/' .
                                                             $lipido->molecule .
                                                             '/' .
                                                             $mappingFile;
-                                                        echo '<a href="' .
-                                                            $pathToScr .
-                                                            '" title="Download Mapping file" target="_blank">';
-                                                        echo '<span ><b>Download Mapping file</b>  </span></br>';
-                                                        echo '</a>';
-                                                    @endphp
+                                                    @endphp 
+                                                    {!! renderGitHubURL($pathToScr, text: 'Download Mapping File', raw: true) !!}
                                                 </div>
                                             </div>
                                         </div> <!--  CARD loop end-->
@@ -310,18 +308,43 @@
 
                                 @if (isset($trayectoria->analisis))
                                     @if (isset($trayectoria->getTrayectoriaAnalisisLipidos))
+                                        {{-- OP section quick-nav (repeated at top of each section) --}}
+                                        @php
+                                            $showNav = count($trayectoria->getTrayectoriaAnalisisLipidos) > 1
+                                                || isset($ApLData) || isset($FFData);
+                                        @endphp
+
                                         @foreach ($trayectoria->getTrayectoriaAnalisisLipidos as $key => $analisis_lipid)
                                             @php
                                                 $lipidName = $analisis_lipid->getLipid->molecule;
                                                 $lipid_id = $analisis_lipid->lipid_id;
                                             @endphp
                                             <!-- Order Parameters -->
-                                            <div class="row p-2">
+                                            <div id="op-{{ Str::slug($lipidName) }}" class="row p-2">
                                                 <div class="col-sm-12 col-md-12" style="max-height: 50%;  padding: 10px;">
-
-                                                    <h3>Order Parameters : '{{ $lipidName }}' </h3>
-                                                    <a href="{{ TC::GitHubURLEXP }}{{ $analisis_lipid->order_parameters_file }}">Download
-                                                        JSON</a>
+                                                    <hr class="my-4" />
+                                                    @if ($showNav)
+                                                    <nav class="op-section-nav my-2 d-flex flex-wrap gap-2 align-items-center">
+                                                        <span class="text-white-50 small me-1">Jump to:</span>
+                                                        @foreach ($trayectoria->getTrayectoriaAnalisisLipidos as $nav_lipid)
+                                                            @php $navSlug = Str::slug($nav_lipid->getLipid->molecule); @endphp
+                                                            @if ($nav_lipid->getLipid->molecule === $lipidName)
+                                                                <span class="badge bg-light text-dark">{{ $nav_lipid->getLipid->molecule }}</span>
+                                                            @else
+                                                                <a href="#op-{{ $navSlug }}" class="badge bg-secondary text-decoration-none">{{ $nav_lipid->getLipid->molecule }}</a>
+                                                            @endif
+                                                        @endforeach
+                                                        @if (isset($ApLData))
+                                                            <a href="#apl-section" class="badge bg-secondary text-decoration-none">Area/Lipid</a>
+                                                        @endif
+                                                        @if (isset($FFData))
+                                                            <a href="#ff-section" class="badge bg-secondary text-decoration-none">Form Factor</a>
+                                                        @endif
+                                                        <a href="#homeAnalysis" class="badge bg-secondary text-decoration-none" title="Back to top">&#9650; Top</a>
+                                                    </nav>
+                                                    @endif
+                                                    <h4>Order Parameters {{ $lipidName }} </h4>
+                                                    {!! renderGitHubURL($analisis_lipid->order_parameters_file, text: 'Download JSON', raw: true) !!}
                                                         @if (isset($OPData[$lipidName]))
                                                             <div class="op-chart-grid">
                                                             @foreach ($OPData[$lipidName] as $group => $plot_data)   
@@ -330,7 +353,7 @@
                                                                     used to pass the plot data and legend to the JavaScript 
                                                                     code that will render the chart -->
                                                                 <div class="op-chart-item">
-                                                                <div class="chart-container" style="max-height: 500px; min-height: 350px; background-color: #3b3944; position: relative;
+                                                                <div class="chart-container" style="max-height: 500px; min-height: 350px; background-color: #070220; position: relative;
                                                                 margin-top: 20px; padding: 20px; border: 1px solid #695e5e; border-radius: 8px;">
                                                                     <h4 class="chart-label">Group {{ $group }}</h4>
                                                                     <canvas
@@ -355,9 +378,24 @@
                                         @endforeach
                                     @endif
                                     @if (isset($ApLData))
-                                    <div class="row" style="">
-                                        <div class="col-sm-12 col-md-12 chart-container" style=" background-color:
-                                                    #0d0d0e;border-right-width:1px;border-right-style: none; padding: 4px; border-radius: 0px;" >
+                                    <div id="apl-section" class="row" style="">
+                                        <hr class="my-4" />
+                                        @if ($showNav)
+                                        <nav class="op-section-nav my-2 d-flex flex-wrap gap-2 align-items-center">
+                                            <span class="text-white-50 small me-1">Jump to:</span>
+                                            @foreach ($trayectoria->getTrayectoriaAnalisisLipidos as $nav_lipid)
+                                                <a href="#op-{{ Str::slug($nav_lipid->getLipid->molecule) }}" class="badge bg-secondary text-decoration-none">{{ $nav_lipid->getLipid->molecule }}</a>
+                                            @endforeach
+                                            <span class="badge bg-light text-dark">Area/Lipid</span>
+                                            @if (isset($FFData))
+                                                <a href="#ff-section" class="badge bg-secondary text-decoration-none">Form Factor</a>
+                                            @endif
+                                            <a href="#homeAnalysis" class="badge bg-secondary text-decoration-none" title="Back to top">&#9650; Top</a>
+                                        </nav>
+                                        @endif
+                                        <div class="chart-container" style="max-height: 500px; min-height: 350px; background-color: #070220; position: relative;
+                                                                margin-top: 20px; padding: 20px; border: 1px solid #1c0876; border-radius: 8px;">
+                                        
                                             <h4 class="chart-label">Area per lipid</h4>
                                             <canvas id="myChartAreaxLip"
                                                 data-apldata="{{  json_encode($ApLData) }}"
@@ -366,15 +404,29 @@
                                     </div>
                                     @else
                                     <div>
-                                        <h2>No Area per Lipid Data Available</h2>
+                                        <h4>No Area per Lipid Data Available</h4>
                                     </div>
                                     @endif
 
                                     @if (isset($FFData))
-                                    <div class="row" style="">
-                                        <div class="col-sm-12 col-md-12 chart-container" style=" background-color:
-                                                    #0d0d0e;border-left-width: 1px;border-left-style: none; padding: 4px; border-radius: 0px;">
-                                            <h4 class="chart-label">Form Factor</h4>
+                                    <div id="ff-section" class="row" style="">
+                                        <hr class="my-4" />
+                                        @if ($showNav)
+                                        <nav class="op-section-nav my-2 d-flex flex-wrap gap-2 align-items-center">
+                                            <span class="text-white-50 small me-1">Jump to:</span>
+                                            @foreach ($trayectoria->getTrayectoriaAnalisisLipidos as $nav_lipid)
+                                                <a href="#op-{{ Str::slug($nav_lipid->getLipid->molecule) }}" class="badge bg-secondary text-decoration-none">{{ $nav_lipid->getLipid->molecule }}</a>
+                                            @endforeach
+                                            @if (isset($ApLData))
+                                                <a href="#apl-section" class="badge bg-secondary text-decoration-none">Area/Lipid</a>
+                                            @endif
+                                            <span class="badge bg-light text-dark">Form Factor</span>
+                                            <a href="#homeAnalysis" class="badge bg-secondary text-decoration-none" title="Back to top">&#9650; Top</a>
+                                        </nav>
+                                        @endif
+                                        <div class="chart-container" style="max-height: 500px; min-height: 350px; background-color: #070220; position: relative;
+                                                                margin-top: 20px; padding: 20px; border: 1px solid #1c93a0; border-radius: 8px;">
+                                        <h4 class="chart-label">Form Factor</h4>
                                             <label class="chart-label" style="display: inline-flex; align-items: center; gap: 6px; color: #ffffff; font-weight: 600; margin-bottom: 8px;">
                                                 <input type="checkbox" data-ffnormalize-target="myChartFormFact" checked>
                                                 Normalize (by max of first series)
@@ -382,8 +434,8 @@
                                             <canvas id="myChartFormFact"
                                                 data-ffdata="{{ json_encode($FFData) }}"
                                                 data-fftitle="Form Factor"
-                                                data-fflegend="{{ json_encode($FFLegend) }}"
-                                            > </canvas>
+                                                data-fflegend="{{ json_encode($FFLegend) }}">
+                                             </canvas>
                                         </div>
                                     </div>
                                     @else
@@ -393,7 +445,7 @@
                                     @endif
                                     <div class="row p-2">
                                         <div class="col-sm-12 col-md-12">
-                                            <h3> Experimental and Molecular Dynamics based descriptors<h3>
+                                            <h4> Experimental and Molecular Dynamics based descriptors</h4>
                                         </div>
                                     </div>
 

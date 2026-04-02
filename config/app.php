@@ -18,6 +18,16 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | GitHub Repository URLs
+    |--------------------------------------------------------------------------
+    */
+
+    'github_base_url' => env('GITHUB_BASE_URL', 'https://github.com/NMRLipids/BilayerData'),
+    'github_raw_url'  => env('GITHUB_RAW_URL', 'https://raw.githubusercontent.com/NMRLipids/BilayerData'),
+    'github_contribute_url' => env('GITHUB_CONTRIBUTE_URL', 'https://nmrlipids.github.io/FAIRMD_lipids/stable/dbcontribute.html'),
+
+    /*
+    |--------------------------------------------------------------------------
     | Application Environment
     |--------------------------------------------------------------------------
     |

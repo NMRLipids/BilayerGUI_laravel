@@ -233,6 +233,7 @@ class ExperimentController extends Controller
                 'entity' => ['doi' => $experiment->article_doi,
                             'data_doi' => $experiment->data_doi,
                             'path' => $experiment->path,
+                            'path' => $experiment->path,
                             'type' => ($experiment->type),
                             'membrane_composition' => $membraneComposition,
                             'solution_composition' => $solutionComposition,

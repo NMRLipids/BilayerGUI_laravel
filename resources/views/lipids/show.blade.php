@@ -69,7 +69,11 @@
                                                 </td>
                                             </tr>
                                         @endif
-                                       
+                                        <tr>
+                                            <th scope="row">Show on GitHub</th>
+                                            <td>{!! renderGitHubURL('Molecules/membrane/' . $entity['molecule']) !!}</td>
+                                        </tr>
+
                                     </tbody>
                                 </table>
                             </div>
