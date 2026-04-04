@@ -13,16 +13,13 @@ foreach ($allSession as $key => $value) {
 
 <body>
     <div id="app" class="bg-datos" style="height:auto;overflow-x:hidden; ">
-        <nav id="mainNav" class="navbar navbar-expand-lg navbar-light fixed-top py-3">
+        <nav id="mainNav" class="navbar navbar-expand-xl navbar-light fixed-top py-3">
             <div class="container px-4 px-lg-5">
                 <a class="navbar-brand" href="{{ url('/') }}">
-                    <img class="img-fluid fairmd-logo" style="max-height: 40px;" alt="FAIRMD Lipids Databank"
+                    <img class="img-fluid fairmd-logo" style="min-height: 20px; max-height: 45px;" alt="FAIRMD Lipids Databank"
                         src="{{ asset('storage/images/fairmd_w_letras.png') }}">
                    
-                    <div class="d-none">
-                        <span>Versión: {{ config('app.version') }}</span>
-                        <span>Entorno: {{ config('app.env') }}</span>
-                    </div>
+                    
                 </a>
                 <button class="navbar-toggler navbar-toggler-right" type="button" data-bs-toggle="collapse"
                     data-nav-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false"
@@ -34,7 +31,7 @@ foreach ($allSession as $key => $value) {
                     <ul class="navbar-nav ms-auto my-2 my-lg-0">
                         <li class="nav-item">
                             <form action="{{ route('search.results') }}" method="get" class="d-flex align-items-center">
-                                <input type="text" name="text" class="form-control form-control-sm" placeholder="Search..." aria-label="Search" style="width: 150px;">
+                                <input type="text" name="text" class="form-control form-control-sm" placeholder="Search..." aria-label="Search" style="width: 120px;">
                                 <button class="btn btn-sm btn-outline-light ms-1" type="submit">Go</button>
                             </form>
                         </li>
@@ -42,6 +39,7 @@ foreach ($allSession as $key => $value) {
                             <li class="nav-item"><a class="nav-link" href="{{ route('lipids.list') }}"><span class="nav-icon" aria-hidden="true" style="font-size: 1.2rem;">◌</span>Lipids</a></li>
                             <li class="nav-item"><a class="nav-link" href="{{ route('experiments.list') }}"><span class="nav-icon" aria-hidden="true">⚗</span>Experiments</a></li>
                             <li class="nav-item"><a class="nav-link" href="{{ route('simulations.list') }}"><span class="nav-icon" aria-hidden="true">◈</span>Simulations</a></li>
+                            <li class="nav-item"><a class="nav-link" href="{{ config('app.github_contribute_url') }}"><span class="nav-icon" aria-hidden="true">✦</span>Contribute</a></li>
                             <li class="nav-item"><a class="nav-link" href="{{ url('/#about') }}"><span class="nav-icon" aria-hidden="true">ⓘ</span>About</a></li>
                             <li class="nav-item d-flex align-items-center ms-2">
                             <button class="contrast-toggle" id="contrastToggle" type="button" title="Toggle high-contrast mode" aria-label="Toggle high-contrast mode">&#9684;</button>
@@ -51,7 +49,7 @@ foreach ($allSession as $key => $value) {
             </div>
         </nav>
 
-        <main style="padding-top: 96px; padding-bottom: 140px;">
+        <main style="padding-top: 5.5rem; padding-bottom: 0rem;">
             @yield('content')
         </main>
 

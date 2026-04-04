@@ -45,7 +45,7 @@
 
     <link rel="stylesheet" href="{{ asset('css/welcome-mobile.css') }}">
     <!-- Core theme CSS (includes Bootstrap)-->
-    <link href="{{ asset('css/styles.css') }}" rel="stylesheet" />
+    <link href="{{ asset('css/styles.css') }}?v={{ config('app.version', '1') }}" rel="stylesheet" />
     <!--  SLIDER -->
     <link href="{{ asset('css/multislider.css') }}" rel="stylesheet" />
 

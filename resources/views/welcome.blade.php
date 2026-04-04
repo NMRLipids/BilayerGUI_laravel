@@ -36,6 +36,7 @@ use App\Http\Controllers\StatisticsController;
                     <li class="nav-item"><a class="nav-link" href="{{ route('lipids.list') }}"><span class="nav-icon" aria-hidden="true">◌</span>Lipids</a></li>
                     <li class="nav-item"><a class="nav-link" href="{{ route('experiments.list') }}"><span class="nav-icon" aria-hidden="true">⚗</span>Experiments</a></li>
                     <li class="nav-item"><a class="nav-link" href="{{ route('simulations.list') }}"><span class="nav-icon" aria-hidden="true">◈</span>Simulations</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{{ config('app.github_contribute_url') }}"><span class="nav-icon" aria-hidden="true">✦</span>Contribute</a></li>
                     <li class="nav-item"><a class="nav-link" href="#about"><span class="nav-icon" aria-hidden="true">ⓘ</span>About</a></li>
                     <li class="nav-item d-flex align-items-center ms-2">
                         <button class="contrast-toggle" id="contrastToggle" type="button" title="Toggle high-contrast mode" aria-label="Toggle high-contrast mode">&#9684;</button>
@@ -51,14 +52,14 @@ use App\Http\Controllers\StatisticsController;
         <div class="container px-4 px-lg-5">
 
             {{-- Hero area --}}
-            <div class="row justify-content-center text-center" style="padding-top: 2rem;">
+            <div class="row justify-content-center text-center pt-2 pt-lg-4">
                 <div class="col-lg-8">
                     <img class="img-fluid d-block mx-auto fairmd-logo" alt="FAIRMD Lipids Databank Logo"
                         src="{{ asset('storage/images/fairmd_w_letras.png') }}"
                         style="max-width: 420px; width: 100%; padding: 0.5rem 0 1rem;">
                     <p class="text-white-75" style="font-size: 0.85rem; margin-bottom: 0.25rem;">version {{ config('app.version') }}</p>
                     <p class="text-white-80 mb-4" style="max-width: 600px; margin: 0 auto; line-height: 1.6;">
-                        Browse, search and compare atomistic MD simulations of lipid membranes from the
+                        Browse, search and compare atomistic MD simulations and experimental data of lipid membranes from the
                         <a href="https://github.com/NMRLipids/Databank">FAIRMD Lipids Databank</a>.
                     </p>
                 </div>
@@ -108,7 +109,7 @@ use App\Http\Controllers\StatisticsController;
             </div>
 
             {{-- Examples & stats --}}
-            <div class="row justify-content-center text-center mt-3">
+            <div class="row justify-content-center text-center mt-3 mb-2 mb-lg-3">
                 <div class="col-lg-7">
                     <p class="text-white-75 mb-2" style="font-size: 0.85rem;">
                         Try:
@@ -118,9 +119,12 @@ use App\Http\Controllers\StatisticsController;
                         Search by trajectory ID (<code style="color: #ffe0b2;">ID123</code>) or
                         DOI (<code style="color: #ffe0b2;">DOI:10.1021/…</code>).
                     </p>
-                    <p class="hero-stats">
-                        {{ StatisticsController::totals() }}
-                    </p>
+                    <div class="hero-stats-card" role="status" aria-label="Databank totals">
+                        <p class="hero-stats-label mb-1">Databank at a glance</p>
+                        <p class="hero-stats mb-0">
+                            {{ StatisticsController::totals() }}
+                        </p>
+                    </div>
                 </div>
             </div>
         </div>
@@ -132,7 +136,7 @@ use App\Http\Controllers\StatisticsController;
    
 
     <!-- About-->
-    <section class="page-section" id="about" style="padding: 4rem 0;">
+    <section class="page-section" id="about" style="padding: 2.25rem 0 4rem;">
         <div class="container px-4 px-lg-5">
             <div class="row justify-content-center">
                 <div class="col-lg-9">
@@ -150,7 +154,16 @@ use App\Http\Controllers\StatisticsController;
                             <a href="https://www.nature.com/articles/s41467-024-45189-z">databank publication</a>.
                             See the <a href="https://nmrlipids.github.io/">online documentation</a> for full details.</p>
                     </div>
-
+                    <div class="about-card mb-4" style="border-left: 4px solid #e8a735; background: linear-gradient(135deg, #fffbe6 0%, #fff 100%);">
+                        <h4 style="color: #7a5e00;">✦ Contribute to the Databank</h4>
+                        <p>FAIRMD Lipids Databank grows through community contributions. You can add your
+                            simulation and experimental data, report issues, or help improve the codebase.</p>
+                        <div class="d-flex flex-wrap gap-2">
+                            <a href="{{ config('app.github_contribute_url') }}" class="btn btn-warning btn-sm">How to Contribute Data</a>
+                            <a href="https://github.com/NMRLipids/Databank/issues" class="btn btn-outline-secondary btn-sm">Report an Issue</a>
+                            <a href="https://github.com/NMRLipids/databank-template/blob/main/scripts/" class="btn btn-outline-secondary btn-sm">Jupyter Notebooks &amp; API Examples</a>
+                        </div>
+                    </div>
                     <div class="about-card mb-4">
                         <h4>Components</h4>
                         <div class="row g-3">
@@ -178,6 +191,8 @@ use App\Http\Controllers\StatisticsController;
                         </div>
                     </div>
 
+                    
+
                     <div class="row g-3 mb-4">
                         <div class="col-md-6">
                             <div class="about-card h-100">
@@ -195,9 +210,8 @@ use App\Http\Controllers\StatisticsController;
                             <div class="about-card h-100">
                                 <h4>Resources</h4>
                                 <ul class="small mb-2">
-                                    <li><a href="https://github.com/NMRLipids/databank-template/blob/main/scripts/">Jupyter Notebooks</a> and API examples</li>
-                                    <li><a href="https://nmrlipids.github.io/dbcontribute.html">How to contribute data</a></li>
                                     <li><a href="https://nmrlipids.github.io/">Full documentation</a></li>
+                                    <li><a href="http://nmrlipids.blogspot.com/">NMRlipids blog</a></li>
                                 </ul>
                                 <p class="small text-dark mb-0">All data and code are provided AS-IS with no warranty. Report issues via each component's GitHub tracker.</p>
                             </div>

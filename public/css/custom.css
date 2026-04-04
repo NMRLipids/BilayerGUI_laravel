@@ -2,6 +2,14 @@
 /** INICIO - Welcome - INICIO **/
 /*******************************/
 
+/* Offset anchors for fixed navbar */
+[id^="op-"],
+#apl-section,
+#ff-section,
+#homeAnalysis {
+  scroll-margin-top: 5rem;
+}
+
 html.welcome, .welcome body {
     background-color: #155764ea!important;
     color: #ffffff;
@@ -624,13 +632,32 @@ a:hover {
   color: #fff !important;
 }
 .hero-stats {
+  color: #fef9e9;
+  font-size: 0.8rem;
+  line-height: 1.45;
+  font-weight: 600;
+}
+.hero-stats-card {
   display: inline-block;
-  background: rgba(0, 0, 0, 0.25);
-  border-radius: 0.5rem;
-  padding: 0.5rem 1.25rem;
-  color: rgba(255, 255, 255, 0.85);
-  font-size: 0.85rem;
-  line-height: 1.5;
+  background: linear-gradient(145deg, rgba(255, 200, 82, 0.2), rgba(16, 35, 38, 0.45));
+  border: 0.5px solid rgba(255, 226, 150, 0.55);
+  border-radius: 0.75rem;
+  padding: 0.65rem 1.15rem 0.75rem;
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.16);
+}
+.hero-stats-label {
+  display: inline-block;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #ffd67a;
+}
+@media (max-width: 576px) {
+  .hero-stats-card {
+    width: 100%;
+    max-width: 24rem;
+  }
 }
 
 /* ── About section cards ─────────────────────────────────── */
@@ -683,13 +710,28 @@ a:hover {
 .nav-icon {
   display: inline-block;
   margin-right: 0.3rem;
-  font-size: 1.05em;
+  font-size: 1em;
   line-height: 1;
   opacity: 1.0;
 }
+@media (min-width: 992px) {
+  #mainNav .navbar-brand {
+    flex-shrink: 0;
+    min-width: max-content;
+  }
+  #mainNav .navbar-brand img {
+    display: block;
+    height: 32px;
+    width: auto;
+  }
+  #mainNav .navbar-nav .nav-link {
+    white-space: nowrap;
+  }
+}
 @media (max-width: 991.98px) {
   .nav-icon {
-    display: none;
+    font-size: 0.8rem;
+      opacity: 0.8;
   }
 }
 .divider {
@@ -704,14 +746,15 @@ a:hover {
 header.masthead {
   min-height: auto !important;
   height: auto !important;
-  padding-top: 5.5rem;
-  padding-bottom: 2.5rem;
+  padding-top: 1.5rem;
+  padding-bottom: 1.5rem;
   background: linear-gradient(135deg, #0a3d48 0%, #12535f 40%, #1a7a6d 100%) !important;
   justify-content: center;
 }
+
 @media (min-width: 992px) {
   header.masthead {
-    padding-top: 6rem;
+    padding-top: 7rem;
     padding-bottom: 3rem;
   }
 }

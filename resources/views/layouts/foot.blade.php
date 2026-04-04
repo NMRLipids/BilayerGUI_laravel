@@ -171,44 +171,113 @@ document.addEventListener('DOMContentLoaded', function () {
     var hideTimer = null;
     var metaCache = {};
 
-    // Fetch metadata for all DOI links
-    document.querySelectorAll('a.doi-link[data-doi]').forEach(function (link) {
+    // Fetch metadata for all DOI links (sequentially to avoid connection/rate limits)
+    var doiLinks = Array.from(document.querySelectorAll('a.doi-link[data-doi]'));
+    var doiQueue = [];
+    doiLinks.forEach(function (link) {
         var doi = link.getAttribute('data-doi');
         if (!doi || metaCache[doi]) return;
         metaCache[doi] = { loading: true };
-        fetch('https://doi.org/' + encodeURIComponent(doi), {
+        if (doiQueue.indexOf(doi) === -1) doiQueue.push(doi);
+    });
+
+    var DOI_CONCURRENCY = {{ config('app.doi_concurrent_fetches', 10) }};
+    var DOI_MAX_RETRIES = {{ config('app.doi_max_retries', 3) }};
+
+    function delay(ms) { return new Promise(function (r) { setTimeout(r, ms); }); }
+
+    function fetchOneDOI(doi, attempt) {
+        attempt = attempt || 0;
+        return fetch('https://doi.org/' + encodeURIComponent(doi), {
             headers: { 'Accept': 'application/citeproc+json' }
         })
-        .then(function (r) { return r.ok ? r.json() : Promise.reject(); })
-        .then(function (data) {
-            var authors = '';
-            if (data.author && data.author.length) {
-                authors = data.author.slice(0, 4).map(function (a) {
-                    return (a.family || '') + (a.given ? ', ' + a.given : '');
-                }).join('; ');
-                if (data.author.length > 4) authors += ' et al.';
+        .then(function (r) {
+            if (!r.ok) {
+                return r.text().then(function (body) {
+                    if (attempt < DOI_MAX_RETRIES && (r.status === 429 || r.status >= 500)) {
+                        return delay(1000 * Math.pow(2, attempt)).then(function () {
+                            return fetchOneDOI(doi, attempt + 1);
+                        });
+                    }
+                    metaCache[doi] = { title: doi, failed: true, debug: 'HTTP ' + r.status + ' ' + r.statusText + '\n' + body.substring(0, 200) };
+                    disableDoiLinks(doi);
+                });
             }
-            var year = '';
-            if (data.issued && data.issued['date-parts'] && data.issued['date-parts'][0]) {
-                year = data.issued['date-parts'][0][0] || '';
+            var ct = (r.headers.get('content-type') || '');
+            if (ct.indexOf('json') === -1) {
+                metaCache[doi] = { title: doi, failed: true, debug: 'HTTP ' + r.status + ' — unexpected content-type: ' + ct.split(';')[0] };
+                disableDoiLinks(doi);
+                return;
             }
-            metaCache[doi] = {
-                title: data.title || doi,
-                authors: authors,
-                year: year,
-                type: data.type || '',
-                publisher: data.publisher || '',
-                container: data['container-title'] || ''
-            };
+            return r.json().then(function (data) {
+                var authors = '';
+                if (data.author && data.author.length) {
+                    authors = data.author.slice(0, 4).map(function (a) {
+                        return (a.family || '') + (a.given ? ', ' + a.given : '');
+                    }).join('; ');
+                    if (data.author.length > 4) authors += ' et al.';
+                }
+                var year = '';
+                if (data.issued && data.issued['date-parts'] && data.issued['date-parts'][0]) {
+                    year = data.issued['date-parts'][0][0] || '';
+                }
+                metaCache[doi] = {
+                    title: data.title || doi,
+                    authors: authors,
+                    year: year,
+                    type: data.type || '',
+                    publisher: data.publisher || '',
+                    container: data['container-title'] || ''
+                };
+            });
         })
-        .catch(function () {
-            metaCache[doi] = { title: doi, failed: true };
+        .catch(function (err) {
+            // Already handled (HTTP error or content-type mismatch) — skip
+            if (metaCache[doi] && metaCache[doi].failed) return;
+            // Network error — retry with short delay (rate-limiting drops connections)
+            if (attempt < DOI_MAX_RETRIES) {
+                return delay(500).then(function () {
+                    return fetchOneDOI(doi, attempt + 1);
+                });
+            }
+            metaCache[doi] = { title: doi, failed: true, debug: 'Network error: ' + (err && err.message ? err.message : String(err)) };
+            disableDoiLinks(doi);
         });
-    });
+    }
+
+    // Process DOI queue with limited concurrency
+    var doiIndex = 0;
+    function runDoiWorker() {
+        if (doiIndex >= doiQueue.length) return Promise.resolve();
+        var doi = doiQueue[doiIndex++];
+        return fetchOneDOI(doi).then(runDoiWorker);
+    }
+    var workers = [];
+    for (var w = 0; w < Math.min(DOI_CONCURRENCY, doiQueue.length); w++) {
+        workers.push(runDoiWorker());
+    }
+
+    function disableDoiLinks(doi) {
+        var meta = metaCache[doi];
+        var tip = 'DOI could not be resolved';
+        if (meta && meta.debug) tip += ' — ' + meta.debug.split('\n')[0];
+        document.querySelectorAll('a.doi-link[data-doi="' + doi + '"]').forEach(function (link) {
+            link.removeAttribute('href');
+            link.style.color = '#999';
+            link.style.textDecoration = 'none';
+            link.style.cursor = 'default';
+            link.title = tip;
+        });
+    }
 
     function renderCard(meta) {
         if (!meta || meta.loading) return '<div class="doi-preview-loading">Loading metadata...</div>';
-        if (meta.failed) return '<div class="doi-preview-loading">Preview not available</div>';
+        if (meta.failed) {
+            var msg = '<div class="doi-preview-loading">Preview not available';
+            if (meta.debug) msg += '<br><small style="color:#c66;white-space:pre-wrap">' + escapeHtml(meta.debug) + '</small>';
+            msg += '</div>';
+            return msg;
+        }
         var html = '<div class="doi-preview-header">' + escapeHtml(meta.title) + '</div>';
         html += '<div class="doi-preview-body">';
         if (meta.authors) html += '<div class="doi-meta-row"><span class="doi-meta-label">Authors:</span> <span class="doi-meta-value">' + escapeHtml(meta.authors) + '</span></div>';
@@ -254,6 +323,22 @@ document.addEventListener('DOMContentLoaded', function () {
         hideTimer = setTimeout(function () { popup.style.display = 'none'; }, 300);
     });
 });
+</script>
+<!-- Navbar shrink on scroll (adds backdrop blur) -->
+<script>
+(function () {
+    var nav = document.getElementById('mainNav');
+    if (!nav) return;
+    function onScroll() {
+        if (window.scrollY > 0) {
+            nav.classList.add('navbar-shrink');
+        } else {
+            nav.classList.remove('navbar-shrink');
+        }
+    }
+    onScroll();
+    document.addEventListener('scroll', onScroll, { passive: true });
+})();
 </script>
 <!-- Core theme JS
 <script src="storage/js/scripts.js"></script>

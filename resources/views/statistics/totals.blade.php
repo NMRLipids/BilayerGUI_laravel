@@ -14,12 +14,12 @@ use Illuminate\Filesystem\Filesystem;
 ?>
 
 <div class="row">
-    <div class="col">
-        <p>Total trajectories</p>
-        <p>{{ $totalTrayectorias }}</p>
+    <div class="col hero-stats">
+        <p>Total&nbsp;trajectories:<br>
+        {{ $totalTrayectorias }}</p>
     </div>
-    <div class="col">
-        <p>Total membranes</p>
-        <p>{{ $totalMembranas }}</p>
+    <div class="col hero-stats">
+        <p>Total&nbsp;membranes:<br>
+        {{ $totalMembranas }}</p>
     </div>
 </div>
