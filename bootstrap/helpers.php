@@ -25,6 +25,16 @@ function renderDOI($doi)
     }
 
     $doi = trim($doi);
+
+    // Normalise: strip common prefixes so only the bare DOI remains.
+    $doi = preg_replace('#^https?://(dx\.)?doi\.org/#i', '', $doi);
+    $doi = preg_replace('#^doi:\s*#i', '', $doi);
+
+    // A valid DOI must start with the "10." directory indicator.
+    if (!preg_match('#^10\.#', $doi)) {
+        return e($doi);
+    }
+
     $url = 'https://doi.org/' .  str_replace('%2F', '/', rawurlencode($doi));
     $escapedDoi = e($doi);
 
