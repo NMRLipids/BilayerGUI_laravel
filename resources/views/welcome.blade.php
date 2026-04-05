@@ -96,14 +96,19 @@ use App\Http\Controllers\StatisticsController;
                             <input type="hidden" name="direction" value="desc">
                             <div class="input-group" style="max-width: 400px;">
                                 <select name="lipid" class="form-select" aria-label="Select lipid">
-                                    <option value="" selected disabled>Best simulation for lipid…</option>
+                                    <option value="" selected disabled>Best simulations for lipid…</option>
                                     @foreach (\App\Lipido::orderBy('molecule')->get()->unique('molecule') as $lipid)
                                         <option value="{{ $lipid->molecule }}">{{ $lipid->molecule }}</option>
                                     @endforeach
                                 </select>
-                                <button class="btn btn-warning" type="submit">★ Find Best</button>
+                                <button class="btn btn-warning" type="submit"
+                                    data-bs-toggle="tooltip" data-bs-placement="top"
+                                    title="Rank product of order-parameter (NMR) and form-factor (X-ray) agreement — a non-parametric statistic that combines two independent quality dimensions without scale assumptions.">★ Find Best</button>
                             </div>
                         </form>
+                        <p class="text-white-75 mb-0 mt-2" style="font-size: 0.78rem; line-height: 1.35;">
+                            Simulations are scored by the <strong>rank product</strong> ({!! renderDOI('10.1016/j.febslet.2004.07.055') !!}) of their agreement with NMR order parameters and X-ray form factors — two independent experimental observables. Lower rank product = better overall quality.
+                        </p>
                     </div>
                 </div>
             </div>

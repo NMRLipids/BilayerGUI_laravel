@@ -17,7 +17,7 @@
                             @endphp
                             <a href="{{ route('trayectorias.list', array_merge(request()->except('page', 'sort', 'direction'), ['sort' => 'best', 'direction' => $bestDir])) }}"
                                class="btn btn-sm {{ $isBest ? 'btn-warning' : 'btn-outline-warning' }}"
-                               title="Sort by rank product of OP and FF quality; missing values rank last">
+                               title="Rank product of order-parameter (NMR) and form-factor (X-ray) agreement; missing values rank last">
                                 ★ Best{!! $isBest ? ($bestDir === 'asc' ? '&nbsp;<span style="font-size:0.7em;">▼</span>' : '&nbsp;<span style="font-size:0.7em;">▲</span>') : '' !!}
                             </a>
                             <small class="text-white ms-2" style="font-size:0.75em;">Rank(OP) &times; Rank(FF) &mdash; missing data ranks last</small>

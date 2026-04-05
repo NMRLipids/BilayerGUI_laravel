@@ -52,6 +52,16 @@ document.addEventListener('DOMContentLoaded', function () {
             });
         });
     });
+
+    // Initialize Bootstrap tooltips when available (works with bundled or fallback Bootstrap JS)
+    (function initTooltips(retriesLeft) {
+        if (!window.bootstrap || !bootstrap.Tooltip) {
+            if (retriesLeft > 0) setTimeout(function () { initTooltips(retriesLeft - 1); }, 120);
+            return;
+        }
+        var tooltipEls = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+        tooltipEls.forEach(function (el) { new bootstrap.Tooltip(el); });
+    })(20);
 });
 </script>
 
