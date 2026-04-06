@@ -65,8 +65,8 @@
                         <thead>
                             <tr>
                                 <th scope="col"><a href="{{ simSortUrl('id', $currentSort, $currentDir) }}" class="text-white text-decoration-none">ID{!! simSortIcon('id', $currentSort, $currentDir) !!}</a></th>
-                                <th scope="col"><a href="{{ simSortUrl('temperature', $currentSort, $currentDir) }}" class="text-white text-decoration-none">Temperature{!! simSortIcon('temperature', $currentSort, $currentDir) !!}</a></th>
-                                <th scope="col"><a href="{{ simSortUrl('trj_length', $currentSort, $currentDir) }}" class="text-white text-decoration-none">Length{!! simSortIcon('trj_length', $currentSort, $currentDir) !!}</a></th>
+                                <th scope="col"><a href="{{ simSortUrl('temperature', $currentSort, $currentDir) }}" class="text-white text-decoration-none">Temperature (K){!! simSortIcon('temperature', $currentSort, $currentDir) !!}</a></th>
+                                <th scope="col"><a href="{{ simSortUrl('trj_length', $currentSort, $currentDir) }}" class="text-white text-decoration-none">Length (ps){!! simSortIcon('trj_length', $currentSort, $currentDir) !!}</a></th>
                                 <th scope="col">Force Field</th>
                                 <th scope="col">Lipids</th>
                                 <th scope="col"><a href="{{ simSortUrl('op_quality_total', $currentSort, $currentDir) }}" class="text-white text-decoration-none">OP Quality{!! simSortIcon('op_quality_total', $currentSort, $currentDir) !!}</a></th>

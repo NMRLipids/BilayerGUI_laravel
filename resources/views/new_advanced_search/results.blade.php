@@ -44,7 +44,7 @@
                                 @php
                                     $sortableColumns = [
                                         'id' => 'ID',
-                                        'temperature' => 'Temperature',
+                                        'temperature' => 'Temperature (K)',
                                         'length' => 'Length (ps)',
                                         'area_per_lipid' => 'Area per lipid',
                                         'op_quality_total' => 'OP Quality: total',
