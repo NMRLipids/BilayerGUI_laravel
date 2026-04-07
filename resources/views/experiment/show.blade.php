@@ -17,7 +17,7 @@
                             <button class="nav-link" id="analysis-tab" data-bs-toggle="tab" data-bs-target="#analysis" type="button" role="tab">Data</button>
                         </li>
                         <li class="nav-item" role="presentation">
-                            <button class="nav-link" id="properties-tab" data-bs-toggle="tab"  data-bs-target="#properties" type="button" role="tab">Properties</button>
+                            <button class="nav-link{{ !isset($properties_to_show) || count($properties_to_show) === 0 ? ' d-none' : '' }}" id="properties-tab" data-bs-toggle="tab"  data-bs-target="#properties" type="button" role="tab">Properties</button>
                         </li>
                         <!-- Add cross reference links to related simulations if available -->
                         @if (count($related_simulations) > 0) 
@@ -279,10 +279,6 @@
                             </div>
 
                         @else
-                            <!-- Hide the properties tab if there are no properties to show -->                           
-                            <style>
-                            #properties-tab { display: none; }
-                            </style>
                         @endif
 
                         <!-- Analysis Tab -->

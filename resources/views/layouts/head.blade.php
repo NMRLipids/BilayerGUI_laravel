@@ -9,6 +9,8 @@
     <meta name="description" content="FAIRMD Lipids Databank" />
     <meta name="author" content="NMRLipids Consortium" />
     <meta name="csrf-token" content="{{ csrf_token() }}" />
+    <meta name="doi-concurrent-fetches" content="{{ config('app.doi_concurrent_fetches', 10) }}" />
+    <meta name="doi-max-retries" content="{{ config('app.doi_max_retries', 3) }}" />
 
     <meta property="og:type" content="website">
     <meta property="og:site_name" content="FAIRMD Lipids Databank">
@@ -89,37 +91,5 @@
     @vite(['resources/js/app.js'])
    
      
-
-<style>
-    /* Dark pill tabs */
-    .nav-pills .nav-link {
-        color: #ddd;
-        background-color: transparent;
-        border-radius: 50rem;
-        margin: 0 0.3rem;
-        transition: background-color 0.2s ease, color 0.2s ease;
-    }
-
-    .nav-pills .nav-link:hover {
-        color: #fff;
-        background-color: rgba(255, 255, 255, 0.15);
-    }
-
-    .nav-pills .nav-link.active {
-        color: #fff;
-        background-color: #0d6efd; /* Bootstrap primary */
-        font-weight: 600;
-        box-shadow: 0 0 10px rgba(13,110,253,0.5);
-    }
-
-    /* Tab content styling */
-    .tab-content {
-        background-color: transparent;
-        border-radius: 0 0 0.5rem 0.5rem;
-        margin-top: 1rem;
-        padding: 1.5rem;
-    }
-</style>
-
 
 </head>

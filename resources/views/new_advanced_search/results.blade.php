@@ -1,21 +1,7 @@
 @extends('layouts.app')
 
-<style>
-    .filters-list {
-        list-style-type: none;
-        padding-left: 0;
-    }
-    .filters-list li {
-        display: inline-block;
-        margin-right: 10px;
-        background-color: #343a40;
-        padding: 5px 10px;
-        border-radius: 5px;
-    }
-</style>
-
 @section('content')
-   <div class="container">
+   <div class="container advanced-results-page">
         <div class="row justify-content-center">
             <div class="">
                 <h3 class="text-white text-center">Simulation Search Results</h3>

@@ -13,23 +13,7 @@
     $ncol = 0;
 @endphp
 @section('content')
-<style>
-    .chart-container {
-            max-width: 90%;
-            margin: 0 auto;
-            background-color: white;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    }
-    .chart-container-half {
-        position: relative;
-        width: 100%;
-        height: 800px;
-    }
-</style>       
-
-<div class="container">
+<div class="container trajectory-show-page">
     <div class="row justify-content-center">
         <div class="col-md-12">
             <div class="container">

@@ -185,7 +185,9 @@ class TrayectoriasController extends Controller
             $query->leftJoin('trajectories_analysis as ta_sort', 'trajectories.id', '=', 'ta_sort.trajectory_id')
                   ->select('trajectories.*');
             if ($sort === 'best') {
-                // Rank product: rank(OP) * rank(FF), lower = better.
+                // Rank product: rank(OP) * rank(FF), lower product = better.
+                // OP quality: higher is better → rank by count of values above.
+                // FF quality: lower is better  → rank by count of values below.
                 // NULLs get worst rank (N+1) per dimension, so they always sort below
                 // any simulation with actual data for both metrics.
                 $rpDir = $direction === 'desc' ? 'ASC' : 'DESC';
@@ -201,7 +203,7 @@ class TrayectoriasController extends Controller
                           THEN (SELECT COUNT(*) FROM trajectories_analysis) + 1
                           ELSE (SELECT COUNT(*) FROM trajectories_analysis ta3
                                 WHERE ta3.ff_quality IS NOT NULL
-                                  AND ta3.ff_quality > ta_sort.ff_quality) + 1
+                                  AND ta3.ff_quality < ta_sort.ff_quality) + 1
                     END)
                     $rpDir
                 ");
