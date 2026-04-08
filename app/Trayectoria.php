@@ -144,8 +144,8 @@ class Trayectoria extends AppModel
 
     function longName(){
         $membrana = $this->membrana;  
-        $l1 = $membrana->lipid_names_l1 . ':' .$membrana->lipid_number_l1 ?? 'N/A';
-        $l2 = $membrana->lipid_names_l2 . ':' .$membrana->lipid_number_l2 ?? 'N/A';
+        $l1 = $membrana->lipid_names_l1 . ':' . ($membrana->lipid_number_l1 ?? 'N/A');
+        $l2 = $membrana->lipid_names_l2 . ':' . ($membrana->lipid_number_l2 ?? 'N/A');
         return  $l1 . ($l1 != $l2 ? ', ' . $l2 : '') . ' - ' . $this->campo_de_fuerza?->name . ' at ' . 
            $this->temperature . 'K, ' . $this->trj_length . ' ps';
     }
