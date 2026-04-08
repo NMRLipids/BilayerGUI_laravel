@@ -45,11 +45,23 @@ jobs:
           extensions: mbstring, dom, fileinfo, mysql, pdo_mysql, xml, curl, gd, zip
           coverage: none
 
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+
       - name: Copy environment file
         run: cp .env-example .env
 
       - name: Install Composer dependencies
         run: composer install --no-interaction --prefer-dist --no-progress
+
+      - name: Install Node dependencies
+        run: npm ci
+
+      - name: Build frontend assets
+        run: npm run build
 
       - name: Wait for MySQL
         run: |
