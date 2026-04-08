@@ -71,7 +71,7 @@ Route::get('/search/basic', 'App\Http\Controllers\SearchController@basic')->name
 Route::get('/sitemap.xml', [SitemapXmlController::class, 'sitemap']);
 
 // Routes for advanced search autocomplete fields
-Route::get('lipids', function (Illuminate\Http\Request  $request) {
+Route::get('lipids/autocomplete', function (Illuminate\Http\Request  $request) {
     $term = $request->term ?: ''; //  <- esto depende del js que lo manda asi
     $tags = App\Lipido::where('molecule', 'LIKE', '%' . $term . '%')
         ->orderBy('molecule', 'asc')
@@ -82,7 +82,7 @@ Route::get('lipids', function (Illuminate\Http\Request  $request) {
         $valid_tags[] = ['id' => $id, 'molecule' => $tag];
     }
     return $valid_tags;
-});
+})->name('lipids.autocomplete');
 
 
 /* Implementing a route for lipids
