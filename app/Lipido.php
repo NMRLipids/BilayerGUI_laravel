@@ -80,8 +80,9 @@ class Lipido extends AppModel
 
     public function displayTitle()
     {
+        $shortestSynonym = $this->getShortestSynonym();
         return "Lipid: " . $this->name .
-        ($this->getShortestSynonym() ? ' (' . $this->getShortestSynonym() . ')' : ' ('.$this->name.')');
+        ($shortestSynonym ? ' (' . $shortestSynonym . ')' : '');
 
     }
 }
