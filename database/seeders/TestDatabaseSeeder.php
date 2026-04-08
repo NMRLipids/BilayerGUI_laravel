@@ -23,8 +23,7 @@ class TestDatabaseSeeder extends Seeder
                 // Ignore if no table lock is active.
             }
         }
-        echo "Test database seeded with SQL dump.\n";
-       # $this->ensureInchiKeyFixture();
+
     }
 
     
