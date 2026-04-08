@@ -51,26 +51,26 @@
                     @php
                         $currentSort = $sort ?? 'id';
                         $currentDir = $direction ?? 'asc';
-                        function simSortUrl($column, $currentSort, $currentDir) {
+                        $simSortUrl = function ($column) use ($currentSort, $currentDir) {
                             $dir = ($currentSort === $column && $currentDir === 'asc') ? 'desc' : 'asc';
                             return route('simulations.list', array_merge(request()->except('page', 'sort', 'direction'), ['sort' => $column, 'direction' => $dir]));
-                        }
-                        function simSortIcon($column, $currentSort, $currentDir) {
+                        };
+                        $simSortIcon = function ($column) use ($currentSort, $currentDir) {
                             if ($currentSort !== $column) return '&nbsp;<span style="font-size: 0.5em;">▲▼</span>';
                             return $currentDir === 'asc' ? '&nbsp;<span style="font-size: 0.5em;">▲</span>' : '&nbsp;<span style="font-size: 0.5em;">▼</span>';
-                        }
+                        };
                     @endphp
 
                     <table class="table table-bordered table-striped table-sm table-glass table-hover">
                         <thead>
                             <tr>
-                                <th scope="col"><a href="{{ simSortUrl('id', $currentSort, $currentDir) }}" class="text-white text-decoration-none">ID{!! simSortIcon('id', $currentSort, $currentDir) !!}</a></th>
-                                <th scope="col"><a href="{{ simSortUrl('temperature', $currentSort, $currentDir) }}" class="text-white text-decoration-none">Temperature (K){!! simSortIcon('temperature', $currentSort, $currentDir) !!}</a></th>
-                                <th scope="col"><a href="{{ simSortUrl('trj_length', $currentSort, $currentDir) }}" class="text-white text-decoration-none">Length (ps){!! simSortIcon('trj_length', $currentSort, $currentDir) !!}</a></th>
+                                <th scope="col"><a href="{{ $simSortUrl('id') }}" class="text-white text-decoration-none">ID{!! $simSortIcon('id') !!}</a></th>
+                                <th scope="col"><a href="{{ $simSortUrl('temperature') }}" class="text-white text-decoration-none">Temperature (K){!! $simSortIcon('temperature') !!}</a></th>
+                                <th scope="col"><a href="{{ $simSortUrl('trj_length') }}" class="text-white text-decoration-none">Length (ps){!! $simSortIcon('trj_length') !!}</a></th>
                                 <th scope="col">Force Field</th>
                                 <th scope="col">Lipids</th>
-                                <th scope="col"><a href="{{ simSortUrl('op_quality_total', $currentSort, $currentDir) }}" class="text-white text-decoration-none">OP Quality{!! simSortIcon('op_quality_total', $currentSort, $currentDir) !!}</a></th>
-                                <th scope="col"><a href="{{ simSortUrl('ff_quality', $currentSort, $currentDir) }}" class="text-white text-decoration-none">FF Quality{!! simSortIcon('ff_quality', $currentSort, $currentDir) !!}</a></th>
+                                <th scope="col"><a href="{{ $simSortUrl('op_quality_total') }}" class="text-white text-decoration-none">OP Quality{!! $simSortIcon('op_quality_total') !!}</a></th>
+                                <th scope="col"><a href="{{ $simSortUrl('ff_quality') }}" class="text-white text-decoration-none">FF Quality{!! $simSortIcon('ff_quality') !!}</a></th>
                                 <th scope="col">Experiments</th>
                                 <th scope="col">Actions</th>
                             </tr>

@@ -1,7 +1,6 @@
 @php
 
     use App\Lipido;
-    require_once '../bootstrap/helpers.php';
 
     /**
      *
