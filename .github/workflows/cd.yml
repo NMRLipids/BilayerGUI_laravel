@@ -1,0 +1,99 @@
+name: Laravel CD
+
+on:
+  workflow_run:
+    workflows:
+      - Laravel CI
+    types:
+      - completed
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+concurrency:
+  group: production-deploy
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-latest
+    environment: production
+    timeout-minutes: 30
+
+    env:
+      PROD_USER: gitcd
+      PROD_HOST: ${{ secrets.PROD_HOST }}
+      PROD_PATH: ${{ secrets.PROD_PATH }}
+      SSH_OPTS: -i ~/.ssh/id_ed25519 -o IdentitiesOnly=yes
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha }}
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          extensions: mbstring, dom, fileinfo, mysql, pdo_mysql, xml, curl, gd, zip
+          coverage: none
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+
+      - name: Install Node dependencies
+        run: npm ci
+
+      - name: Build frontend assets
+        run: npm run build
+
+      - name: Configure SSH
+        run: |
+          install -m 700 -d ~/.ssh
+          printf '%s\n' '${{ secrets.PROD_SSH_KEY }}' > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          printf '%s\n' '${{ secrets.PROD_KNOWN_HOSTS }}' > ~/.ssh/known_hosts
+          chmod 644 ~/.ssh/known_hosts
+
+      - name: Create target directory
+        run: |
+          ssh ${SSH_OPTS} ${PROD_USER}@${PROD_HOST} "mkdir -p '${PROD_PATH}'"
+
+      - name: Sync application files
+        run: |
+          rsync -az --delete \
+            --exclude='.git/' \
+            --exclude='.github/' \
+            --exclude='.env' \
+            --exclude='node_modules/' \
+            --exclude='vendor/' \
+            --exclude='tests/' \
+            --exclude='storage/' \
+            --exclude='public/storage' \
+            --exclude='database/testing/' \
+            --exclude='dev-tools/' \
+            --exclude='*.sql' \
+            -e "ssh ${SSH_OPTS}" \
+            ./ ${PROD_USER}@${PROD_HOST}:${PROD_PATH}/
+
+      - name: Install production dependencies and optimize
+        run: |
+          ssh ${SSH_OPTS} ${PROD_USER}@${PROD_HOST} <<EOF
+          set -e
+          cd '${PROD_PATH}'
+          composer install --no-dev --prefer-dist --no-interaction --optimize-autoloader
+          php artisan migrate --force
+          php artisan optimize:clear
+          php artisan config:cache
+          php artisan view:cache
+          if [ ! -L public/storage ]; then
+            php artisan storage:link
+          fi
+          EOF
