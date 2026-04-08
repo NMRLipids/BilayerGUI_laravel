@@ -112,7 +112,7 @@
 $(function() {
     $('#lipid-filter').autocomplete({
         source: function(request, response) {
-            $.getJSON('/lipids', { term: request.term }, function(data) {
+            $.getJSON("{{ route('lipids.autocomplete') }}", { term: request.term }, function(data) {
                 response($.map(data, function(item) {
                     return { label: item.molecule, value: item.molecule };
                 }));
