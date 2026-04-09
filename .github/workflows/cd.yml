@@ -28,6 +28,7 @@ jobs:
       PROD_HOST: ${{ secrets.PROD_HOST }}
       PROD_PATH: ${{ secrets.PROD_PATH }}
       SSH_OPTS: -i ~/.ssh/id_ed25519 -o IdentitiesOnly=yes
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
     steps:
       - name: Checkout
@@ -55,11 +56,14 @@ jobs:
         run: npm run build
 
       - name: Configure SSH
+        env:
+          PROD_SSH_KEY: ${{ secrets.PROD_SSH_KEY }}
+          PROD_KNOWN_HOSTS: ${{ secrets.PROD_KNOWN_HOSTS }}
         run: |
           install -m 700 -d ~/.ssh
-          printf '%s\n' '${{ secrets.PROD_SSH_KEY }}' > ~/.ssh/id_ed25519
+          printf '%s\n' "$PROD_SSH_KEY" > ~/.ssh/id_ed25519
           chmod 600 ~/.ssh/id_ed25519
-          printf '%s\n' '${{ secrets.PROD_KNOWN_HOSTS }}' > ~/.ssh/known_hosts
+          printf '%s\n' "$PROD_KNOWN_HOSTS" > ~/.ssh/known_hosts
           chmod 644 ~/.ssh/known_hosts
 
       - name: Create target directory
@@ -68,7 +72,7 @@ jobs:
 
       - name: Sync application files
         run: |
-          rsync -az --delete \
+          rsync -az --delete --no-owner --no-group \
             --exclude='.git/' \
             --exclude='.github/' \
             --exclude='.env' \
