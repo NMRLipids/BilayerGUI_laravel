@@ -1,9 +1,33 @@
+```html
 <footer class="text-center text-white navbar bg-primary">
     <!-- fixed-bottom-->
     <!-- Grid container -->
     <div class=" p-4 w-100">
         <!-- Section: Images -->
         <section>
+
+            <div class="row justify-content-center align-items-center mb-3">
+                <div class="col-12 d-flex justify-content-center align-items-center gap-4 flex-wrap">
+                    <div class="d-flex align-items-center" style="gap:0.75rem;">
+                        <img src="{{ asset('storage/images/EN_Co-fundedbytheEU_RGB_WHITE.svg') }}" alt="Co-funded by the EU" style="height:48px; width:auto;">
+                        <small class="text-white">
+                            The FAIRMD project has been co-funded from the European Commission’s Horizon Europe Research and Innovation programme through the
+                            <a href="https://oscars-project.eu/" class="text-white text-decoration-underline" target="_blank" rel="noopener">OSCARS</a>
+                            project Open Call under grant agreement No.
+                            <a href="https://cordis.europa.eu/project/id/101129751l" class="text-white text-decoration-underline" target="_blank" rel="noopener">101129751</a>
+                        </small>
+                    </div>
+
+                    <div class="d-flex align-items-center" style="gap:0.75rem;">
+                        <img src="{{ asset('storage/images/TMS_eng_sh.svg') }}" alt="Trond Mohn Foundation" style="height:48px; width:auto;">
+                        <small class="text-white">
+                            M.S.M. is supported by the
+                            <a href="https://www.trondmohn.no/" class="text-white text-decoration-underline" target="_blank" rel="noopener">Trond Mohn Foundation</a>
+                            (BFS2017TMT01)
+                        </small>
+                    </div>
+                </div>
+            </div>
 
             <div class="row justify-content-center align-items-center ">
                 <span> Copyright &copy;{{ date('Y') }} - FAIRMD Lipids (Formerly known as NMRlipids) - Universidade de Santiago de Compostela, Universitetet i Bergen </span>
@@ -147,3 +171,4 @@ document.addEventListener('DOMContentLoaded', function () {
 </body>
 
 </html>
+```
