@@ -16,7 +16,7 @@
                     <p class="mb-0" style="max-width:780px;">
                         The FAIRMD project has been co-funded from the European Commission’s Horizon Europe Research and Innovation programme through the
                         <a href="https://oscars-project.eu/" target="_blank" rel="noopener" class="text-white text-decoration-underline">OSCARS</a> project Open Call under grant agreement No.
-                        <a href="https://cordis.europa.eu/project/id/101129751l" target="_blank" rel="noopener" class="text-white text-decoration-underline">101129751</a>,
+                        <a href="https://cordis.europa.eu/project/id/101129751" target="_blank" rel="noopener" class="text-white text-decoration-underline">101129751</a>,
                         M.S.M. is supported by the
                         <a href="https://mohnfoundation.no/en/" target="_blank" rel="noopener" class="text-white text-decoration-underline">Trond Mohn Foundation</a> (BFS2017TMT01)
                     </p>
