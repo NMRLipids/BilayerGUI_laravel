@@ -7,7 +7,7 @@
             <div class="row justify-content-center mb-2">
                 <div class="col-auto d-flex align-items-center justify-content-center gap-3">
                     <img src="{{ asset('storage/images/EN_Co-fundedbytheEU_RGB_WHITE.svg') }}" alt="Co-funded by the EU" style="max-height:64px; width:auto; display:block;">
-                    <img src="{{ asset('storage/images/EN_Co-fundedbytheEU_RGB_WHITE.svg') }}" alt="Co-funded by the EU" style="max-height:64px; width:auto; display:block;">
+                    <img src="{{ asset('storage/images/TMS_eng_sh.svg') }}" alt="Co-funded by the Trond Mohn Foundation" style="max-height:75px; width:auto; display:block;">
                 </div>
             </div>
 
@@ -86,8 +86,6 @@ document.addEventListener('DOMContentLoaded', function () {
 });
 </script>
 
-<!-- SimpleLightbox plugin JS-->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/SimpleLightbox/2.1.0/simpleLightbox.min.js"></script>
 
 <!-- High-contrast toggle + OS preference detection -->
 <script>
