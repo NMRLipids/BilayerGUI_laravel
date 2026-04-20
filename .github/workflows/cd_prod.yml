@@ -83,6 +83,8 @@ jobs:
             --exclude='Python/config.json' \
             --exclude='.github/' \
             --exclude='.env' \
+            --exclude='Python/.venv/' \
+            --exclude='bootstrap/cache/'
             --exclude='public/robots.txt' \
             --exclude='node_modules/' \
             --exclude='vendor/' \
