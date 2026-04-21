@@ -1,7 +1,11 @@
 name: Laravel CD Testing
 
 on:
-  push:
+  workflow_run:
+    workflows:
+      - Laravel CI
+    types:
+      - completed
     branches:
       - testing
 
@@ -13,23 +17,9 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  wait-for-ci:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Wait for Laravel CI to pass
-        uses: lewagon/wait-on-check-action@v1.3.4
-        with:
-          ref: ${{ github.sha }}
-          # IMPORTANT: Use the Job Name from your CI file, not the Workflow Name
-          check-name: 'tests' 
-          repo-token: ${{ secrets.GITHUB_TOKEN }}
-          wait-interval: 10 # Seconds between polls
-          allowed-conclusions: success
-
-
   deploy:
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-latest
-    needs: wait-for-ci
     environment: testing
     timeout-minutes: 30
 
@@ -38,33 +28,32 @@ jobs:
       TEST_HOST: ${{ secrets.TEST_HOST }}
       TEST_PATH: ${{ secrets.TEST_PATH }}
       SSH_OPTS: -i ~/.ssh/id_ed25519 -o IdentitiesOnly=yes
-      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
     steps:
+      # Check out the pushed commit so the runner has the source code and package.json.
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           ref: ${{ github.event.workflow_run.head_sha }}
 
-      - name: Setup PHP
-        uses: shivammathur/setup-php@v2
-        with:
-          php-version: '8.4'
-          extensions: mbstring, dom, fileinfo, mysql, pdo_mysql, xml, curl, gd, zip
-          coverage: none
-
+      # Install Node.js on the runner — needed to build frontend assets in the next steps.
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v5
         with:
           node-version: '24'
           cache: npm
 
+      # Install npm packages from package-lock.json.
       - name: Install Node dependencies
         run: npm ci
 
+      # Compile and bundle JS/CSS on the runner.
+      # The built artefacts are rsynced to the server — no Node.js required there.
       - name: Build frontend assets
         run: npm run build
 
+      # Write the private SSH key and known_hosts from GitHub Secrets so subsequent
+      # ssh/rsync steps can authenticate without prompts.        
       - name: Configure SSH
         env:
           TEST_SSH_KEY: ${{ secrets.TEST_SSH_KEY }}
@@ -76,6 +65,12 @@ jobs:
           printf '%s\n' "$TEST_KNOWN_HOSTS" > ~/.ssh/known_hosts
           chmod 644 ~/.ssh/known_hosts
 
+      # Ensure the deployment directory exists on the server with correct group ownership.
+      # g+s (setgid) ensures new files inherit the www-data group automatically.
+      # Note 1: The deploy user must have permissions to create this directory and set its group.
+      # Note 2: The user needs to create .env and Python/config.json manually the first time, 
+      # so we can exclude those from rsync and avoid overwriting them on subsequent deploys.
+      # Note 3: We also exclude robots.txt to allow the tester to modify it for testing purposes without affecting the repo.
       - name: Create target directory if it doesn't exist
         run: |
           ssh ${SSH_OPTS} ${TEST_USER}@${TEST_HOST} <<EOF
@@ -84,8 +79,13 @@ jobs:
           chgrp www-data '${TEST_PATH}'
           chmod g+s '${TEST_PATH}'
           EOF
-          
 
+      # Push only the files the server needs. vendor/, node_modules/, storage/, .env
+      # and other environment-specific paths are excluded — they are managed on the
+      # server directly. --delete removes files on the server that no longer exist in
+      # the repo, keeping the deployment clean.
+      # Note 4: CD user does not need sudo permissions to write to the deployment directory, 
+      # but it does need permissions to delete files in it for --delete to work.          
       - name: Sync application files
         run: |
           rsync -rlz --delete --omit-dir-times --no-owner --no-group --no-perms \
@@ -106,6 +106,9 @@ jobs:
             -e "ssh ${SSH_OPTS}" \
             ./ ${TEST_USER}@${TEST_HOST}:${TEST_PATH}/
 
+      # On the server: install PHP dependencies (no dev packages), run any pending
+      # database migrations, clear and rebuild the Laravel config/view caches, and
+      # create the public/storage symlink if it does not already exist.
       - name: Install production dependencies and optimize
         run: |
           ssh ${SSH_OPTS} ${TEST_USER}@${TEST_HOST} <<EOF
