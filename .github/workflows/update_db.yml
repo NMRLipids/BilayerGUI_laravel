@@ -59,8 +59,8 @@ jobs:
           
           export FMDL_DATA_PATH="${PROD_PATH}/BilayerData"
           cd "${PROD_PATH}"
-          git -C $FMDL_DATA_PATH pull || git clone https://github.com/NMRLipids/BilayerData $FMDL_DATA_PATH
-          cd $FMDL_DATA_PATH
+          git -C "\$FMDL_DATA_PATH" pull || git clone https://github.com/NMRLipids/BilayerData "\$FMDL_DATA_PATH"
+          cd "\$FMDL_DATA_PATH"
           BILAYERDATA_VERSION=$(git log -1 --oneline)
           export BILAYERDATA_VERSION
           if [ "${{ inputs.force }}" = "true" ]; then
