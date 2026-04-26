@@ -50,7 +50,6 @@ jobs:
       - name: Update database
         run: |
           ssh ${SSH_OPTS} ${PROD_USER}@${PROD_HOST} <<EOF
-          set -euo pipefail
 
           cd "${PROD_PATH}/Python"
           python3 -m venv .venv
