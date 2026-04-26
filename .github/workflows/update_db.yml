@@ -5,7 +5,7 @@ on:
   workflow_dispatch:
     inputs:
       force:
-        description: 'Force update with potentially destructive operations (e.g. dropping tables). Use with caution.
+        description: 'Force update with potentially destructive operations (e.g. dropping tables). Use with caution.'
         # This option is intended for use when the database 
         # schema has changed in a way that cannot be handled by 
         # Laravels built-in migration system, such as when
