@@ -5,7 +5,11 @@ on:
   workflow_dispatch:
     inputs:
       force:
-        description: 'Force update'
+        description: 'Force update with potentially destructive operations (e.g. dropping tables). Use with caution.
+        # This option is intended for use when the database 
+        # schema has changed in a way that cannot be handled by 
+        # Laravels built-in migration system, such as when
+        # tables have been renamed or when there are complex relationships that require manual intervention. 
         required: false
         default: 'false'
 
@@ -18,13 +22,12 @@ concurrency:
 
 jobs:
   deploy:
-    if: ${{ github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-latest
     environment: production
     timeout-minutes: 30
 
     env:
-      PROD_USER: gitcd
+      PROD_USER: ${{ secrets.PROD_USER }}
       PROD_HOST: ${{ secrets.PROD_HOST }}
       PROD_PATH: ${{ secrets.PROD_PATH }}
       SSH_OPTS: -i ~/.ssh/id_ed25519 -o IdentitiesOnly=yes
@@ -61,7 +64,9 @@ jobs:
           cd $FMDL_DATA_PATH
           BILAYERDATA_VERSION=$(git log -1 --oneline)
           export BILAYERDATA_VERSION
-          php artisan migrate:fresh --force; 
+          if [ "${{ inputs.force }}" = "true" ]; then
+            php artisan migrate:fresh --force; 
+          fi
           # we don't want to drop the whole database
           # but we want to make sure that the schema is up to date. 
           # The UI_DB_Update.py script will handle the rest of the updates and will not delete any data.

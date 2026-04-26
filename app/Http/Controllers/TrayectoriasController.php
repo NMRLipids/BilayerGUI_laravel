@@ -203,7 +203,7 @@ class TrayectoriasController extends Controller
                           THEN (SELECT COUNT(*) FROM trajectories_analysis) + 1
                           ELSE (SELECT COUNT(*) FROM trajectories_analysis ta3
                                 WHERE ta3.ff_quality IS NOT NULL
-                                  AND ta3.ff_quality < ta_sort.ff_quality) + 1
+                                  AND ta3.ff_quality > ta_sort.ff_quality) + 1
                     END)
                     $rpDir
                 ");
