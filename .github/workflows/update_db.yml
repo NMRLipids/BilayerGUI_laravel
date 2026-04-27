@@ -65,6 +65,8 @@ jobs:
           export BILAYERDATA_VERSION
           if [ "${{ inputs.force }}" = "true" ]; then
             php artisan migrate:fresh --force; 
+          else
+            php artisan migrate --force;
           fi
           # we don't want to drop the whole database
           # but we want to make sure that the schema is up to date. 
