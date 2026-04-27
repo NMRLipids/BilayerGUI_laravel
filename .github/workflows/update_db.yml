@@ -11,7 +11,8 @@ on:
         # Laravel's built-in migration system, such as when
         # tables have been renamed or when there are complex relationships that require manual intervention. 
         required: false
-        default: 'false'
+        default: false
+        type: boolean
 
 permissions:
   contents: read
