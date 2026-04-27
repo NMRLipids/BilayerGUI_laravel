@@ -187,9 +187,16 @@ class TrayectoriasController extends Controller
             if ($sort === 'best') {
                 // Rank product: rank(OP) * rank(FF), lower product = better.
                 // OP quality: higher is better → rank by count of values above.
-                // FF quality: lower is better  → rank by count of values below.
+                // FF quality: higher is better → rank by count of values above.
                 // NULLs get worst rank (N+1) per dimension, so they always sort below
                 // any simulation with actual data for both metrics.
+
+                // Note, this also means that if both metrics have different amounts of missing data, 
+                // simulations with missing data in the metric with more missing data will be ranked better than 
+                // those with missing data in the metric with less missing data, 
+                // which is a reasonable approach to handle the varying completeness of the data across metrics.
+                // We compensate for a potential bias for underrepresented metrics. 
+
                 $rpDir = $direction === 'desc' ? 'ASC' : 'DESC';
                 $query->orderByRaw("
                     (CASE WHEN ta_sort.op_quality_total IS NULL
