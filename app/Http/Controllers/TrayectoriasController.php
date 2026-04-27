@@ -194,8 +194,8 @@ class TrayectoriasController extends Controller
                 // Note, this also means that if both metrics have different amounts of missing data, 
                 // simulations with missing data in the metric with more missing data will be ranked better than 
                 // those with missing data in the metric with less missing data, 
-                // which is a reasonable approach to handle the varying completeness of the data across metrics.
-                // We compensate for a potential bias for underrepresented metrics. 
+                // which reflects the current raw rank-product behavior when data completeness varies
+                // across metrics; no additional compensation or weighting is applied here.
 
                 $rpDir = $direction === 'desc' ? 'ASC' : 'DESC';
                 $query->orderByRaw("
