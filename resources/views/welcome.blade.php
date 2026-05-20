@@ -206,7 +206,7 @@ use App\Http\Controllers\StatisticsController;
                                     and relevant trajectory entries.</p>
                                 <ul class="small mb-0">
                                     <li>Data: <a href="https://github.com/NMRLipids/BilayerData/blob/main/LICENSE">CC-BY-4.0</a></li>
-                                    <li>API code: <a href="https://github.com/NMRLipids/Databank/blob/main/LICENSE.txt">GPLv3</a></li>
+                                    <li>API code: <a href="https://github.com/NMRLipids/Databank/blob/main/LICENSE">GPLv3</a></li>
                                     <li>GUI code: <a href="https://github.com/NMRLipids/BilayerGUI_laravel/blob/main/LICENSE">MIT</a></li>
                                 </ul>
                             </div>
