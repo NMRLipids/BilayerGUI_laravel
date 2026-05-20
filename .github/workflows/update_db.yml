@@ -5,9 +5,14 @@ on:
   workflow_dispatch:
     inputs:
       force:
-        description: 'Force update'
+        description: 'Force update with potentially destructive operations (e.g. dropping tables). Use with caution.'
+        # This option is intended for use when the database 
+        # schema has changed in a way that cannot be handled by 
+        # Laravel's built-in migration system, such as when
+        # tables have been renamed or when there are complex relationships that require manual intervention. 
         required: false
-        default: 'false'
+        default: false
+        type: boolean
 
 permissions:
   contents: read
@@ -18,13 +23,12 @@ concurrency:
 
 jobs:
   deploy:
-    if: ${{ github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-latest
     environment: production
     timeout-minutes: 30
 
     env:
-      PROD_USER: gitcd
+      PROD_USER: ${{ secrets.PROD_USER }}
       PROD_HOST: ${{ secrets.PROD_HOST }}
       PROD_PATH: ${{ secrets.PROD_PATH }}
       SSH_OPTS: -i ~/.ssh/id_ed25519 -o IdentitiesOnly=yes
@@ -47,7 +51,6 @@ jobs:
       - name: Update database
         run: |
           ssh ${SSH_OPTS} ${PROD_USER}@${PROD_HOST} <<EOF
-          set -euo pipefail
 
           cd "${PROD_PATH}/Python"
           python3 -m venv .venv
@@ -57,11 +60,15 @@ jobs:
           
           export FMDL_DATA_PATH="${PROD_PATH}/BilayerData"
           cd "${PROD_PATH}"
-          git -C $FMDL_DATA_PATH pull || git clone https://github.com/NMRLipids/BilayerData $FMDL_DATA_PATH
-          cd $FMDL_DATA_PATH
-          BILAYERDATA_VERSION=$(git log -1 --oneline)
+          git -C "\$FMDL_DATA_PATH" pull || git clone https://github.com/NMRLipids/BilayerData "\$FMDL_DATA_PATH"
+          cd "\$FMDL_DATA_PATH"
+          BILAYERDATA_VERSION=\$(git log -1 --oneline)
           export BILAYERDATA_VERSION
-          php artisan migrate:fresh --force; 
+          if [ "${{ inputs.force }}" = "true" ]; then
+            php artisan migrate:fresh --force; 
+          else
+            php artisan migrate --force;
+          fi
           # we don't want to drop the whole database
           # but we want to make sure that the schema is up to date. 
           # The UI_DB_Update.py script will handle the rest of the updates and will not delete any data.

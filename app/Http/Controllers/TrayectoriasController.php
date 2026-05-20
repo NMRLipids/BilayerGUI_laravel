@@ -187,9 +187,16 @@ class TrayectoriasController extends Controller
             if ($sort === 'best') {
                 // Rank product: rank(OP) * rank(FF), lower product = better.
                 // OP quality: higher is better → rank by count of values above.
-                // FF quality: lower is better  → rank by count of values below.
+                // FF quality: higher is better → rank by count of values above.
                 // NULLs get worst rank (N+1) per dimension, so they always sort below
                 // any simulation with actual data for both metrics.
+
+                // Note, this also means that if both metrics have different amounts of missing data, 
+                // simulations with missing data in the metric with more missing data will be ranked better than 
+                // those with missing data in the metric with less missing data, 
+                // which reflects the current raw rank-product behavior when data completeness varies
+                // across metrics; no additional compensation or weighting is applied here.
+
                 $rpDir = $direction === 'desc' ? 'ASC' : 'DESC';
                 $query->orderByRaw("
                     (CASE WHEN ta_sort.op_quality_total IS NULL
@@ -203,7 +210,7 @@ class TrayectoriasController extends Controller
                           THEN (SELECT COUNT(*) FROM trajectories_analysis) + 1
                           ELSE (SELECT COUNT(*) FROM trajectories_analysis ta3
                                 WHERE ta3.ff_quality IS NOT NULL
-                                  AND ta3.ff_quality < ta_sort.ff_quality) + 1
+                                  AND ta3.ff_quality > ta_sort.ff_quality) + 1
                     END)
                     $rpDir
                 ");
