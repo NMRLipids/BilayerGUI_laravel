@@ -157,7 +157,7 @@ use App\Http\Controllers\StatisticsController;
                             It improves the <a href="https://www.go-fair.org/fair-principles/">Findability, Accessibility, Interoperability, and Reuse (FAIR)</a>
                             of MD simulation data using an overlay databank structure described in the
                             <a href="https://www.nature.com/articles/s41467-024-45189-z">databank publication</a>.
-                            See the <a href="https://nmrlipids.github.io/">online documentation</a> for full details.</p>
+                            See the <a href="https://databank.readthedocs.io/">online documentation</a> for full details.</p>
                     </div>
                     <div class="about-card mb-4" style="border-left: 4px solid #e8a735; background: linear-gradient(135deg, #fffbe6 0%, #fff 100%);">
                         <h4 style="color: #7a5e00;">✦ Contribute to the Databank</h4>
@@ -215,7 +215,7 @@ use App\Http\Controllers\StatisticsController;
                             <div class="about-card h-100">
                                 <h4>Resources</h4>
                                 <ul class="small mb-2">
-                                    <li><a href="https://nmrlipids.github.io/">Full documentation</a></li>
+                                    <li><a href="https://databank.readthedocs.io/">Full documentation</a></li>
                                     <li><a href="http://nmrlipids.blogspot.com/">NMRlipids blog</a></li>
                                 </ul>
                                 <p class="small text-dark mb-0">All data and code are provided AS-IS with no warranty. Report issues via each component's GitHub tracker.</p>
