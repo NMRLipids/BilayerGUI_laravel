@@ -8,6 +8,12 @@ on:
       - 'database/schema/**'
       - '.github/workflows/verify_can_update.yml'
   workflow_dispatch:
+    inputs:
+      bilayer_data_tag:
+        description: 'Branch or tag to checkout BilayerData'
+        required: false
+        default: 'main'
+        type: string
 
 jobs:
   run-with-mysql:
@@ -28,13 +34,13 @@ jobs:
 
     steps:
       - name: Checkout this
-        uses: actions/checkout@v5
+        uses: actions/checkout@v4
 
       - name: Checkout BilayerData
-        uses: actions/checkout@v5
+        uses: actions/checkout@v4
         with:
           repository: NMRlipids/BilayerData
-          ref: main
+          ref: ${{ github.event.inputs.bilayer_data_tag || 'v1.5.2' }}
           path: BilayerData
 
       - name: Set up Python
