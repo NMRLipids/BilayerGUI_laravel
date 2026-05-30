@@ -1,3 +1,3 @@
 PyMySQL
 loguru
-git+https://github.com/NMRLipids/FAIRMD_lipids.git
+fairmd-lipids
