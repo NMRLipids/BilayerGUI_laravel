@@ -193,9 +193,9 @@ def UPSERT(conn, table, data) -> int | None:
     for c in columns:
         if c == pk:
             # Wrap pk in LAST_INSERT_ID so cursor.lastrowid returns it on UPDATE
-            update_parts.append(f"`{c}` = LAST_INSERT_ID(new.`{c}`)")
+            update_parts.append(f"`{c}` = LAST_INSERT_ID(VALUES(`{c}`))")
         else:
-            update_parts.append(f"`{c}` = new.`{c}`")
+            update_parts.append(f"`{c}` = VALUES(`{c}`)")
 
     # Force LAST_INSERT_ID(pk) so we get pk on UPDATE too
     # only if pk is not part of the columns being updated
@@ -208,7 +208,7 @@ def UPSERT(conn, table, data) -> int | None:
 
     sql = f"""
         INSERT INTO `{table}` ({col_list})
-        VALUES ({placeholders}) AS new
+        VALUES ({placeholders})
         ON DUPLICATE KEY UPDATE
             {update_clause}
     """
