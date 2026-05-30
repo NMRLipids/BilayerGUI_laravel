@@ -604,7 +604,7 @@ def load_experiment_composition(database, Exp_ID, expobj, ExpInfo=None) -> None:
             try:
                 op_data = build_nice_OPdict(op_data, lipid_object)
             except Exception as e:
-                logger.warning(f"Problem building OP dict in experiment {README.get('DOI', 'unknown')} for lipid {lipid_name}")
+                logger.warning(f"Problem building OP dict in experiment {expobj.exp_id} for lipid {lipid_name}")
                 #logger.exception(e)
                 if args.strict_experiments:
                     raise e
