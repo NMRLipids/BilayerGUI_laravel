@@ -97,6 +97,12 @@ parser.add_argument(
     "--dry-run", action='store_true',
     help=''' Run without committing changes to the database. Default: %(default)s ''')
 
+# Use MariaDB
+parser.add_argument(
+    "--maria-db", action='store_true',
+    help=''' Turn on if you use MariaDB and not MySQL. Default: %(default)s ''')
+
+
 # Debug mode
 parser.add_argument(
     "-d", "--debug", type=int, default=0,
@@ -188,14 +194,15 @@ def UPSERT(conn, table, data) -> int | None:
 
     placeholders = ", ".join(["%s"] * len(columns))
     col_list = ", ".join(f"`{c}`" for c in columns)
+    backref_clause = lambda c: f"VALUES(`{c}`)" if args.maria_db else f"new.`{c}`"
 
     update_parts = []
     for c in columns:
         if c == pk:
             # Wrap pk in LAST_INSERT_ID so cursor.lastrowid returns it on UPDATE
-            update_parts.append(f"`{c}` = LAST_INSERT_ID(VALUES(`{c}`))")
+            update_parts.append(f"`{c}` = LAST_INSERT_ID({backref_clause(c)})")
         else:
-            update_parts.append(f"`{c}` = VALUES(`{c}`)")
+            update_parts.append(f"`{c}` = {backref_clause(c)}")
 
     # Force LAST_INSERT_ID(pk) so we get pk on UPDATE too
     # only if pk is not part of the columns being updated
@@ -205,10 +212,10 @@ def UPSERT(conn, table, data) -> int | None:
         )
 
     update_clause = ", ".join(update_parts)
-
+    alias = "" if args.maria_db else "AS new"
     sql = f"""
         INSERT INTO `{table}` ({col_list})
-        VALUES ({placeholders})
+        VALUES ({placeholders}) {alias}
         ON DUPLICATE KEY UPDATE
             {update_clause}
     """
