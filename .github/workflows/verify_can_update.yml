@@ -6,6 +6,7 @@ on:
     paths:
       - 'Python/**'
       - 'database/schema/**'
+      - '.github/workflows/verify_can_update.yml'
   workflow_dispatch:
 
 jobs:
