@@ -1,6 +1,11 @@
 name: Probing sweep of experiments
 
 on:
+  pull_request:
+    branches: [ main ]
+    paths:
+      - 'Python/**'
+      - 'database/schema/**'
   workflow_dispatch:
 
 jobs:
