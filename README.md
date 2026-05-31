@@ -1,5 +1,6 @@
 [![Laravel CI](https://github.com/NMRLipids/BilayerUI_laravel/actions/workflows/ci.yml/badge.svg)](https://github.com/NMRLipids/BilayerUI_laravel/actions/workflows/ci.yml)
-[![Laravel CD](https://github.com/NMRLipids/BilayerUI_laravel/actions/workflows/cd.yml/badge.svg)](https://github.com/NMRLipids/BilayerUI_laravel/actions/workflows/cd.yml)
+[![Laravel CD](https://github.com/NMRLipids/BilayerUI_laravel/actions/workflows/cd_test.yml/badge.svg)](https://github.com/NMRLipids/BilayerUI_laravel/actions/workflows/cd_test.yml)
+[![Laravel CD](https://github.com/NMRLipids/BilayerUI_laravel/actions/workflows/cd_prod.yml/badge.svg)](https://github.com/NMRLipids/BilayerUI_laravel/actions/workflows/cd_prod.yml)
 # Synopsis
 
 FAIRMDLipids Databank -- A portal for visualization of molecular simulations
