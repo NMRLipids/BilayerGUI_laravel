@@ -25,6 +25,7 @@ return [
     'github_base_url' => env('GITHUB_BASE_URL', 'https://github.com/NMRLipids/BilayerData'),
     'github_raw_url'  => env('GITHUB_RAW_URL', 'https://raw.githubusercontent.com/NMRLipids/BilayerData'),
     'github_contribute_url' => env('GITHUB_CONTRIBUTE_URL', 'https://databank.readthedocs.io/stable/dbcontribute.html'),
+    'submission_portal_url' => env('SUBMISSION_PORTAL_URL', 'https://upload-portal.nmrlipids.fi'),
 
     'doi_concurrent_fetches' => env('DOI_CONCURRENT_FETCHES', 10),
     'doi_max_retries' => env('DOI_MAX_RETRIES', 3),
