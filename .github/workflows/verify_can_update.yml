@@ -34,17 +34,17 @@ jobs:
 
     steps:
       - name: Checkout this
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Checkout BilayerData
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           repository: NMRlipids/BilayerData
           ref: ${{ github.event.inputs.bilayer_data_tag || 'main' }}
           path: BilayerData
 
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: "3.12"
 
