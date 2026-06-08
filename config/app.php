@@ -14,7 +14,7 @@ return [
     */
 
     'name' => env('APP_NAME', 'FAIRMD Lipids'),
-    'version' => '2.0.0-alpha-2', // Application version
+    'version' => '2.0.0', // Application version
 
     /*
     |--------------------------------------------------------------------------
