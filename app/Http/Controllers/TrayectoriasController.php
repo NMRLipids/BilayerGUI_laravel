@@ -115,7 +115,9 @@ class TrayectoriasController extends Controller
                 }
             }
         } else {
-            error_log("No analysis or lipid analysis data found for trajectory id " . $trayectoria->id);
+            if (config('app.debug')) {
+                error_log("No analysis or lipid analysis data found for trajectory id " . $trayectoria->id);
+            }
         }
         //  where plot_data is the data to be plotted for that lipid and group, and legend is the label for the dataset in the chart. The view can then iterate over this structure to render charts for each lipid and group combination.
         // Example: $OPData['DPPC']['G1'] = [plot_data_for_DPPC_G1]
@@ -148,7 +150,9 @@ class TrayectoriasController extends Controller
                     }
                     foreach ($decodedPlotData as $group => $plot_data) {
                         if (empty($plot_data)) {
-                            error_log("Decoded OP plot data for lipid " . $lipidName . " in experiment " . $experimentName . " is empty for group " . $group);
+                            if (config('app.debug')) {
+                                error_log("Decoded OP plot data for lipid " . $lipidName . " in experiment " . $experimentName . " is empty for group " . $group);
+                            }       
                             continue; // Skip if plot data is empty
                         }
                         // If we don't have existing data for this lipid and group, we don't plot it. 

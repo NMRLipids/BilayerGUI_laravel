@@ -34,9 +34,7 @@ Route::redirect('/about', '/#about')->name('about');
 // advanced search
 Route::get('/advanced-search', 'App\Http\Controllers\NewAdvancedSearchController@form')->name('new_advanced_search.form');
 Route::get('/advanced-search/result', 'App\Http\Controllers\NewAdvancedSearchController@results')->name('new_advanced_search.results');
-Route::get('/advanced-search/compare', 'App\Http\Controllers\NewAdvancedSearchController@compare')->name('new_advanced_search.compare');
-Route::post('/advanced-search/updatecompare', 'App\Http\Controllers\NewAdvancedSearchController@updatecompare')->name('new_advanced_search.updatecompare');
-Route::get('/advanced-search/export', 'App\Http\Controllers\NewAdvancedSearchController@resultsExport')->name('new_advanced_search.resultsExportacion');
+
 
 Route::get('/advanced-search/exportcompare', 'App\Http\Controllers\NewAdvancedSearchController@exportarcompare')->name('new_advanced_search.exportarcompare');
 Route::redirect('/new-advanced-search/', '/advanced-search/')->name('new_advanced_search.redirect');
