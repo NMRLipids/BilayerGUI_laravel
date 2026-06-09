@@ -122,9 +122,9 @@
                                                 <td>{{ $xref->database ?? 'Database' }}</td>
                                                 <td>
                                                     @if(!empty($xref->url))
-                                                        <a href="{{ $xref->url }}" target="_blank" class="text-white-75">{{ $xref->external_id ?? '' }}</a>
+                                                        <a href="{{ $xref->url }}" target="_blank" rel="noopener noreferrer" class="text-white-75">{{ $xref->external_id ?? '' }}</a>
                                                     @else
-                                                        <a href="https://identifiers.org/{{ $xref->database }}/{{ $xref->external_id }}" target="_blank" class="text-white-75">{{ $xref->external_id ?? '' }}</a>
+                                                        <a href="https://identifiers.org/{{ $xref->database }}/{{ $xref->external_id }}" target="_blank" rel="noopener noreferrer" class="text-white-75">{{ $xref->external_id ?? '' }}</a>
                                                     @endif
                                                 </td>
                                             </tr>

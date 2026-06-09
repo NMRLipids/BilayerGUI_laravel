@@ -34,9 +34,7 @@ Route::redirect('/about', '/#about')->name('about');
 // advanced search
 Route::get('/advanced-search', 'App\Http\Controllers\NewAdvancedSearchController@form')->name('new_advanced_search.form');
 Route::get('/advanced-search/result', 'App\Http\Controllers\NewAdvancedSearchController@results')->name('new_advanced_search.results');
-Route::get('/advanced-search/compare', 'App\Http\Controllers\NewAdvancedSearchController@compare')->name('new_advanced_search.compare');
-Route::post('/advanced-search/updatecompare', 'App\Http\Controllers\NewAdvancedSearchController@updatecompare')->name('new_advanced_search.updatecompare');
-Route::get('/advanced-search/export', 'App\Http\Controllers\NewAdvancedSearchController@resultsExport')->name('new_advanced_search.resultsExportacion');
+
 
 Route::get('/advanced-search/exportcompare', 'App\Http\Controllers\NewAdvancedSearchController@exportarcompare')->name('new_advanced_search.exportarcompare');
 Route::redirect('/new-advanced-search/', '/advanced-search/')->name('new_advanced_search.redirect');
@@ -44,10 +42,8 @@ Route::redirect('/new-advanced-search/', '/advanced-search/')->name('new_advance
 // Statistics
 Route::get('/statistics', 'App\Http\Controllers\StatisticsController@results')->name('statistics.results');
 Route::get('/totals', 'App\Http\Controllers\StatisticsController@totals')->name('statistics.totals');
-// File
-Route::get('files/{id}/{file}', 'App\Http\Controllers\FileController@download')->name('download');
-Route::get('filesp/{id}/{file}', 'App\Http\Controllers\FileController@downloadp')->name('downloadp');
-Route::get('filesff/{id}/{file}', 'App\Http\Controllers\FileController@downloadff')->name('downloadff');
+// File: removed
+
 
 Route::get('/filtro/{codigo}', 'App\Http\Controllers\FiltrosController@html')->name('filtros.html');
 Route::get('/filtro-busqueda-avanzada/{codigo}/{numero}', 'App\Http\Controllers\FiltrosController@htmlBusquedaAvanzada')->name('filtros.html_busqueda_avanzada');
@@ -74,6 +70,19 @@ Route::get('/search/basic', 'App\Http\Controllers\SearchController@basic')->name
 
 
 Route::get('/sitemap.xml', [SitemapXmlController::class, 'sitemap']);
+
+Route::get('/robots.txt', function () {
+    if (app()->environment('production')) {
+        $body = "User-agent: *\n"
+            . "Allow: /\n"
+            . 'Sitemap: ' . url('/sitemap.xml') . "\n";
+    } else {
+        $body = "User-agent: *\nDisallow: /\n";
+    }
+
+    return response($body, 200)
+        ->header('Content-Type', 'text/plain; charset=utf-8');
+})->name('robots.txt');
 
 // Routes for advanced search autocomplete fields
 Route::get('lipids/autocomplete', function (Illuminate\Http\Request  $request) {
@@ -112,4 +121,53 @@ Route::get('/experiment/{type}/{path}', [ExperimentController::class, 'show'])
 
 Route::get('/experiments', [ExperimentController::class, 'list'])
     ->name('experiments.list');    
+
+// MCP discovery advertisements. Both expose the public MCP endpoint so that
+// MCP-aware clients and LLM crawlers can find it. The endpoint URL is built from
+// the current request host so it is correct in any deployment.
+Route::get('/llms.txt', function () {
+    $mcpUrl = url('/mcp/fairmd-lipids');
+    $site = url('/');
+    $sitemap = url('/sitemap.xml');
+    $name = config('app.name', 'FAIRMD Lipids');
+
+    $body = <<<TXT
+    # {$name}
+
+    > {$name} is a databank for visualization of molecular dynamics (MD) simulations
+    > of lipid membranes and related NMR/X-ray experiments. It exposes a read-only
+    > Model Context Protocol (MCP) server for programmatic, AI-assistant access.
+
+    ## MCP
+
+    - MCP endpoint (Streamable HTTP): {$mcpUrl}
+    - Protocol: Model Context Protocol (https://modelcontextprotocol.io)
+    - Access: read-only, rate-limited
+
+    ## Site
+
+    - Home: {$site}
+    - Sitemap: {$sitemap}
+    TXT;
+
+    return response($body, 200)
+        ->header('Content-Type', 'text/plain; charset=utf-8');
+})->name('llms.txt');
+
+Route::get('/.well-known/mcp', function () {
+    $name = config('app.name', 'FAIRMD Lipids');
+
+    return response()->json([
+        'name' => $name,
+        'description' => 'Read-only MCP access to the '.$name.' databank of lipid membrane MD simulations and related NMR/X-ray experiments.',
+        'documentation' => 'https://github.com/NMRLipids/BilayerUI_laravel/blob/main/app/Mcp/README.md',
+        'servers' => [
+            [
+                'name' => 'fairmd-lipids',
+                'transport' => 'streamable-http',
+                'url' => url('/mcp/fairmd-lipids'),
+            ],
+        ],
+    ], 200, [], JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT);
+})->name('well-known.mcp');
 

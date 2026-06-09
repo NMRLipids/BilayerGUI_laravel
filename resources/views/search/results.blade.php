@@ -45,7 +45,7 @@
                                  and all trajectories and experiments that contain POPE or PYPE in their lipid composition, but also those that contain it in their name or in the path of the files.
                                  <em>"CHOL"</em> will return only results for CHOL but not DCHOL.
                                  See <a
-                                    target="_blank" href="https://databank.readthedocs.io/stable/schemas/moleculesAndMapping.html">Molecules
+                                    target="_blank" rel="noopener noreferrer" href="https://databank.readthedocs.io/stable/schemas/moleculesAndMapping.html">Molecules
                                     and Mapping</a> for a list of  molecules. For simulation search, try the Advanced
                                 Search.<br>
                             </span>

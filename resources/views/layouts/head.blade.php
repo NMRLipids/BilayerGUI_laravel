@@ -12,6 +12,11 @@
     <meta name="doi-concurrent-fetches" content="{{ config('app.doi_concurrent_fetches', 10) }}" />
     <meta name="doi-max-retries" content="{{ config('app.doi_max_retries', 3) }}" />
 
+    {{-- MCP (Model Context Protocol) discovery: advertise the read-only MCP endpoint --}}
+    <meta name="mcp-server" content="{{ url('/mcp/fairmd-lipids') }}" />
+    <link rel="mcp-server" type="application/json" href="{{ url('/mcp/fairmd-lipids') }}" />
+    <link rel="alternate" type="text/plain" title="llms.txt" href="{{ url('/llms.txt') }}" />
+
     <meta property="og:type" content="website">
     <meta property="og:site_name" content="FAIRMD Lipids Databank">
     <meta property="og:title" content="FAIRMD Lipids Databank">

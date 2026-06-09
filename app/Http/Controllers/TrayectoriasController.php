@@ -53,29 +53,45 @@ class TrayectoriasController extends Controller
     private function augmentFFDataWithExperiments($trayectoria): void {
         if (isset($trayectoria->experimentsFF)) {
             foreach ($trayectoria->experimentsFF as $key => $experiment) {
-                error_log("Processing FF experiment: " . ($experiment->path ?? $experiment->article_doi ?? 'Unknown Experiment') . " for trajectory id " . $trayectoria->id);
+                if (config('app.debug') && app()->environment('local')) {
+                    error_log("Processing FF experiment: " . ($experiment->path ?? $experiment->article_doi ?? 'Unknown Experiment') . " for trajectory id " . $trayectoria->id);
+                }                
                 $experimentName = $experiment->path ?? $experiment->article_doi ?? 'Unknown Experiment';               
                 // Each FF experiment stores its FF data in the data attribute of its base table, so we can access it directly from the experiment model
-                error_log(var_export($experiment->doi, true)); // Log the raw data for debugging
+                if (config('app.debug') && app()->environment('local')) {
+                    error_log(var_export($experiment->doi, true)); // Log the raw data for debugging
+                }
                 if (isset($experiment->data) && !empty($experiment->data)) { 
-                    error_log("Data found: FF data with experiment " . $experimentName);
+                    if (config('app.debug') && app()->environment('local')) {
+                        error_log("Data found: FF data with experiment " . $experimentName);
+                    }
                     $this->FFLegend[] = $experimentName; // Add the experiment name to the legend for chart labeling
                     $decodedFFData = json_decode($experiment->data, true);
                     if (json_last_error() === JSON_ERROR_NONE) {
-                        error_log("Augmenting FF data with experiment " . $experimentName);
+                        if (config('app.debug') && app()->environment('local')) {
+                            error_log("Augmenting FF data with experiment " . $experimentName);
+                        }
                         $this->FFData[] = $decodedFFData; // Append to existing FF data
                     } else {
-                        error_log("Error decoding FF data for experiment " . $experimentName . ": " . json_last_error_msg());
+                        if (config('app.debug') && app()->environment('local')) {
+                            error_log("Error decoding FF data for experiment " . $experimentName . ": " . json_last_error_msg());
+                        }
                     }   
                 } else {
-                    error_log("No FF data found for ". $experiment->type. " experiment " . $experimentName);
+                    if (config('app.debug') && app()->environment('local')) {
+                        error_log("No FF data found for ". $experiment->type. " experiment " . $experimentName);
+                    }
                 }
 
-                error_log("Finished processing experiment " . $experimentName);
+                if (config('app.debug') && app()->environment('local')) {
+                    error_log("Finished processing experiment " . $experimentName);
+                }
             }
         }
         else {
-            error_log("No FF experiments found for trajectory id " . $trayectoria->id);
+            if (config('app.debug') && app()->environment('local')) {
+                error_log("No FF experiments found for trajectory id " . $trayectoria->id);
+            }
         }
     }
 
@@ -99,7 +115,9 @@ class TrayectoriasController extends Controller
                 }
             }
         } else {
-            error_log("No analysis or lipid analysis data found for trajectory id " . $trayectoria->id);
+            if (config('app.debug')) {
+                error_log("No analysis or lipid analysis data found for trajectory id " . $trayectoria->id);
+            }
         }
         //  where plot_data is the data to be plotted for that lipid and group, and legend is the label for the dataset in the chart. The view can then iterate over this structure to render charts for each lipid and group combination.
         // Example: $OPData['DPPC']['G1'] = [plot_data_for_DPPC_G1]
@@ -132,7 +150,9 @@ class TrayectoriasController extends Controller
                     }
                     foreach ($decodedPlotData as $group => $plot_data) {
                         if (empty($plot_data)) {
-                            error_log("Decoded OP plot data for lipid " . $lipidName . " in experiment " . $experimentName . " is empty for group " . $group);
+                            if (config('app.debug')) {
+                                error_log("Decoded OP plot data for lipid " . $lipidName . " in experiment " . $experimentName . " is empty for group " . $group);
+                            }       
                             continue; // Skip if plot data is empty
                         }
                         // If we don't have existing data for this lipid and group, we don't plot it. 

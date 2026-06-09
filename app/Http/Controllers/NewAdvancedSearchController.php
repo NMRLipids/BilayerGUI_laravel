@@ -133,7 +133,7 @@ class NewAdvancedSearchController extends Controller
      
     $inputs = $this->validateAdvancedSearchRequest($request);
 
-    if (config('app.debug')) {
+    if (config('app.debug') && app()->environment('local')) {
       error_log('Debug: Validated inputs: ' . json_encode($inputs)); // Debug line to check validated inputs
     }
     
@@ -374,7 +374,7 @@ class NewAdvancedSearchController extends Controller
                   ->whereIn('tm.membrane_id', $inputs['membranas']);
     }
 
-    if (config('app.debug')) {
+    if (config('app.debug') && app()->environment('local')) {
       // Debug: Print interpolated query
       $sql = $this->query->toSql();
       $bindings = $this->query->getBindings();

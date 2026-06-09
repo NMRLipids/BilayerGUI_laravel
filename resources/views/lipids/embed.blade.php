@@ -21,7 +21,7 @@
                             
                             <td>
                                 <a href="{{ route('lipid.show', $lipid->id) }}" 
-                                 target="_blank"
+                                 target="_blank" rel="noopener"
                                 class="btn btn-sm btn-primary" title="{{ $lipid->displayTitle() }}">View</a>
                             </td>
                         </tr>

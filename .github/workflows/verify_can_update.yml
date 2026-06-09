@@ -1,0 +1,80 @@
+name: Probing sweep of experiments
+
+on:
+  pull_request:
+    branches: [ main ]
+    paths:
+      - 'Python/**'
+      - 'database/schema/**'
+      - '.github/workflows/verify_can_update.yml'
+  workflow_dispatch:
+    inputs:
+      bilayer_data_tag:
+        description: 'Branch or tag to checkout BilayerData'
+        required: false
+        default: 'main'
+        type: string
+
+jobs:
+  run-with-mysql:
+    runs-on: ubuntu-latest
+
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: root
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -proot"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=10
+
+    steps:
+      - name: Checkout this
+        uses: actions/checkout@v6
+
+      - name: Checkout BilayerData
+        uses: actions/checkout@v6
+        with:
+          repository: NMRlipids/BilayerData
+          ref: ${{ github.event.inputs.bilayer_data_tag || 'main' }}
+          path: BilayerData
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+
+      - name: Install MySQL client
+        run: sudo apt-get update && sudo apt-get install -y mysql-client
+
+      - name: Wait for MySQL
+        run: |
+          until mysqladmin ping -h127.0.0.1 -P3306 -uroot -proot --silent; do
+            sleep 2
+          done
+
+      - name: Create database
+        run: |
+          mysql -h127.0.0.1 -P3306 -uroot -proot \
+            -e "CREATE DATABASE IF NOT EXISTS \`laravel\`;"
+
+      - name: Import schema
+        run: |
+          mysql -h127.0.0.1 -P3306 -uroot -proot laravel < database/schema/mysql-schema.sql
+
+      - name: Install Python packages
+        run: |
+          python -m pip install --upgrade pip && \
+          python -m pip install -r Python/requirements.txt
+
+      - name: Run script
+        env:
+          FMDL_DATA_PATH: ../BilayerData
+        run: |
+          cd Python && \
+          echo '{"host": "127.0.0.1","port": 3306,"user": "root","password": "root","database": "laravel"}' > config.json && \
+          ./UI_DB_Update.py --strict_experiments

@@ -2,9 +2,12 @@
 
 namespace App\Providers;
 
+use Illuminate\Cache\RateLimiting\Limit;
+use Illuminate\Http\Request;
 use Illuminate\Pagination\Paginator;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\Blade;
+use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\Schema; 
 
 
@@ -42,7 +45,9 @@ class AppServiceProvider extends ServiceProvider
             return "<?php \$__html = ob_get_clean(); Cache::forever($key, \$__html); echo \$__html; } ?>";
         });
 
-       
-
+        // Rate limiter for the public, unauthenticated MCP endpoint.
+        RateLimiter::for('mcp', function (Request $request) {
+            return Limit::perMinute(60)->by($request->ip());
+        });
     }
 }

@@ -11,6 +11,8 @@ services:
         ports:
             - '${APP_PORT:-80}:80'
             - '${VITE_PORT:-5173}:${VITE_PORT:-5173}'
+            - '6274:6274'   # MCP Inspector UI, used for debugging and profiling Laravel applications
+            - '6277:6277'   # MCP Inspector proxy, comment out if you are not using MCP Inspector
         environment:
             WWWUSER: '${WWWUSER}'
             LARAVEL_SAIL: 1
