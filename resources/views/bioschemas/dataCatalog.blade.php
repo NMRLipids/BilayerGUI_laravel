@@ -14,8 +14,10 @@
               
         # Ensure @id and url are set to the current page URL if they are empty in the JSON file
         if (empty($dcp['@id']) || empty($dcp['url'])) {
-            error_log('Warning: @id or url is missing in resources/site-metadata/dataCatalogProfile.json.');
-            error_log('These fields should be populated with the current page URL for proper schema.org metadata in a production environment.');
+            if (app()->environment('production')) {
+                error_log('Warning: @id or url is missing in resources/site-metadata/dataCatalogProfile.json.');
+                error_log('These fields should be populated with the current page URL for proper schema.org metadata in a production environment.');
+            }
         }
         $baseUrl = config('app.url');
         $dcp['@id'] = (empty($dcp['@id'])) ? $baseUrl : $dcp['@id']; 

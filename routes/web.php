@@ -44,10 +44,8 @@ Route::redirect('/new-advanced-search/', '/advanced-search/')->name('new_advance
 // Statistics
 Route::get('/statistics', 'App\Http\Controllers\StatisticsController@results')->name('statistics.results');
 Route::get('/totals', 'App\Http\Controllers\StatisticsController@totals')->name('statistics.totals');
-// File
-Route::get('files/{id}/{file}', 'App\Http\Controllers\FileController@download')->name('download');
-Route::get('filesp/{id}/{file}', 'App\Http\Controllers\FileController@downloadp')->name('downloadp');
-Route::get('filesff/{id}/{file}', 'App\Http\Controllers\FileController@downloadff')->name('downloadff');
+// File: removed
+
 
 Route::get('/filtro/{codigo}', 'App\Http\Controllers\FiltrosController@html')->name('filtros.html');
 Route::get('/filtro-busqueda-avanzada/{codigo}/{numero}', 'App\Http\Controllers\FiltrosController@htmlBusquedaAvanzada')->name('filtros.html_busqueda_avanzada');
