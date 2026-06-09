@@ -73,6 +73,19 @@ Route::get('/search/basic', 'App\Http\Controllers\SearchController@basic')->name
 
 Route::get('/sitemap.xml', [SitemapXmlController::class, 'sitemap']);
 
+Route::get('/robots.txt', function () {
+    if (app()->environment('production')) {
+        $body = "User-agent: *\n"
+            . "Allow: /\n"
+            . 'Sitemap: ' . url('/sitemap.xml') . "\n";
+    } else {
+        $body = "User-agent: *\nDisallow: /\n";
+    }
+
+    return response($body, 200)
+        ->header('Content-Type', 'text/plain; charset=utf-8');
+})->name('robots.txt');
+
 // Routes for advanced search autocomplete fields
 Route::get('lipids/autocomplete', function (Illuminate\Http\Request  $request) {
     $term = $request->term ?: ''; //  <- esto depende del js que lo manda asi

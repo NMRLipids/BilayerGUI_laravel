@@ -9,7 +9,6 @@
     use App\Trayectoria;
 
     $CadSelectMem = '';
-    $cadPath = asset('storage/simulations/' . $trayectoria->git_path);
     $ncol = 0;
 @endphp
 @section('content')
@@ -155,8 +154,6 @@
                                                 <td>
                                                    {!! renderGitHubURL('Simulations/' . $trayectoria->git_path, text: 'View on GitHub') !!}<br>
 
-                                                    @php $cadPath = asset('storage/simulations/' . $trayectoria->git_path) @endphp
-                                                    <a class="bi bi-cloud-download" href="{{ $cadPath }}/conf.pdb.gz">&nbsp;Download PDB File</a><br>
                                                     <a class="bi bi-cloud-download" href="https://doi.org/{{ $trayectoria->doi }}" target="_blank" rel="noopener noreferrer">&nbsp;Link to simulation files</a><br>
                                                 </td>
                                             </tr>
