@@ -557,6 +557,7 @@ CREATE TABLE `trajectories_ions` (
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
   PRIMARY KEY (`id`),
+  UNIQUE KEY `trajectory_ion_unique` (`trajectory_id`,`ion_id`),
   KEY `analysis_trajectory_id_foreign` (`trajectory_id`),
   KEY `Ion_ID` (`ion_id`) USING BTREE,
   CONSTRAINT `trajectories_ions_ibfk_1` FOREIGN KEY (`trajectory_id`) REFERENCES `trajectories` (`id`),
