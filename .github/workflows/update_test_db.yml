@@ -1,0 +1,81 @@
+name: DB TestUpdate
+
+on:
+
+  workflow_dispatch:
+    inputs:
+      force:
+        description: 'Force update with potentially destructive operations (e.g. dropping tables). Use with caution.'
+        # This option is intended for use when the database 
+        # schema has changed in a way that cannot be handled by 
+        # Laravel's built-in migration system, such as when
+        # tables have been renamed or when there are complex relationships that require manual intervention. 
+        required: false
+        default: false
+        type: boolean
+
+permissions:
+  contents: read
+
+concurrency:
+  group: production-deploy
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: production
+    timeout-minutes: 30
+
+    env:
+      PROD_USER: ${{ secrets.TEST_USER }}
+      PROD_HOST: ${{ secrets.TEST_HOST }}
+      PROD_PATH: ${{ secrets.TEST_PATH }}
+      SSH_OPTS: -i ~/.ssh/id_ed25519 -o IdentitiesOnly=yes
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
+    steps:
+
+      - name: Configure SSH
+        env:
+          TEST_SSH_KEY: ${{ secrets.TEST_SSH_KEY }}
+          TEST_KNOWN_HOSTS: ${{ secrets.TEST_KNOWN_HOSTS }}
+        run: |
+          install -m 700 -d ~/.ssh
+          printf '%s\n' "$TEST_SSH_KEY" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          printf '%s\n' "$TEST_KNOWN_HOSTS" > ~/.ssh/known_hosts
+          chmod 644 ~/.ssh/known_hosts
+
+           
+      - name: Update database
+        run: |
+          ssh ${SSH_OPTS} ${PROD_USER}@${PROD_HOST} <<EOF
+
+          cd "${PROD_PATH}/Python"
+          python3 -m venv .venv
+          . .venv/bin/activate
+          python3 -m pip install --no-cache-dir --upgrade pip
+          python3 -m pip install --no-cache-dir -r requirements.txt
+          
+          export FMDL_DATA_PATH="${PROD_PATH}/BilayerData"
+          cd "${PROD_PATH}"
+          git -C "\$FMDL_DATA_PATH" pull || git clone https://github.com/NMRLipids/BilayerData "\$FMDL_DATA_PATH"
+          cd "\$FMDL_DATA_PATH"
+          BILAYERDATA_VERSION=\$(git log -1 --oneline)
+          export BILAYERDATA_VERSION
+          cd "${PROD_PATH}"
+          if [ "${{ inputs.force }}" = "true" ]; then
+            php artisan migrate:fresh --force; 
+          else
+            php artisan migrate --force;
+          fi
+          # we don't want to drop the whole database
+          # but we want to make sure that the schema is up to date. 
+          # The UI_DB_Update.py script will handle the rest of the updates and will not delete any data.
+          cd "${PROD_PATH}/Python"
+          ./UI_DB_Update.py -c config.json --level ERROR
+          cd "${PROD_PATH}"
+          php artisan cache:clear
+          
+          EOF
