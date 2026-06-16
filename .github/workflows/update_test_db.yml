@@ -2,6 +2,16 @@ name: DB TestUpdate
 
 on:
 
+  push:
+    branches:
+      - testing
+    paths:
+      - 'database/migrations/**'
+      - 'database/seeders/**'
+      - 'database/schema/**'
+      - 'Python/UI_DB_Update.py'
+      - 'Python/requirements.txt'
+
   workflow_dispatch:
     inputs:
       force:
@@ -36,6 +46,34 @@ jobs:
 
     steps:
 
+      # On a push we need the git history to detect whether the schema
+      # file changed; this drives the (destructive) force flag below.
+      - name: Checkout
+        if: github.event_name == 'push'
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Determine force flag
+        id: force
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            # Manual run: honour the user-provided input.
+            echo "force=${{ inputs.force }}" >> "$GITHUB_OUTPUT"
+          else
+            # Push run: force a fresh migration only when the schema changed.
+            BEFORE="${{ github.event.before }}"
+            if [ -z "$BEFORE" ] || [ "$BEFORE" = "0000000000000000000000000000000000000000" ]; then
+              BEFORE="${{ github.sha }}^"
+            fi
+            if git diff --name-only "$BEFORE" "${{ github.sha }}" | grep -q '^database/schema/'; then
+              echo "Schema change detected: enabling force."
+              echo "force=true" >> "$GITHUB_OUTPUT"
+            else
+              echo "force=false" >> "$GITHUB_OUTPUT"
+            fi
+          fi
+
       - name: Configure SSH
         env:
           TEST_SSH_KEY: ${{ secrets.TEST_SSH_KEY }}
@@ -65,7 +103,7 @@ jobs:
           BILAYERDATA_VERSION=\$(git log -1 --oneline)
           export BILAYERDATA_VERSION
           cd "${PROD_PATH}"
-          if [ "${{ inputs.force }}" = "true" ]; then
+          if [ "${{ steps.force.outputs.force }}" = "true" ]; then
             php artisan migrate:fresh --force; 
           else
             php artisan migrate --force;
