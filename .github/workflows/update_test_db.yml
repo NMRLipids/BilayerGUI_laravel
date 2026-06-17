@@ -2,15 +2,16 @@ name: DB TestUpdate
 
 on:
 
-  push:
+  # Run after the test server has been (re)deployed successfully.
+  # "Laravel CD Testing" itself only runs after "Laravel CI" passes,
+  # so waiting on CD transitively guarantees CI passed too.
+  workflow_run:
+    workflows:
+      - Laravel CD Testing
+    types:
+      - completed
     branches:
       - testing
-    paths:
-      - 'database/migrations/**'
-      - 'database/seeders/**'
-      - 'database/schema/**'
-      - 'Python/UI_DB_Update.py'
-      - 'Python/requirements.txt'
 
   workflow_dispatch:
     inputs:
@@ -28,53 +29,75 @@ permissions:
   contents: read
 
 concurrency:
-  group: production-deploy
+  group: testing-deploy
   cancel-in-progress: true
 
 jobs:
   deploy:
+    # Manual runs always proceed; automatic runs only when the CD
+    # workflow that triggered us actually succeeded.
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-latest
-    environment: production
+    environment: testing
     timeout-minutes: 30
 
     env:
-      PROD_USER: ${{ secrets.TEST_USER }}
-      PROD_HOST: ${{ secrets.TEST_HOST }}
-      PROD_PATH: ${{ secrets.TEST_PATH }}
+      TEST_USER: ${{ secrets.TEST_USER }}
+      TEST_HOST: ${{ secrets.TEST_HOST }}
+      TEST_PATH: ${{ secrets.TEST_PATH }}
       SSH_OPTS: -i ~/.ssh/id_ed25519 -o IdentitiesOnly=yes
       FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
     steps:
 
-      # On a push we need the git history to detect whether the schema
-      # file changed; this drives the (destructive) force flag below.
+      # Check out the exact commit that was deployed so we can diff it
+      # to decide (a) whether a DB update is needed at all and
+      # (b) whether the schema changed (which requires a forced rebuild).
       - name: Checkout
-        if: github.event_name == 'push'
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
+          ref: ${{ github.event.workflow_run.head_sha || github.ref }}
 
-      - name: Determine force flag
-        id: force
+      - name: Determine update scope
+        id: scope
         run: |
           if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
-            # Manual run: honour the user-provided input.
+            # Manual run: always update, honour the user-provided force input.
+            echo "run=true" >> "$GITHUB_OUTPUT"
             echo "force=${{ inputs.force }}" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          HEAD="${{ github.event.workflow_run.head_sha }}"
+          if git rev-parse --verify --quiet "$HEAD^" >/dev/null; then
+            BASE="$HEAD^"
           else
-            # Push run: force a fresh migration only when the schema changed.
-            BEFORE="${{ github.event.before }}"
-            if [ -z "$BEFORE" ] || [ "$BEFORE" = "0000000000000000000000000000000000000000" ]; then
-              BEFORE="${{ github.sha }}^"
-            fi
-            if git diff --name-only "$BEFORE" "${{ github.sha }}" | grep -q '^database/schema/'; then
-              echo "Schema change detected: enabling force."
-              echo "force=true" >> "$GITHUB_OUTPUT"
-            else
-              echo "force=false" >> "$GITHUB_OUTPUT"
-            fi
+            # First commit on the branch: nothing to diff against.
+            BASE="$(git hash-object -t tree /dev/null)"
+          fi
+          CHANGED="$(git diff --name-only "$BASE" "$HEAD")"
+          echo "Changed files:"
+          echo "$CHANGED"
+
+          # Only run when DB-relevant files changed.
+          if echo "$CHANGED" | grep -qE '^(database/migrations/|database/seeders/|database/schema/|Python/UI_DB_Update\.py|Python/requirements\.txt)'; then
+            echo "run=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "No DB-relevant changes detected; skipping update."
+            echo "run=false" >> "$GITHUB_OUTPUT"
+          fi
+
+          # Force a fresh migration only when the schema file changed.
+          if echo "$CHANGED" | grep -q '^database/schema/'; then
+            echo "Schema change detected: enabling force."
+            echo "force=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "force=false" >> "$GITHUB_OUTPUT"
           fi
 
       - name: Configure SSH
+        if: steps.scope.outputs.run == 'true'
         env:
           TEST_SSH_KEY: ${{ secrets.TEST_SSH_KEY }}
           TEST_KNOWN_HOSTS: ${{ secrets.TEST_KNOWN_HOSTS }}
@@ -87,23 +110,24 @@ jobs:
 
            
       - name: Update database
+        if: steps.scope.outputs.run == 'true'
         run: |
-          ssh ${SSH_OPTS} ${PROD_USER}@${PROD_HOST} <<EOF
+          ssh ${SSH_OPTS} ${TEST_USER}@${TEST_HOST} <<EOF
 
-          cd "${PROD_PATH}/Python"
+          cd "${TEST_PATH}/Python"
           python3 -m venv .venv
           . .venv/bin/activate
           python3 -m pip install --no-cache-dir --upgrade pip
           python3 -m pip install --no-cache-dir -r requirements.txt
           
-          export FMDL_DATA_PATH="${PROD_PATH}/BilayerData"
-          cd "${PROD_PATH}"
+          export FMDL_DATA_PATH="${TEST_PATH}/BilayerData"
+          cd "${TEST_PATH}"
           git -C "\$FMDL_DATA_PATH" pull || git clone https://github.com/NMRLipids/BilayerData "\$FMDL_DATA_PATH"
           cd "\$FMDL_DATA_PATH"
           BILAYERDATA_VERSION=\$(git log -1 --oneline)
           export BILAYERDATA_VERSION
-          cd "${PROD_PATH}"
-          if [ "${{ steps.force.outputs.force }}" = "true" ]; then
+          cd "${TEST_PATH}"
+          if [ "${{ steps.scope.outputs.force }}" = "true" ]; then
             php artisan migrate:fresh --force; 
           else
             php artisan migrate --force;
@@ -111,9 +135,9 @@ jobs:
           # we don't want to drop the whole database
           # but we want to make sure that the schema is up to date. 
           # The UI_DB_Update.py script will handle the rest of the updates and will not delete any data.
-          cd "${PROD_PATH}/Python"
+          cd "${TEST_PATH}/Python"
           ./UI_DB_Update.py -c config.json --level ERROR
-          cd "${PROD_PATH}"
+          cd "${TEST_PATH}"
           php artisan cache:clear
           
           EOF
