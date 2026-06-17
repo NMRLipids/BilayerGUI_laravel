@@ -543,6 +543,8 @@ CREATE TABLE `trajectories_experiments_OP` (
 
 --
 -- Table structure for table `trajectories_ions`
+-- This table is used to link trajectories to the ions present in the system.
+-- Each trajectory can be associated with multiple ions, and each ion can be associated with multiple trajectories
 --
 
 DROP TABLE IF EXISTS `trajectories_ions`;
@@ -554,6 +556,8 @@ CREATE TABLE `trajectories_ions` (
   `ion_id` bigint unsigned NOT NULL,
   `ion_name` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_unicode_ci NOT NULL DEFAULT 'from ions select name',
   `number` int NOT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
   PRIMARY KEY (`id`),
 /* The UNIQUE KEY constraint ensures that each trajectory can only be associated with a specific ion once, 
  preventing duplicate entries for the same trajectory and ion combination. */
