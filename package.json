@@ -25,6 +25,6 @@
         "wnumb": "^1.2.0"
     },
     "overrides": {
-        "shell-quote": "1.8.4"
+        "shell-quote": "^1.9.0"
     }
 }
