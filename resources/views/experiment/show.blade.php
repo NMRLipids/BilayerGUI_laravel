@@ -152,8 +152,9 @@
                                                     'DETECTOR', 'SOURCE', 'LAMBDA', 'BEAMSIZE', 'DISTANCE',
                                                     'DATATYPE', 'EXPOSURE', 'FRAMES', 'SAMPLE_TYPE', 'QRANGE',
                                                 ];
-                                                $xray_value = is_array($properties['XRAY']->value) ? $properties['XRAY']->value : [];
-                                                $xray_extra = array_diff_key($xray_value, array_flip($xray_labelled));
+$xray_value = is_array($properties['XRAY']->value) ? $properties['XRAY']->value : [];
+$properties['XRAY']->value = $xray_value;
+$xray_extra = array_diff_key($xray_value, array_flip($xray_labelled));
                                             @endphp
                                              <tr>
                                                 <th scope="row">X-ray detector</th>
