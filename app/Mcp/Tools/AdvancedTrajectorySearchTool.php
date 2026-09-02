@@ -16,7 +16,7 @@ use Laravel\Mcp\Server\Tools\Annotations\IsReadOnly;
 
 #[Name('advanced-trajectory-search')]
 #[Title('Advanced trajectory (simulation) search')]
-#[Description('Filter MD trajectories by lipid/ion/membrane composition, force field and numeric ranges (temperature and quality metrics), with sorting and pagination. Composition filters accept per-item logical operators (and/or/not).')]
+#[Description('Filter MD trajectories by lipid/ion/membrane composition, force field and numeric ranges (temperature and quality metrics), with sorting and pagination. Composition filters accept per-item logical operators (and/or/not). Range filters (_min/_max) may each be used alone; trajectories with no value for a range-filtered metric are excluded.')]
 #[IsReadOnly]
 #[IsIdempotent]
 class AdvancedTrajectorySearchTool extends Tool
@@ -138,8 +138,8 @@ class AdvancedTrajectorySearchTool extends Tool
                 ->description('Force field name patterns to filter by.'),
             'force_fields_operator' => $schema->array()->items($schema->string()->enum(['equals', 'contains', 'starts_with', 'ends_with']))
                 ->description('Per-force-field match mode, aligned by index with "force_fields". Defaults to "equals".'),
-            'temperature_min' => $schema->number()->description('Minimum temperature in K (use together with temperature_max).'),
-            'temperature_max' => $schema->number()->description('Maximum temperature in K.'),
+            'temperature_min' => $schema->number()->description('Minimum temperature in K. May be used alone or with temperature_max.'),
+            'temperature_max' => $schema->number()->description('Maximum temperature in K. May be used alone or with temperature_min.'),
             'area_per_lipid_min' => $schema->number()->description('Minimum area per lipid.'),
             'area_per_lipid_max' => $schema->number()->description('Maximum area per lipid.'),
             'quality_total_min' => $schema->number()->description('Minimum total OP quality.'),

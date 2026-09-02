@@ -16,9 +16,11 @@
 /public/build
 /public/hot
 /public/storage
+/public/fairmd-lipids.skill
 /storage/*.key
 /storage/pail
 /vendor
 Homestead.json
 Homestead.yaml
 Thumbs.db
+__pycache__/
