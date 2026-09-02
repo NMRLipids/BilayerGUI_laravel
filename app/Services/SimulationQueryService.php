@@ -360,43 +360,46 @@ class SimulationQueryService
                 }
             }
             if (! empty($conditions)) {
-                $query->whereRaw(implode(' OR ', $conditions), $bindings);
+                // Parenthesize so later AND filters are not absorbed into the OR chain.
+                $query->whereRaw('('.implode(' OR ', $conditions).')', $bindings);
             }
         }
 
-        if (! empty($inputs['temperature-start']) && ! empty($inputs['temperature-end'])) {
-            $query->whereBetween('temperature', [$inputs['temperature-start'], $inputs['temperature-end']]);
-        }
+        // Range filters: each bound applies independently (a lone min or max still
+        // filters), 0 is a valid bound, and rows with NULL in the column never pass.
+        $rangeColumns = [
+            'temperature' => 'trajectories.temperature',
+            'Area_per_lipid' => 'ta.area_per_lipid',
+            'quality_total' => 'ta.op_quality_total',
+            'quality_hg' => 'ta.op_quality_headgroups',
+            'quality_tails' => 'ta.op_quality_tails',
+            'Bilayer_thickness' => 'ta.bilayer_thickness',
+            'Form_factor_quality' => 'ta.ff_quality',
+        ];
 
-        $needsAnalysisJoin =
-            (! empty($inputs['Area_per_lipid-start']) && ! empty($inputs['Area_per_lipid-end'])) ||
-            (! empty($inputs['quality_total-start']) && ! empty($inputs['quality_total-end'])) ||
-            (! empty($inputs['quality_hg-start']) && ! empty($inputs['quality_hg-end'])) ||
-            (! empty($inputs['quality_tails-start']) && ! empty($inputs['quality_tails-end'])) ||
-            (! empty($inputs['Bilayer_thickness-start']) && ! empty($inputs['Bilayer_thickness-end'])) ||
-            (! empty($inputs['Form_factor_quality-start']) && ! empty($inputs['Form_factor_quality-end']));
+        $bound = fn (string $key): mixed => isset($inputs[$key]) && $inputs[$key] !== '' ? $inputs[$key] : null;
+
+        $needsAnalysisJoin = false;
+        foreach ($rangeColumns as $prefix => $column) {
+            if (str_starts_with($column, 'ta.') && ($bound($prefix.'-start') !== null || $bound($prefix.'-end') !== null)) {
+                $needsAnalysisJoin = true;
+                break;
+            }
+        }
 
         if ($needsAnalysisJoin) {
             $query->join('trajectories_analysis as ta', 'trajectories.id', '=', 'ta.trajectory_id');
         }
 
-        if (! empty($inputs['Area_per_lipid-start']) && ! empty($inputs['Area_per_lipid-end'])) {
-            $query->whereBetween('ta.area_per_lipid', [$inputs['Area_per_lipid-start'], $inputs['Area_per_lipid-end']]);
-        }
-        if (! empty($inputs['quality_total-start']) && ! empty($inputs['quality_total-end'])) {
-            $query->whereBetween('ta.op_quality_total', [$inputs['quality_total-start'], $inputs['quality_total-end']]);
-        }
-        if (! empty($inputs['quality_hg-start']) && ! empty($inputs['quality_hg-end'])) {
-            $query->whereBetween('ta.op_quality_headgroups', [$inputs['quality_hg-start'], $inputs['quality_hg-end']]);
-        }
-        if (! empty($inputs['quality_tails-start']) && ! empty($inputs['quality_tails-end'])) {
-            $query->whereBetween('ta.op_quality_tails', [$inputs['quality_tails-start'], $inputs['quality_tails-end']]);
-        }
-        if (! empty($inputs['Bilayer_thickness-start']) && ! empty($inputs['Bilayer_thickness-end'])) {
-            $query->whereBetween('ta.bilayer_thickness', [$inputs['Bilayer_thickness-start'], $inputs['Bilayer_thickness-end']]);
-        }
-        if (! empty($inputs['Form_factor_quality-start']) && ! empty($inputs['Form_factor_quality-end'])) {
-            $query->whereBetween('ta.ff_quality', [$inputs['Form_factor_quality-start'], $inputs['Form_factor_quality-end']]);
+        foreach ($rangeColumns as $prefix => $column) {
+            $min = $bound($prefix.'-start');
+            $max = $bound($prefix.'-end');
+            if ($min !== null) {
+                $query->where($column, '>=', $min);
+            }
+            if ($max !== null) {
+                $query->where($column, '<=', $max);
+            }
         }
 
         if (! empty($inputs['trayectoria'] ?? false)) {

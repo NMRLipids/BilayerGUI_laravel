@@ -1,0 +1,83 @@
+{
+  "skill_name": "fairmd-lipids",
+  "evals": [
+    {
+      "id": 0,
+      "name": "pops-force-field-choice",
+      "prompt": "I'm setting up a POPS bilayer simulation and my group can't agree on a force field. What does the NMRlipids databank actually say? Give me the numbers, I want to take this back to the group.",
+      "expected_output": "Component OP/FF scores per trajectory or family, an explicit denominator (how many POPS trajectories are scored vs total), the trade-off framed rather than a bare winner, and geometry/spread caveats.",
+      "files": [],
+      "assertions": [
+        {
+          "text": "States the denominator: 88 POPS-containing trajectories, 18 scored"
+        },
+        {
+          "text": "Reports OP and FF component scores separately rather than only a composite rank"
+        },
+        {
+          "text": "Flags that no force field reproduces the PS headgroup (best headgroup score ~0.26)"
+        },
+        {
+          "text": "Notes within-force-field replicate spread as a floor on meaningful differences"
+        },
+        {
+          "text": "Notes that POPS:POPC mixtures carry no quality scores"
+        },
+        {
+          "text": "Avoids presenting a single winner without stating which observable it wins on"
+        }
+      ]
+    },
+    {
+      "id": 1,
+      "name": "dppc-coverage-counts",
+      "prompt": "How many DPPC simulations are in the lipid databank, broken down by force field? And how many of those have actually been checked against experimental data?",
+      "expected_output": "Per-family DPPC trajectory counts that reconcile against an independent whole-set total, plus OP-scored and FF-scored counts kept separate (not summed).",
+      "files": [],
+      "assertions": [
+        {
+          "text": "Total DPPC count is 88 and the per-family breakdown sums to it"
+        },
+        {
+          "text": "Reports OP-scored (14) and FF-scored (18) separately and does not add them"
+        },
+        {
+          "text": "Identifies that op_quality_tails is zero for all DPPC because tails were never measured"
+        },
+        {
+          "text": "Notes that no DPPC mixture has been validated"
+        },
+        {
+          "text": "Groups the free-text force-field strings into families rather than listing ~11 raw names"
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "name": "cholesterol-quality-claim",
+      "prompt": "Someone on our mailing list claimed CHARMM36 is the best force field for cholesterol-containing membranes because it tops the databank rankings. Is that actually supported?",
+      "expected_output": "Checks the ranking tool's scored-subset limitation, separates OP from FF, flags temperature/reference confounding and within-force-field spread, and states how thin the evidence is rather than confirming or denying flatly.",
+      "files": [],
+      "assertions": [
+        {
+          "text": "Checks the actual ranking rather than accepting the claim"
+        },
+        {
+          "text": "States the evidence base: 190 CHOL trajectories, 18 OP-scored, 53 FF-scored"
+        },
+        {
+          "text": "Separates OP from FF and shows CHARMM36 ranks differently on each"
+        },
+        {
+          "text": "Flags that FF quality is confounded by which experimental reference was used"
+        },
+        {
+          "text": "Notes replicates come from single depositions, so they are not independent"
+        },
+        {
+          "text": "Distinguishes 'most common' from 'best'"
+        }
+      ]
+    }
+  ]
+}

@@ -48,6 +48,11 @@ jobs:
       - name: Build frontend assets
         run: npm run build
 
+      - name: Package agent skill
+        run: |
+          rm -f public/fairmd-lipids.skill
+          (cd public && zip -r fairmd-lipids.skill fairmd-lipids -x '*/__pycache__/*' '*.pyc')
+
       - name: Configure SSH
         env:
           PROD_SSH_KEY: ${{ secrets.PROD_SSH_KEY }}
