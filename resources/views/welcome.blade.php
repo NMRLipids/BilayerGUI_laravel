@@ -222,6 +222,10 @@ use App\Http\Controllers\StatisticsController;
                                         <a href="https://modelcontextprotocol.io/">MCP</a> server at
                                         <code style="color: #0e4a56;">{{ url('/mcp/fairmd-lipids') }}</code>
                                         (see <a href="{{ url('/llms.txt') }}">llms.txt</a>).</li>
+                                    <li><strong>Agent skill:</strong> download
+                                        <a href="{{ url('/fairmd-lipids.skill') }}">fairmd-lipids.skill</a>
+                                        to teach Claude and other agents how to query the databank
+                                        (<a href="{{ url('/fairmd-lipids/SKILL.md') }}">browse the source</a>).</li>
                                 </ul>
                                 <p class="small text-dark mb-0">All data and code are provided AS-IS with no warranty. Report issues via each component's GitHub tracker.</p>
                             </div>
