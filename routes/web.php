@@ -127,6 +127,8 @@ Route::get('/experiments', [ExperimentController::class, 'list'])
 // the current request host so it is correct in any deployment.
 Route::get('/llms.txt', function () {
     $mcpUrl = url('/mcp/fairmd-lipids');
+    $skillUrl = url('/fairmd-lipids.skill');
+    $skillSource = url('/fairmd-lipids/SKILL.md');
     $site = url('/');
     $sitemap = url('/sitemap.xml');
     $name = config('app.name', 'FAIRMD Lipids');
@@ -143,6 +145,11 @@ Route::get('/llms.txt', function () {
     - MCP endpoint (Streamable HTTP): {$mcpUrl}
     - Protocol: Model Context Protocol (https://modelcontextprotocol.io)
     - Access: read-only, rate-limited
+
+    ## Agent skill
+
+    - Skill package (zip): {$skillUrl}
+    - Skill instructions (Markdown): {$skillSource}
 
     ## Site
 
