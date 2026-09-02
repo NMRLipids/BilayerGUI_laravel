@@ -52,6 +52,14 @@ jobs:
       - name: Build frontend assets
         run: npm run build
 
+      # Package the agent skill from its source folder into a downloadable .skill
+      # archive (a zip). Built here rather than committed so the skill files stay
+      # versioned and editable as plain text in the repo.
+      - name: Package agent skill
+        run: |
+          rm -f public/fairmd-lipids.skill
+          (cd public && zip -r fairmd-lipids.skill fairmd-lipids -x '*/__pycache__/*' '*.pyc')
+
       # Write the private SSH key and known_hosts from GitHub Secrets so subsequent
       # ssh/rsync steps can authenticate without prompts.        
       - name: Configure SSH

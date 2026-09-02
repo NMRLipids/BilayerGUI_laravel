@@ -172,6 +172,7 @@ class SearchQueryService
         $properties = DB::table('lipid_properties')
             ->join('properties', 'lipid_properties.property_id', '=', 'properties.id')
             ->select('name', 'value', 'unit')
+            ->distinct()
             ->where('lipid_id', $lipidId)
             ->where('name', '!=', 'description')
             ->get();
