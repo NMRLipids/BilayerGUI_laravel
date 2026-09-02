@@ -26,5 +26,9 @@
     },
     "overrides": {
         "shell-quote": "^1.9.0"
+    },
+    "allowScripts": {
+        "fsevents@2.3.3": true,
+        "node@24.20.0": true
     }
 }
