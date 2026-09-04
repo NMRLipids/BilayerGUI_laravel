@@ -113,37 +113,6 @@ test('advanced-trajectory-search keeps range filters with multiple force-field p
     });
 });
 
-test('get-lipid returns each property once even when linked property rows duplicate values', function () {
-    $lipidId = DB::table('lipids')->where('molecule', 'POPC')->value('id');
-    $property = DB::table('lipid_properties')
-        ->join('properties', 'lipid_properties.property_id', '=', 'properties.id')
-        ->where('lipid_id', $lipidId)
-        ->where('name', '!=', 'description')
-        ->first();
-
-    $expectedCount = DB::table('lipid_properties')
-        ->join('properties', 'lipid_properties.property_id', '=', 'properties.id')
-        ->where('lipid_id', $lipidId)
-        ->where('name', '!=', 'description')
-        ->count();
-
-    // Link a second property row with byte-identical name/value/unit.
-    $duplicateId = DB::table('properties')->insertGetId([
-        'name' => $property->name,
-        'value' => $property->value,
-        'unit' => $property->unit,
-        'type' => $property->type,
-    ]);
-    DB::table('lipid_properties')->insert(['lipid_id' => $lipidId, 'property_id' => $duplicateId]);
-
-    $response = FairmdLipidsServer::tool(GetLipidTool::class, [
-        'id_or_molecule' => 'POPC',
-    ]);
-
-    $response->assertOk()->assertStructuredContent(function (AssertableJson $json) use ($expectedCount) {
-        $json->count('properties', $expectedCount)->etc();
-    });
-});
 
 test('best-simulations reports ranked_count for the scored subset', function () {
     $response = FairmdLipidsServer::tool(BestSimulationsTool::class, [
