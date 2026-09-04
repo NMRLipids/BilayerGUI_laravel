@@ -513,7 +513,7 @@ def load_lipid_metadata(lipid, database):
         }
         prop_id = UPSERT(database, 'properties', prop_data)
         # Link lipid and property
-        LinkEntries('lipid_properties', {'lipid_id': lipid_id, 'property_id': prop_id})
+        UPSERT(database, 'lipid_properties', {'lipid_id': lipid_id, 'property_id': prop_id})
         logger.debug(f"Linked property {prop} to lipid ID {lipid_id}")
 
     # Insert cross-references
@@ -675,7 +675,7 @@ def load_experiment_properties(database, id, expobj) -> None:
         prop_id = UPSERT(database, 'experiment_property', prop_data)
         # Link experiment and property
         logger.debug(f"Linking property {prop_id}:{prop} to experiment ID {id}")
-        LinkEntries('experiments_properties_linker', {'experiment_id': id, 'property_id': prop_id})
+        UPSERT(database, 'experiments_properties_linker', {'experiment_id': id, 'property_id': prop_id})
         
 
 
