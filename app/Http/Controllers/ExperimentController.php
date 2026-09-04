@@ -172,12 +172,16 @@ class ExperimentController extends Controller
             ->where('efl.experiment_id', $experiment->id)
             ->select('ep.name', 'ep.value', 'ep.unit', 'ep.type', 'ep.description')
             ->get();
-        // convert properties with type 'array' or 'dict' from JSON strings to PHP arrays
+        // convert properties with type 'array', 'list' or 'dict' from JSON strings to PHP arrays
+        // ('list' is what the UI_DB_Update.py importer writes for YAML sequences)
         $assocProps = [];
         foreach ($properties as $prop) {
-            if ($prop->type === 'array' || $prop->type === 'dict') {
-                $prop->value = json_decode($prop->value, true);
-            }
+if ($prop->type === 'array' || $prop->type === 'list' || $prop->type === 'dict') {
+    $decoded = json_decode($prop->value, true);
+    if (json_last_error() === JSON_ERROR_NONE) {
+        $prop->value = $decoded;
+    }
+}
             $assocProps[$prop->name] = $prop;
         }
         // Fetch membrane composition property if exists

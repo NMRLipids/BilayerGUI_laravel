@@ -56,7 +56,7 @@ jobs:
           python3 -m venv .venv
           . .venv/bin/activate
           python3 -m pip install --no-cache-dir --upgrade pip
-          python3 -m pip install --no-cache-dir -r requirements.txt
+          python3 -m pip install --no-cache-dir --upgrade -r requirements.txt
           
           export FMDL_DATA_PATH="${PROD_PATH}/BilayerData"
           cd "${PROD_PATH}"

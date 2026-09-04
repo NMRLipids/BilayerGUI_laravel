@@ -22,6 +22,5 @@
 /vendor
 Homestead.json
 Homestead.yaml
-/composer.lock
 Thumbs.db
 __pycache__/

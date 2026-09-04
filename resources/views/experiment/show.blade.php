@@ -1,5 +1,16 @@
 @extends('layouts.app')
 @section('content')
+    @php
+        // Properties that get their own rows in the Overview tab (or are outdated and
+        // deliberately suppressed) must not be repeated in the generic Properties tab.
+        // Computed here, before the tab bar, so the Properties tab button knows whether
+        // there is anything left to show.
+        $properties_in_overview = [
+            'TEMPERATURE', 'TOTAL_HYDRATION', 'PH', 'REAGENT_SOURCES', 'SAMPLE_PROTOCOL',
+            'TOTAL_LIPID_CONCENTRATION', 'COUNTER_IONS', 'XRAY', 'NMR',
+        ];
+        $properties_to_show = array_diff_key($properties, array_flip($properties_in_overview));
+    @endphp
     <!-- Main page -->
         <div class="container px-4 px-lg-5">
             <div class="row gx-4 gx-lg-5 justify-content-center">
@@ -17,7 +28,7 @@
                             <button class="nav-link" id="analysis-tab" data-bs-toggle="tab" data-bs-target="#analysis" type="button" role="tab">Data</button>
                         </li>
                         <li class="nav-item" role="presentation">
-                            <button class="nav-link{{ !isset($properties_to_show) || count($properties_to_show) === 0 ? ' d-none' : '' }}" id="properties-tab" data-bs-toggle="tab"  data-bs-target="#properties" type="button" role="tab">Properties</button>
+                            <button class="nav-link{{ count($properties_to_show) === 0 ? ' d-none' : '' }}" id="properties-tab" data-bs-toggle="tab"  data-bs-target="#properties" type="button" role="tab">Properties</button>
                         </li>
                         <!-- Add cross reference links to related simulations if available -->
                         @if (count($related_simulations) > 0) 
@@ -133,6 +144,18 @@
                                             <!-- tr>
                                                 <th scope="row" colspan="2">X-ray properties</th>
                                             </tr -->
+                                            @php
+                                                // Keys with a dedicated row below; anything else the README
+                                                // carries is listed generically at the end of the block so it
+                                                // does not silently disappear from the page.
+                                                $xray_labelled = [
+                                                    'DETECTOR', 'SOURCE', 'LAMBDA', 'BEAMSIZE', 'DISTANCE',
+                                                    'DATATYPE', 'EXPOSURE', 'FRAMES', 'SAMPLE_TYPE', 'QRANGE',
+                                                ];
+$xray_value = is_array($properties['XRAY']->value) ? $properties['XRAY']->value : [];
+$properties['XRAY']->value = $xray_value;
+$xray_extra = array_diff_key($xray_value, array_flip($xray_labelled));
+                                            @endphp
                                              <tr>
                                                 <th scope="row">X-ray detector</th>
                                                 <td>{{ $properties['XRAY']->value['DETECTOR'] ?? 'N/A' }}</td>
@@ -142,14 +165,15 @@
                                                 <td>{{ $properties['XRAY']->value['SOURCE'] ?? 'N/A' }}</td>
                                             </tr>
                                             <tr>
-                                                <th scope="row">X-ray wavelength (nm)</th>
+                                                <th scope="row">X-ray wavelength (Å)</th>
                                                 <td>{{ $properties['XRAY']->value['LAMBDA'] ?? 'N/A' }}</td>
                                             </tr>
                                             <tr>
-                                                <th scope="row">X-ray beam size (mm)</th>
+                                                <!-- BEAMSIZE is recorded with its own unit, e.g. "0.24 x 0.24 mm" -->
+                                                <th scope="row">X-ray beam size</th>
                                                 <td>{{ $properties['XRAY']->value['BEAMSIZE'] ?? 'N/A' }}</td>
                                             </tr>
-                                           
+
                                             <tr>
                                                 <th scope="row">X-ray distance to sample (m)</th>
                                                 <td>{{ $properties['XRAY']->value['DISTANCE'] ?? 'N/A' }}</td>
@@ -174,6 +198,45 @@
                                                 <th scope="row">X-ray Q-range (Å⁻¹)</th>
                                                 <td>{{ $properties['XRAY']->value['QRANGE'] ?? 'N/A' }}</td>
                                             </tr>
+                                            @foreach ($xray_extra as $key => $value)
+                                            <tr>
+                                                <th scope="row">X-ray {{ strtolower(str_replace('_', ' ', $key)) }}</th>
+                                                <td>{{ is_array($value) ? json_encode($value) : $value }}</td>
+                                            </tr>
+                                            @endforeach
+                                        @endif
+                                        @if ($properties['NMR'] ?? false)
+                                            @php
+                                                $nmr_labelled = ['METHOD', 'INSTRUMENT', 'T_RF_HEATING', 'SIGN_MEASURED', 'DETAILS'];
+                                                $nmr_value = is_array($properties['NMR']->value) ? $properties['NMR']->value : [];
+                                                $nmr_extra = array_diff_key($nmr_value, array_flip($nmr_labelled));
+                                            @endphp
+                                            <tr>
+                                                <th scope="row">NMR method</th>
+                                                <td>{{ $properties['NMR']->value['METHOD'] ?? 'N/A' }}</td>
+                                            </tr>
+                                            <tr>
+                                                <th scope="row">NMR instrument</th>
+                                                <td>{{ $properties['NMR']->value['INSTRUMENT'] ?? 'N/A' }}</td>
+                                            </tr>
+                                            <tr>
+                                                <th scope="row">NMR RF heating correction</th>
+                                                <td>{{ $properties['NMR']->value['T_RF_HEATING'] ?? 'N/A' }}</td>
+                                            </tr>
+                                            <tr>
+                                                <th scope="row">NMR sign measured</th>
+                                                <td>{{ $properties['NMR']->value['SIGN_MEASURED'] ?? 'N/A' }}</td>
+                                            </tr>
+                                            <tr>
+                                                <th scope="row">NMR details</th>
+                                                <td>{{ $properties['NMR']->value['DETAILS'] ?? 'N/A' }}</td>
+                                            </tr>
+                                            @foreach ($nmr_extra as $key => $value)
+                                            <tr>
+                                                <th scope="row">NMR {{ strtolower(str_replace('_', ' ', $key)) }}</th>
+                                                <td>{{ is_array($value) ? json_encode($value) : $value }}</td>
+                                            </tr>
+                                            @endforeach
                                         @endif
                                         <tr>
                                             <th scope="row">Show on GitHub</th>
@@ -188,19 +251,8 @@
                                 </table>
                             </div>
                         </div>
-                        <!-- Properties Tab -->
-                        @php
-                            unset($properties['TEMPERATURE']);
-                            unset($properties['TOTAL_HYDRATION']);
-                            unset($properties['PH']);
-                            unset($properties['REAGENT_SOURCES']);
-                            unset($properties['SAMPLE_PROTOCOL']);
-                            unset($properties['TOTAL_LIPID_CONCENTRATION']);
-                            unset($properties['COUNTER_IONS']);
-                            unset($properties['XRAY']);
-                        @endphp
-                          
-                        @if (count($properties) > 0)
+                        <!-- Properties Tab: everything not already covered by the Overview tab -->
+                        @if (count($properties_to_show) > 0)
                         
                             <div class="tab-pane fade" id="properties" role="tabpanel" aria-labelledby="properties-tab">
                                 <br/>
@@ -214,12 +266,12 @@
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        @foreach ($properties as $prop)
+                                        @foreach ($properties_to_show as $prop)
                                         <tr>
                                             <td>{{ $prop->name }}</td>
                                             <!--td>{{ $prop->description }}</td-->
                                             <td>
-                                            @if( preg_match('/^(array|dict)$/', $prop->type) )
+                                            @if( preg_match('/^(array|list|dict)$/', $prop->type) )
                                             <!-- Format arrays and dictionaries nicely using html in nested tables -->
                                                 @php
                                                     $decoded_value = $prop->value;
