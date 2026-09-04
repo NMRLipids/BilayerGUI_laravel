@@ -395,39 +395,6 @@ def CheckEntry(Table: str, LipidInformation: dict = {}) -> int:
        
     return None
 
-def LinkEntries(Table: str, LipidInformation: dict) -> None:
-    '''
-    Link two entries in a table
-
-    Parameters
-    ----------
-    Table : str
-        Name of the table.
-    LipidInformation : dict
-        Values to add.
-        Must contain the IDs of the two entries to link in the source tables.
-
-    Returns
-    -------
-    None: Linker table is not expected to return an ID
-    '''
-    Query = "INSERT INTO `{}` (".format(Table) + \
-            ", ".join(map(lambda x: f'`{x}`', LipidInformation.keys())) + \
-            ") VALUES  (\"%d,%d\") "
-    # Create a cursor
-    with database.cursor() as cursor:
-        # Execute the query creating a new entry
-        res = cursor.execute(SQL_Create(Table, LipidInformation), list(LipidInformation.values()))
-
-    # Num rows affected should be 1
-    if res != 1:
-        RuntimeError("ERROR: record wasn't inserted!")
-        
-            
-    
-    #print("A new entry was created in {}: index {}".format(Table, LipidInformation))
-    return None
-
 def CreateEntry(Table: str, LipidInformation: dict) -> int:
     '''
     Add an entry into a table
@@ -513,7 +480,7 @@ def load_lipid_metadata(lipid, database):
         }
         prop_id = UPSERT(database, 'properties', prop_data)
         # Link lipid and property
-        LinkEntries('lipid_properties', {'lipid_id': lipid_id, 'property_id': prop_id})
+        UPSERT(database, 'lipid_properties', {'lipid_id': lipid_id, 'property_id': prop_id})
         logger.debug(f"Linked property {prop} to lipid ID {lipid_id}")
 
     # Insert cross-references
@@ -675,7 +642,7 @@ def load_experiment_properties(database, id, expobj) -> None:
         prop_id = UPSERT(database, 'experiment_property', prop_data)
         # Link experiment and property
         logger.debug(f"Linking property {prop_id}:{prop} to experiment ID {id}")
-        LinkEntries('experiments_properties_linker', {'experiment_id': id, 'property_id': prop_id})
+        UPSERT(database, 'experiments_properties_linker', {'experiment_id': id, 'property_id': prop_id})
         
 
 

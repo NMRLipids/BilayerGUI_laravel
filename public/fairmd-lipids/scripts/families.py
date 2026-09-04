@@ -11,37 +11,29 @@ subtly wrong by hand, and a silent double-count looks exactly like a real result
 Usage
 -----
   python families.py --patterns
-      Print the query plan: one line per (family, pattern, operator). Run one
-      advanced-trajectory-search call per family with per_page=1 -- its patterns
-      OR together and combine correctly with quality filters -- and record the
-      returned `total` in counts.json under the FAMILY LABEL. On servers older
-      than September 2026, batching patterns silently dropped any quality filter
-      in the same call (see SKILL.md "Filter mechanics"); there, query one
-      pattern at a time and record each total under the PATTERN string instead.
+      Print the query plan: one line per (family, pattern, operator). Run these
+      as advanced-trajectory-search calls with per_page=1 and read `total`; a
+      family's patterns can share one call (they OR together and combine
+      correctly with quality filters). On servers older than September 2026,
+      batching patterns silently dropped any quality filter in the same call --
+      there, query one pattern at a time (see SKILL.md "Filter mechanics").
 
   python families.py --check counts.json
       Apply the overlap rules and verify the families sum to the set total.
       Exits non-zero on a mismatch, because a mismatch means a bad query.
 
-counts.json shape -- raw totals, before overlap correction. Keys of "patterns"
-are family labels holding the union total of one OR query (preferred: the union
-cannot double-count a name matching two of the family's patterns):
+counts.json shape -- raw per-pattern totals, before overlap correction:
 
   {
     "label": "All trajectories",
     "total": 893,
-    "patterns": {"CHARMM36": 409, "CHARMM-Drude": 22, "Slipids": 135, ...},
+    "patterns": {"charmm": 409, "drude": 22, "slipids": 135, ...},
     "overlaps": {"OPLSAA-compatible Berger-DPPC-06": 5,
                  "Berger lipids + Gromos 53A6": 1,
                  "GROMOS-CKP, Berger/Chiu NH3 charges and PME": 6}
   }
 
-Per-pattern keys ("Lipid14": 1, "Lipid17": 13, ...) are the fallback for the
-one-pattern-per-call plan; they are summed, so this only partitions correctly
-when no name matches two patterns of the same family. A family label present in
-"patterns" takes precedence over that family's per-pattern keys.
-
-Omitted families are treated as zero, so the same file shape works for a lipid
+Omitted patterns are treated as zero, so the same file shape works for a lipid
 subset where several families are absent.
 """
 
@@ -134,15 +126,11 @@ FAMILIES = [label for label, _ in PATTERNS]
 
 
 def resolve(patterns, overlaps):
-    """Raw totals (family-label unions, or per-pattern) -> disjoint family counts."""
+    """Raw per-pattern totals -> disjoint per-family counts."""
+    get = lambda p: patterns.get(p, 0)
     fam = {}
     for label, pats in PATTERNS:
-        if label in patterns:
-            # Union total of one OR query over the family's patterns.
-            fam[label] = patterns[label]
-        else:
-            # Per-pattern fallback; correct only if no name matches two patterns.
-            fam[label] = sum(patterns.get(p, 0) for p in pats)
+        fam[label] = sum(get(p) for p in pats)
 
     # Drude matches "charmm" too; report classical CHARMM36 net of it.
     fam["CHARMM36"] -= fam["CHARMM-Drude"]
@@ -172,8 +160,7 @@ def main():
         for name in OVERLAPS:
             print(f"{'(overlap)':22} {name:46} equals")
         print("\nRun one advanced-trajectory-search call per family (its patterns "
-              "OR together), per_page=1, and record the returned `total` under "
-              "the family label in counts.json.")
+              "OR together), per_page=1, and read `total`.")
         return 0
 
     if not args.check:

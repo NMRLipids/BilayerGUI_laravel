@@ -91,9 +91,9 @@ separately — they behave very differently (see below).
 Schrödinger's commercial **OPLS3e/OPLS4** differ in functional form and
 parameterisation — they are not comparable, and a single "OPLS" row averaging them
 asserts something false. Keep them as separate families. In this data they never even
-meet for POPE: OPLS-AA has exactly one trajectory (POPE), while OPLS3e/OPLS4
-have no POPE trajectories. An "OPLS" row would therefore look strong for POPC and
-terrible for POPE while describing two disjoint force fields.
+meet: OPLS-AA has exactly one trajectory (POPE), OPLS3e/OPLS4 have none, so an "OPLS"
+row would look strong for POPC and terrible for POPE while describing two disjoint
+force fields. Groupings that *are* one lineage and merge safely: Lipid14/17/21,
 Parsley/Sage, OPLS3e→OPLS4. Before folding a new name into a family, ask whether it
 shares developers, functional form and parameterisation lineage — string similarity is
 not the test. The domain expert reading your table will notice if it isn't.
